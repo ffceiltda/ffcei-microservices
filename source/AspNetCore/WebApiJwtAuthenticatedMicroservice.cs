@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace FFCEI.Microservices.AspNetCore
 {
@@ -7,7 +10,7 @@ namespace FFCEI.Microservices.AspNetCore
         where TWebApiClaims : WebApiClaims
     {
 #pragma warning disable CA1000
-        public new static WebApiJwtAuthenticatedMicroservice<TWebApiClaims>? Instance =>
+        public static new WebApiJwtAuthenticatedMicroservice<TWebApiClaims>? Instance =>
             WebApiMicroservice.Instance as WebApiJwtAuthenticatedMicroservice<TWebApiClaims>;
 #pragma warning restore CA1000
 
@@ -32,11 +35,35 @@ namespace FFCEI.Microservices.AspNetCore
             return application;
         }
 
+#pragma warning disable IDE0058 // Expression value is never used
         private void BuildJwtAuthenticator(WebApplicationBuilder builder)
         {
             var tokenSecret = new Jwt.TokenSecret(ConfigurationManager);
 
             builder.Services.AddSingleton(tokenSecret);
+
+            builder.Services.AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, jwt =>
+                {
+                    jwt.SaveToken = true;
+                    jwt.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        IssuerSigningKey = new SymmetricSecurityKey(tokenSecret.KeyBytes),
+                        ValidateIssuer = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateTokenReplay = true,
+                        RequireExpirationTime = true,
+                        ClockSkew = TimeSpan.Zero
+                    };
+                });
         }
+#pragma warning restore IDE0058 // Expression value is never used
     }
 }

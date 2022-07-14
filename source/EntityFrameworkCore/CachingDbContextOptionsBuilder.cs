@@ -7,13 +7,15 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 {
     public class CachingDbContextOptionsBuilder<TDbContext> where TDbContext : DbContext
     {
-        public CachingDbContextOptionsBuilder(string connectionString, DbContextOptionsBuilder options, IServiceProvider? serviceProvider = null)
-            : base()
+        public string ConnectionString { get; private set; }
+
+        public CachingDbContextOptionsBuilder(string connectionString)
         {
+            ConnectionString = connectionString;
         }
 
 #pragma warning disable IDE0058 // Expression value is never used
-        public virtual void ApplyOptions(string connectionString, DbContextOptionsBuilder options, IServiceProvider? serviceProvider = null)
+        public virtual void ApplyOptions(DbContextOptionsBuilder options, IServiceProvider? serviceProvider = null)
         {
             if (options == null)
             {

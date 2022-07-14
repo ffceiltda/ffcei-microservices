@@ -6,17 +6,17 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 {
     public sealed class MySqlCachingDbContextOptionsBuilder<TDbModelRepositoryContext> : CachingDbContextOptionsBuilder<TDbModelRepositoryContext> where TDbModelRepositoryContext : DbContext
     {
-        public MySqlCachingDbContextOptionsBuilder(string database, string username, string password, string server, ushort port, DbContextOptionsBuilder options, IServiceProvider? serviceProvider = null)
-            : base(MySqlConnectionStringBuilder.Build(database, username, password, server, port), options, serviceProvider)
+        public MySqlCachingDbContextOptionsBuilder(string database, string username, string password, string server, ushort port)
+            : base(MySqlConnectionStringBuilder.Build(database, username, password, server, port))
         {
         }
 
-        public override void ApplyOptions(string connectionString, DbContextOptionsBuilder options, IServiceProvider? serviceProvider = null)
+        public override void ApplyOptions(DbContextOptionsBuilder options, IServiceProvider? serviceProvider = null)
         {
 #pragma warning disable IDE0058 // Expression value is never used
-            base.ApplyOptions(connectionString, options, serviceProvider);
+            base.ApplyOptions(options, serviceProvider);
 
-            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
+            options.UseMySql(ConnectionString, ServerVersion.AutoDetect(ConnectionString),
                 parameters =>
                 {
                     parameters.DefaultDataTypeMappings(m => m.WithClrBoolean(MySqlBooleanType.Bit1));

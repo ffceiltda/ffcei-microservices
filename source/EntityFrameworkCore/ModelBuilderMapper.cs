@@ -70,7 +70,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
                     foreach (var assemblyType in assemblyTypes)
                     {
                         if ((assemblyType.Namespace is not null) &&
-                            (assemblyType.Namespace.Contains("ModelBuilder", StringComparison.InvariantCulture)) &&
+                            (assemblyType.Namespace.EndsWith("ModelBuilders", StringComparison.InvariantCulture)) &&
                             (assemblyType.Name.EndsWith("ModelBuilder", StringComparison.InvariantCulture)))
                         {
                             var assemblyStaticMethod = assemblyType.GetMethod("OnModelCreating", BindingFlags.Public | BindingFlags.Static);
