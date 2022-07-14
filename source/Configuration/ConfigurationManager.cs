@@ -30,7 +30,7 @@ namespace FFCEI.Microservices.Configuration
                 var mainAssemblyCodeBaseUri = new UriBuilder(mainAssemblyCodeBase);
                 var mainAssemblyCodeBasePath = mainAssemblyCodeBaseUri.Path;
                 var mainAssemblyFilenamePath = Path.GetDirectoryName(mainAssemblyCodeBasePath);
-             
+
                 while (!string.IsNullOrEmpty(mainAssemblyFilenamePath) &&
                     (string.IsNullOrEmpty(_allConfigurationsFilePath) || string.IsNullOrEmpty(_applicationConfigurationsFilePath)))
                 {
@@ -139,19 +139,19 @@ namespace FFCEI.Microservices.Configuration
             }
         }
 
-        public string this[string key] 
-        { 
-            get 
-            { 
+        public string? this[string key]
+        {
+            get
+            {
                 return GetKey(key);
             }
         }
 
-        public string GetKey(string key)
+        public string? GetKey(string key)
         {
             TryGetKey(key, out var value);
 
-            return value ?? string.Empty;
+            return value;
         }
 
         public bool HasKey(string key)
@@ -214,7 +214,7 @@ namespace FFCEI.Microservices.Configuration
 
                 var lineKey = line.Substring(0, equalIndex).Replace("export", "", StringComparison.InvariantCulture).
                     TrimStart().TrimEnd().ToUpper(CultureInfo.InvariantCulture);
-                
+
                 if (lineKey == environmentKey)
                 {
                     value = line.Substring(equalIndex + 1).TrimStart().TrimEnd();

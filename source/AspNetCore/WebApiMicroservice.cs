@@ -1,5 +1,4 @@
 using Destructurama;
-using FFCEI.Microservices.Configuration;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -19,7 +18,7 @@ namespace FFCEI.Microservices.AspNetCore
         private readonly string[] _args;
         private WebApplicationBuilder? _builder;
         private WebApplication? _application;
-        
+
         public WebApplicationBuilder Builder => _builder ??= CreateBuilder();
         public WebApplication Application => _application ??= CreateApplication();
         public FFCEI.Microservices.Configuration.ConfigurationManager ConfigurationManager { get; private set; } = null!;
@@ -251,11 +250,11 @@ namespace FFCEI.Microservices.AspNetCore
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
             {
-                options.SwaggerDoc(WebApiVersion, 
-                    new OpenApiInfo 
-                    { 
-                        Title = Builder.Environment.ApplicationName, 
-                        Version = WebApiVersion 
+                options.SwaggerDoc(WebApiVersion,
+                    new OpenApiInfo
+                    {
+                        Title = Builder.Environment.ApplicationName,
+                        Version = WebApiVersion
                     });
 
                 options.TagActionsBy(api =>
@@ -275,7 +274,7 @@ namespace FFCEI.Microservices.AspNetCore
 
                 options.DocInclusionPredicate((docName, apiDesc) => true);
 
-                options.AddSecurityDefinition("oauth2", 
+                options.AddSecurityDefinition("oauth2",
                     new OpenApiSecurityScheme
                     {
                         Description = "Standard Authorization header using the Bearer Scheme. Use the format \"Bearer {token}\"",

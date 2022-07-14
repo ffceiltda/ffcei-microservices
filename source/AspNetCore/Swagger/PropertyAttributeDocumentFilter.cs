@@ -7,7 +7,9 @@ using System.Text.Json;
 
 namespace FFCEI.Microservices.AspNetCore.Swagger
 {
-    public class PropertyAttributeDocumentFilter : IDocumentFilter
+#pragma warning disable CA1812
+    internal sealed class PropertyAttributeDocumentFilter : IDocumentFilter
+#pragma warning restore CA1812
     {
         public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
         {

@@ -1,9 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using System.Data.Common;
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace FFCEI.Microservices.EntityFrameworkCore
 {
     public interface IModelRepositoryContainer

@@ -1,18 +1,12 @@
-using System.Data.Common;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-
 namespace FFCEI.Microservices.EntityFrameworkCore
 {
-    public abstract class ModelRepositoryContainer<T> : IModelRepositoryContainer where T : ModelRepositoryDbContext
+    public abstract class ModelRepositoryContainer<TDbContext> : IModelRepositoryContainer where TDbContext : ModelRepositoryDbContext
     {
-        public T Context { get; private set; }
+        public TDbContext Context { get; private set; }
 
         ModelRepositoryDbContext IModelRepositoryContainer.Context => Context;
 
-        protected ModelRepositoryContainer(T context)
+        protected ModelRepositoryContainer(TDbContext context)
         {
             Context = context;
         }

@@ -1,6 +1,6 @@
 namespace FFCEI.Microservices.EntityFrameworkCore
 {
-    public class IncompatibleModelObjectTypeForDbSetException : Exception
+    public sealed class IncompatibleModelObjectTypeForDbSetException : Exception
     {
         public Type? ExpectedModelObjectType { get; set; }
         public Type? ModelObjectType { get; set; }

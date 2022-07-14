@@ -1,6 +1,6 @@
+using FFCEI.Microservices.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
-using System.Diagnostics.CodeAnalysis;
 
 namespace FFCEI.Microservices.EntityFrameworkCore
 {
@@ -8,6 +8,10 @@ namespace FFCEI.Microservices.EntityFrameworkCore
     {
         public MySqlCachingDbContextOptionsBuilder(string database, string username, string password, string server, ushort port)
             : base(MySqlConnectionStringBuilder.Build(database, username, password, server, port))
+        {
+        }
+        public MySqlCachingDbContextOptionsBuilder(MySqlConfiguration configuration)
+            : base(MySqlConnectionStringBuilder.Build(configuration))
         {
         }
 

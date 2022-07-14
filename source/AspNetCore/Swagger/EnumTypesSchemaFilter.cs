@@ -5,7 +5,9 @@ using System.Xml.Linq;
 
 namespace FFCEI.Microservices.AspNetCore.Swagger
 {
-    public class EnumTypesSchemaFilter : ISchemaFilter
+#pragma warning disable CA1812
+    internal sealed class EnumTypesSchemaFilter : ISchemaFilter
+#pragma warning restore CA1812
     {
         private readonly XDocument? _xmlComments;
 
@@ -71,7 +73,8 @@ namespace FFCEI.Microservices.AspNetCore.Swagger
                 var enumValue = Convert.ToInt32(enumMemberValue);
                 var enumMemberName = Enum.GetName(enumType, enumValue);
                 var enumMemberFullName = $"F:{fullTypeName}.{enumMemberName}";
-                var enumMemberComments = _xmlComments.Descendants("member").FirstOrDefault(m => {
+                var enumMemberComments = _xmlComments.Descendants("member").FirstOrDefault(m =>
+                {
                     var attribute = m.Attribute("name");
 
                     if (attribute == null)

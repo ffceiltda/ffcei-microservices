@@ -1,10 +1,9 @@
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace FFCEI.Microservices.AspNetCore.Json
 {
-    public class LooseStringEnumConverter : JsonConverterFactory
+    sealed class LooseStringEnumConverter : JsonConverterFactory
     {
         public override bool CanConvert(Type typeToConvert)
         {
@@ -23,6 +22,7 @@ namespace FFCEI.Microservices.AspNetCore.Json
 
 #pragma warning disable CA1812
         private sealed class DictionaryValueConverterInner<TValue> : JsonConverter<TValue> where TValue : struct, Enum
+#pragma warning restore CA1812
         {
             public override TValue Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
@@ -50,6 +50,5 @@ namespace FFCEI.Microservices.AspNetCore.Json
 
             public override void Write(Utf8JsonWriter writer, TValue value, JsonSerializerOptions options) => writer.WriteNumberValue((int)(object)value);
         }
-#pragma warning restore CA1812
     }
 }

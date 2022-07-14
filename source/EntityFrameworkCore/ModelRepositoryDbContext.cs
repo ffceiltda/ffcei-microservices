@@ -1,5 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using FFCEI.Microservices.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
 namespace FFCEI.Microservices.EntityFrameworkCore

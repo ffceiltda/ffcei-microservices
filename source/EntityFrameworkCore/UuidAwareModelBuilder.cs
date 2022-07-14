@@ -1,6 +1,6 @@
+using FFCEI.Microservices.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using FFCEI.Microservices.Models;
 
 namespace FFCEI.Microservices.EntityFrameworkCore
 {
