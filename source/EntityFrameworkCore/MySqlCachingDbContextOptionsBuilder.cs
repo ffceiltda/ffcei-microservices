@@ -4,6 +4,10 @@ using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 namespace FFCEI.Microservices.EntityFrameworkCore
 {
+    /// <summary>
+    /// CachingDbContextOptionsBuilder options builder with MySql support
+    /// </summary>
+    /// <typeparam name="TDbModelRepositoryContext">ModelRepositoryDbContext derived class</typeparam>
     public sealed class MySqlCachingDbContextOptionsBuilder<TDbModelRepositoryContext> : CachingDbContextOptionsBuilder<TDbModelRepositoryContext> where TDbModelRepositoryContext : DbContext
     {
         /// <summary>

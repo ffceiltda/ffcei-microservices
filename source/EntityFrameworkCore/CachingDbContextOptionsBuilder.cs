@@ -8,7 +8,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
     /// <summary>
     /// DbContext options builder if SecondLevelCache interception support
     /// </summary>
-    /// <typeparam name="TDbContext"></typeparam>
+    /// <typeparam name="TDbContext">DbContext derived class</typeparam>
     public class CachingDbContextOptionsBuilder<TDbContext> where TDbContext : DbContext
     {
         /// <summary>
