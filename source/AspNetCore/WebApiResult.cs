@@ -22,15 +22,15 @@ namespace FFCEI.Microservices.AspNetCore
         }
 
         /// <summary>
-        /// Creates a 'failed' Web Api result response
+        /// Creates a 'internal error' Web Api result response
         /// </summary>
         /// <param name="detail">Detail message</param>
         /// <returns>WebApiResult instance</returns>
-        public static WebApiResult Failed(string? detail = null)
+        public static WebApiResult InternalError(string? detail = null)
         {
             return new WebApiResult()
             {
-                Status = -1,
+                Status = StatusInternalError,
                 Detail = detail
             };
         }
@@ -45,22 +45,10 @@ namespace FFCEI.Microservices.AspNetCore
         {
             return new WebApiResult()
             {
-                Status = (status == 0 ? -1 : status),
+                Status = (status == 0 ? StatusInternalError : status),
                 Detail = detail
             };
         }
-
-        /// <summary>
-        /// Generate HTTP response for Web Api controller
-        /// </summary>
-        /// <returns>ActionResult&lt;WebApiResult&gt; instance</returns>
-        public ActionResult<WebApiResult> ToHttpResponse() => Status switch
-        {
-            0 => new OkObjectResult(this),
-            > 0 => new BadRequestObjectResult(this),
-            -1 => new ObjectResult(this) { StatusCode = StatusCodes.Status406NotAcceptable },
-            _ => new ObjectResult(this) { StatusCode = StatusCodes.Status500InternalServerError }
-        };
     }
 }
 

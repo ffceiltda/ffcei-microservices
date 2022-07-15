@@ -5,6 +5,8 @@ namespace FFCEI.Microservices.AspNetCore
     /// </summary>
     public class WebApiResultBase : WebApiResponse
     {
+        internal const int StatusInternalError = -2147483648;
+
         /// <summary>
         /// Status code
         /// </summary>

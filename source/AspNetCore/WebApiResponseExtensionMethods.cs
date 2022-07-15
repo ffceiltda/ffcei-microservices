@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FFCEI.Microservices.AspNetCore
@@ -7,13 +8,7 @@ namespace FFCEI.Microservices.AspNetCore
     /// </summary>
     public static class WebApiResponseExtensionMethods
     {
-        /// <summary>
-        /// Creates ActionResult for returning Web Api HTTP responses
-        /// </summary>
-        /// <typeparam name="TWebApiResponse"></typeparam>
-        /// <param name="response">WebApiResponse descentant instance</param>
-        /// <returns></returns>
-        public static ActionResult<TWebApiResponse> ToHttpResponse<TWebApiResponse>(this TWebApiResponse response)
+        public static IActionResult ToHttpResponse<TWebApiResponse>(this TWebApiResponse response)
             where TWebApiResponse : WebApiResponse
         {
             if (response == null)
@@ -22,6 +17,43 @@ namespace FFCEI.Microservices.AspNetCore
             }
 
             return new OkObjectResult(response);
+        }
+
+        public static IActionResult ToHttpResponse(this WebApiResult response)
+        {
+            if (response == null)
+            {
+                return new NotFoundObjectResult(response);
+            }
+
+            var httpResponse = response.Status switch
+            {
+                0 => new OkObjectResult(response),
+                > 0 => new BadRequestObjectResult(response),
+                WebApiResultBase.StatusInternalError => new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError },
+                _ => new ObjectResult(response) { StatusCode = StatusCodes.Status406NotAcceptable }
+            };
+
+            return httpResponse;
+        }
+
+        public static IActionResult ToHttpResponse<TResult>(this WebApiResultWith<TResult> response)
+            where TResult : class
+        {
+            if (response == null)
+            {
+                throw new ArgumentNullException(nameof(response));
+            }
+
+            var httpResponse = response.Status switch
+            {
+                0 => new OkObjectResult(response.Result),
+                > 0 => new BadRequestObjectResult(response) { Value = $"[{response.Status}] {response.Detail}" },
+                WebApiResultBase.StatusInternalError => new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError, Value = $"[{response.Status}] {response.Detail}" },
+                _ => new ObjectResult(response) { StatusCode = StatusCodes.Status406NotAcceptable, Value = $"[{response.Status}] {response.Detail}" }
+            };
+
+            return httpResponse;
         }
     }
 }

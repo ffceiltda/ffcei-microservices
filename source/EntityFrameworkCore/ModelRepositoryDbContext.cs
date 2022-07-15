@@ -9,6 +9,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
     /// </summary>
     public abstract class ModelRepositoryDbContext : DbContext
     {
+        private static readonly PropertyInfo? UuidProperty = typeof(UuidAwareModel).GetProperty("Uuid");
         private static readonly PropertyInfo? CreatedAtProperty = typeof(TimeStampedModel).GetProperty("CreatedAt");
         private static readonly PropertyInfo? UpdatedAtProperty = typeof(TimeStampedModel).GetProperty("UpdatedAt");
 
@@ -91,6 +92,11 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
                 if (entity.State == EntityState.Added)
                 {
+                    if (UuidProperty is not null)
+                    {
+                        UuidProperty.SetValue(entity.Entity, Guid.NewGuid());
+                    }
+
                     if (CreatedAtProperty is not null)
                     {
                         CreatedAtProperty.SetValue(entity.Entity, now);
