@@ -340,7 +340,6 @@ namespace FFCEI.Microservices.AspNetCore
         private static void BuildAutoMapper(WebApplicationBuilder builder)
         {
             builder.Services.AddAutoMapper(Assembly.GetEntryAssembly());
-
         }
 
         private void BuildWebApiSwagger(WebApplicationBuilder builder)

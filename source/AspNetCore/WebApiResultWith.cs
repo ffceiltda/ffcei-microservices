@@ -6,43 +6,43 @@ namespace FFCEI.Microservices.AspNetCore
     /// <summary>
     /// Web Api result response with result data
     /// </summary>
-    public sealed class WebApiResultWith<TResultData> : WebApiResultBase
-        where TResultData : struct
+    public sealed class WebApiResultWith<TResult> : WebApiResultBase
+        where TResult : struct
     {
         /// <summary>
         /// Result data
         /// </summary>
-        public TResultData? ResultData { get; set; }
+        public TResult? Result { get; set; }
 
 #pragma warning disable CA1000 // Do not declare static members on generic types
         /// <summary>
         /// Creates a 'succeeded' Web Api result response
         /// </summary>
-        /// <param name="resultData">Result date</param>
+        /// <param name="result">Result date</param>
         /// <param name="detail">Detail message</param>
-        /// <returns>WebApiResultWith&lt;TResultData&gt; instance</returns>
-        public static WebApiResultWith<TResultData> Succeeded(TResultData? resultData = null, string? detail = null)
+        /// <returns>WebApiResultWith&lt;TResult&gt; instance</returns>
+        public static WebApiResultWith<TResult> Succeeded(TResult? result = null, string? detail = null)
         {
-            return new WebApiResultWith<TResultData>()
+            return new WebApiResultWith<TResult>()
             {
                 Detail = detail,
-                ResultData = resultData
+                Result = result
             };
         }
 
         /// <summary>
         /// Creates a 'failed' Web Api result response
         /// </summary>
-        /// <param name="resultData">Result date</param>
+        /// <param name="result">Result date</param>
         /// <param name="detail">Detail message</param>
-        /// <returns>WebApiResultWith&lt;TResultData&gt; instance</returns>
-        public static WebApiResultWith<TResultData> Failed(TResultData? resultData = null, string? detail = null)
+        /// <returns>WebApiResultWith&lt;TResult&gt; instance</returns>
+        public static WebApiResultWith<TResult> Failed(TResult? result = null, string? detail = null)
         {
-            return new WebApiResultWith<TResultData>()
+            return new WebApiResultWith<TResult>()
             {
                 Status = -1,
                 Detail = detail,
-                ResultData = resultData
+                Result = result
             };
         }
 
@@ -50,37 +50,37 @@ namespace FFCEI.Microservices.AspNetCore
         /// Creates a 'error' Web Api result response
         /// </summary>
         /// <param name="status">Status code</param>
-        /// <param name="resultData">Result date</param>
+        /// <param name="result">Result date</param>
         /// <param name="detail">Detail message</param>
-        /// <returns>WebApiResultWith&lt;TResultData&gt; instance</returns>
-        public static WebApiResultWith<TResultData> Error(int status, TResultData? resultData = null, string? detail = null)
+        /// <returns>WebApiResultWith&lt;TResult&gt; instance</returns>
+        public static WebApiResultWith<TResult> Error(int status, TResult? result = null, string? detail = null)
         {
-            return new WebApiResultWith<TResultData>()
+            return new WebApiResultWith<TResult>()
             {
                 Status = (status == 0 ? -1 : status),
                 Detail = detail,
-                ResultData = resultData
+                Result = result
             };
         }
 #pragma warning restore CA1000 // Do not declare static members on generic types
 
         /// <summary>
-        /// Generate HTTP response for Web Api controller with TResultData only
+        /// Generate HTTP response for Web Api controller with TResult only
         /// </summary>
-        /// <returns>ActionResult&lt;TResultData&gt; instance</returns>
-        public ActionResult<TResultData> ToHttpResponseWithResultDataOnly() => Status switch
+        /// <returns>ActionResult&lt;TResult&gt; instance</returns>
+        public ActionResult<TResult> ToHttpResponseWithResultOnly() => Status switch
         {
-            0 => new OkObjectResult(ResultData),
-            > 0 => new BadRequestObjectResult(ResultData) { Value = $"[{Status}] {Detail}" },
-            -1 => new ObjectResult(ResultData) { StatusCode = StatusCodes.Status406NotAcceptable, Value = $"[{Status}] {Detail}" },
-            _ => new ObjectResult(ResultData) { StatusCode = StatusCodes.Status500InternalServerError, Value = $"[{Status}] {Detail}" }
+            0 => new OkObjectResult(Result),
+            > 0 => new BadRequestObjectResult(Result) { Value = $"[{Status}] {Detail}" },
+            -1 => new ObjectResult(Result) { StatusCode = StatusCodes.Status406NotAcceptable, Value = $"[{Status}] {Detail}" },
+            _ => new ObjectResult(Result) { StatusCode = StatusCodes.Status500InternalServerError, Value = $"[{Status}] {Detail}" }
         };
 
         /// <summary>
         /// Generate HTTP response for Web Api controller
         /// </summary>
-        /// <returns>ActionResult&lt;WebApiResultWith&lt;TResultData&gt;&gt; instance</returns>
-        public ActionResult<WebApiResultWith<TResultData>> ToHttpResponse() => Status switch
+        /// <returns>ActionResult&lt;WebApiResultWith&lt;TResult&gt;&gt; instance</returns>
+        public ActionResult<WebApiResultWith<TResult>> ToHttpResponse() => Status switch
         {
             0 => new OkObjectResult(this),
             > 0 => new BadRequestObjectResult(this),

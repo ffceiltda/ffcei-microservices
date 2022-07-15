@@ -170,7 +170,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
                 await Context.SaveChangesAsync();
             }
         }
-        
+
         public async Task RemoveManyAsync(IEnumerable<IModel> contents, bool autoCommit = true)
         {
             if (contents == null)
