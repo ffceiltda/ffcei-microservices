@@ -13,22 +13,59 @@ using System.Reflection;
 
 namespace FFCEI.Microservices.AspNetCore
 {
+    /// <summary>
+    /// Web Api microservice template
+    /// </summary>
     public class WebApiMicroservice
     {
         private readonly string[] _args;
         private WebApplicationBuilder? _builder;
         private WebApplication? _application;
+        private static WeakReference<WebApiMicroservice> _instance = null!;
 
+        /// <summary>
+        /// ASP.NET Core Mvc Web Application Builder
+        /// </summary>
         public WebApplicationBuilder Builder => _builder ??= CreateBuilder();
+
+        /// <summary>
+        /// ASP.NET Core Mvc Web Application
+        /// </summary>
         public WebApplication Application => _application ??= CreateApplication();
+
+        /// <summary>
+        /// Configuration Manager (with support for system environment, environment files and ASP.NET Core appSettings)
+        /// </summary>
         public FFCEI.Microservices.Configuration.ConfigurationManager ConfigurationManager { get; private set; } = null!;
+
+        /// <summary>
+        /// HTTP settings: Web Api use CORS (defaults to true)
+        /// </summary>
         public bool HttpUseCors { get; set; } = true;
+
+        /// <summary>
+        /// HTTP settings: Web Api redirect to HTTPS (defaults to false)
+        /// </summary>
         public bool HttpRedirectToHttps { get; set; }
+
+        /// <summary>
+        /// HTTP settings: Request max body length (defaults to 8 hexabytes)
+        /// </summary>
         public long HttpRequestMaxBodyLength { get; set; } = long.MaxValue;
+
+        /// <summary>
+        /// Web Api: version (defaults to v1)
+        /// </summary>
         public string WebApiVersion { get; set; } = "v1";
+
+        /// <summary>
+        /// Web Api: generate swagger documentation (defaults to Development environment only)
+        /// </summary>
         public bool? WebApiGenerateSwagger { get; set; }
 
-        private static WeakReference<WebApiMicroservice> _instance = null!;
+        /// <summary>
+        /// Microservice instance
+        /// </summary>
 
         public static WebApiMicroservice? Instance
         {
@@ -43,13 +80,27 @@ namespace FFCEI.Microservices.AspNetCore
             }
         }
 
+        /// <summary>
+        /// Microservice constructor
+        /// </summary>
+        /// <param name="args">Command line arguments</param>
+        /// <exception cref="InvalidOperationException">Throws a invalid operation exception if you try to instantiante more than one instance</exception>
         public WebApiMicroservice(string[] args)
         {
+            if (_instance != null)
+            {
+                throw new InvalidOperationException("WebApiMicroservice must be instantiated only once");
+            }
+
             _args = args;
             _instance = new WeakReference<WebApiMicroservice>(this);
         }
 
-        public virtual WebApplicationBuilder CreateBuilder()
+        /// <summary>
+        /// Create Web Application Builder and apply internal builder settings
+        /// </summary>
+        /// <returns>WebApplicationBuilder instance</returns>
+        protected virtual WebApplicationBuilder CreateBuilder()
         {
             var builder = WebApplication.CreateBuilder(_args);
 
@@ -58,7 +109,11 @@ namespace FFCEI.Microservices.AspNetCore
             return builder;
         }
 
-        public virtual WebApplication CreateApplication()
+        /// <summary>
+        /// Create Web Application and apply internal application settings
+        /// </summary>
+        /// <returns>WebApplication instance</returns>
+        protected virtual WebApplication CreateApplication()
         {
             var webApplication = Builder.Build();
 
@@ -67,7 +122,12 @@ namespace FFCEI.Microservices.AspNetCore
             return webApplication;
         }
 
-        public void OnCreateBuilder(WebApplicationBuilder builder)
+        /// <summary>
+        /// Create Web Application builder settings
+        /// </summary>
+        /// <param name="builder">WebApplicationBuilder instance</param>
+        /// <exception cref="ArgumentNullException">Throws when builder is null</exception>
+        private void OnCreateBuilder(WebApplicationBuilder builder)
         {
             if (builder == null)
             {
@@ -81,6 +141,11 @@ namespace FFCEI.Microservices.AspNetCore
             BuildWebApi(builder);
         }
 
+        /// <summary>
+        /// Create Web Application settings
+        /// </summary>
+        /// <param name="webApplication">WebApplication instance</param>
+        /// <exception cref="ArgumentNullException">Throws when webApplication is null</exception>
         public void OnCreateApplication(WebApplication webApplication)
         {
             if (webApplication == null)
@@ -94,17 +159,25 @@ namespace FFCEI.Microservices.AspNetCore
         }
 
 #pragma warning disable CA1054 // URI-like parameters should not be strings
+        /// <summary>
+        /// Run microservice
+        /// </summary>
+        /// <param name="url">The URL to listen to if the server hasn't been configured directly</param>
         public void Run(string? url = null)
         {
             Application.Run(url);
         }
 
-#pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
+        /// <summary>
+        /// Run microservice asynchronously
+        /// </summary>
+        /// <param name="url">The URL to listen to if the server hasn't been configured directly</param>
         public async Task RunAsync(string? url = null)
         {
+#pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
             await Application.RunAsync(url);
-        }
 #pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
+        }
 #pragma warning restore CA1054 // URI-like parameters should not be strings
 
 #pragma warning disable IDE0058 // Expression value is never used
@@ -140,7 +213,7 @@ namespace FFCEI.Microservices.AspNetCore
                 webApplication.UseSwaggerUI(options =>
                 {
                     options.RoutePrefix = "swagger";
-                    options.SwaggerEndpoint("/swagger/v1/swagger.json", $"{webApplication.Environment.ApplicationName} ({WebApiVersion})");
+                    options.SwaggerEndpoint($"/swagger/{WebApiVersion}/swagger.json", $"{webApplication.Environment.ApplicationName} ({WebApiVersion})");
                 });
             }
 

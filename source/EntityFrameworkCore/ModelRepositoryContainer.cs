@@ -1,7 +1,13 @@
 namespace FFCEI.Microservices.EntityFrameworkCore
 {
+    /// <summary>
+    /// Generic Model Repository Container abstract class
+    /// </summary>
     public abstract class ModelRepositoryContainer<TDbContext> : IModelRepositoryContainer where TDbContext : ModelRepositoryDbContext
     {
+        /// <summary>
+        /// Associated ModelRepositoryDbContext (of type TDbContext)
+        /// </summary>
         public TDbContext Context { get; private set; }
 
         ModelRepositoryDbContext IModelRepositoryContainer.Context => Context;

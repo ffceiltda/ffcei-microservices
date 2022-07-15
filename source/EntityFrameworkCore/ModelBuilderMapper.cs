@@ -4,23 +4,32 @@ using System.Reflection;
 
 namespace FFCEI.Microservices.EntityFrameworkCore
 {
+    /// <summary>
+    /// Map model builders and keeps a cache for speed-up request processing
+    /// </summary>
     public static class ModelBuilderMapper
     {
         private static readonly Dictionary<string, List<MethodInfo>> _assembliesDecoded = new();
 
-        public static void MapModelBuilders(ModelBuilder modelBuilder, Assembly? modelAssembly)
+        /// <summary>
+        /// Map model builders from a assembly
+        /// </summary>
+        /// <param name="modelBuilder">ModelBuilder instance</param>
+        /// <param name="initialAssembly">Initial assembly</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static void MapModelBuilders(ModelBuilder modelBuilder, Assembly? initialAssembly)
         {
             if (modelBuilder == null)
             {
                 throw new ArgumentNullException(nameof(modelBuilder));
             }
 
-            if (modelAssembly is null)
+            if (initialAssembly is null)
             {
                 return;
             }
 
-            var modelAssemblyFullName = modelAssembly.FullName ?? string.Empty;
+            var modelAssemblyFullName = initialAssembly.FullName ?? string.Empty;
 
             if (string.IsNullOrEmpty(modelAssemblyFullName))
             {
@@ -36,14 +45,14 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
             if (methods is null)
             {
-                var referencedAssemblies = modelAssembly.GetReferencedAssemblies();
+                var referencedAssemblies = initialAssembly.GetReferencedAssemblies();
 
                 if (referencedAssemblies is null)
                 {
                     return;
                 }
 
-                var assemblies = new List<Assembly> { modelAssembly };
+                var assemblies = new List<Assembly> { initialAssembly };
 
                 foreach (var referencedAssembly in referencedAssemblies)
                 {

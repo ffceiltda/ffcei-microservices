@@ -93,7 +93,7 @@ namespace FFCEI.Microservices.AspNetCore.Swagger
                             dynamic miniObject = new ExpandoObject();
 
                             var fullObject = Activator.CreateInstance(type);
-                            var requiredProperties = type.GetProperties().Where(prop => prop.IsDefined(typeof(SwaggerPropertyAttribute), true));
+                            var requiredProperties = type.GetProperties().Where(prop => prop.IsDefined(typeof(SwaggerRequiredPropertyAttribute), true));
                             var expandoDictionary = miniObject as IDictionary<string, object>;
 
 #pragma warning disable CA1508 // Avoid dead conditional code

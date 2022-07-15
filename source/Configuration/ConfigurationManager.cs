@@ -5,13 +5,16 @@ using System.Reflection;
 
 namespace FFCEI.Microservices.Configuration
 {
+    /// <summary>
+    /// Configuration Manager (with support for system environment, environment files and ASP.NET Core appSettings)
+    /// </summary>
     public sealed class ConfigurationManager
     {
         private Microsoft.Extensions.Configuration.ConfigurationManager _configuration;
         private string _allConfigurationsFilePath = string.Empty;
         private string _applicationConfigurationsFilePath = string.Empty;
 
-        public ConfigurationManager(WebApplicationBuilder builder)
+        internal ConfigurationManager(WebApplicationBuilder builder)
         {
             if (builder == null)
             {
@@ -139,6 +142,11 @@ namespace FFCEI.Microservices.Configuration
             }
         }
 
+        /// <summary>
+        /// Obtains a configuration from repositories
+        /// </summary>
+        /// <param name="key">Setting name</param>
+        /// <returns>Setting value or null if not found</returns>
         public string? this[string key]
         {
             get
@@ -147,18 +155,32 @@ namespace FFCEI.Microservices.Configuration
             }
         }
 
+        /// <summary>
+        /// Obtains a configuration from repositories
+        /// </summary>
+        /// <param name="key">Setting name</param>
+        /// <returns>Setting value or null if not found</returns>
         public string? GetKey(string key)
         {
-            TryGetKey(key, out var value);
-
-            return value;
+            return TryGetKey(key, out var value) ? value : null;
         }
 
+        /// <summary>
+        /// Check if a configuration exists on repositories
+        /// </summary>
+        /// <param name="key">Setting name</param>
+        /// <returns>true if found, false otherwise</returns>
         public bool HasKey(string key)
         {
             return TryGetKey(key, out var _);
         }
 
+        /// <summary>
+        /// Obtains a configuration from repositories
+        /// </summary>
+        /// <param name="key">Setting name</param>
+        /// <param name="value">Value found, or null if not found</param>
+        /// <returns>true if found, false otherwise</returns>
         public bool TryGetKey(string key, out string? value)
         {
             if (TryGetKeyFromApplicationConfigurations(key, out value))

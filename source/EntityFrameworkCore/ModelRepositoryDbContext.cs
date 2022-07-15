@@ -4,6 +4,9 @@ using System.Reflection;
 
 namespace FFCEI.Microservices.EntityFrameworkCore
 {
+    /// <summary>
+    /// DbContext with support for Model objects
+    /// </summary>
     public abstract class ModelRepositoryDbContext : DbContext
     {
         private static readonly PropertyInfo? CreatedAtProperty = typeof(TimeStampedModel).GetProperty("CreatedAt");
@@ -13,11 +16,18 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
         private readonly Assembly _modelAssembly;
 
+        /// <summary>
+        /// Modify UpdateAt field on saving with current timestamp (defaults to true)
+        /// </summary>
         public bool RefreshUpdateAtFieldOnSaving { get; set; } = true;
 
         protected ModelRepositoryDbContext(DbContextOptions options, Assembly modelAssembly)
             : base(options) => _modelAssembly = modelAssembly;
 
+        /// <summary>
+        /// See DbContext.SaveChanges
+        /// </summary>
+        /// <returns>Rows affected</returns>
         public override int SaveChanges()
         {
             DbModelUpdateCreatedAtUpdatedAtFields();
@@ -25,6 +35,11 @@ namespace FFCEI.Microservices.EntityFrameworkCore
             return base.SaveChanges();
         }
 
+        /// <summary>
+        /// See DbContext.SaveChanges
+        /// </summary>
+        /// <param name="acceptAllChangesOnSuccess">See DbContext.SaveChanges</param>
+        /// <returns>Rows affected</returns>
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
             DbModelUpdateCreatedAtUpdatedAtFields();
@@ -32,6 +47,12 @@ namespace FFCEI.Microservices.EntityFrameworkCore
             return base.SaveChanges(acceptAllChangesOnSuccess);
         }
 
+        /// <summary>
+        /// See DbContext.SaveChangesAsync
+        /// </summary>
+        /// <param name="acceptAllChangesOnSuccess">See DbContext.SaveChangesAsync</param>
+        /// <param name="cancellationToken">See DbContext.SaveChangesAsync</param>
+        /// <returns>Rows affected</returns>
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
         {
             DbModelUpdateCreatedAtUpdatedAtFields();
@@ -39,6 +60,11 @@ namespace FFCEI.Microservices.EntityFrameworkCore
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
 
+        /// <summary>
+        /// See DbContext.SaveChangesAsync
+        /// </summary>
+        /// <param name="cancellationToken">See DbContext.SaveChangesAsync</param>
+        /// <returns>Rows affected</returns>
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             DbModelUpdateCreatedAtUpdatedAtFields();

@@ -5,8 +5,16 @@ using System.Linq.Expressions;
 
 namespace FFCEI.Microservices.EntityFrameworkCore
 {
+    /// <summary>
+    /// Generic Model Repository
+    /// </summary>
+    /// <typeparam name="TModel"></typeparam>
     public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRepository<TModel> where TModel : Model
     {
+        /// <summary>
+        /// Model Repository constructor
+        /// </summary>
+        /// <param name="context">Model Repository DbContext instance</param>
         public ModelRepository(ModelRepositoryDbContext context) : base(context) { }
 
 #pragma warning disable IDE0058 // Expression value is never used
@@ -22,7 +30,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
             if (autoCommit)
             {
-                await SaveChangesAsync();
+                await Context.SaveChangesAsync();
             }
         }
 
@@ -43,7 +51,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
             }
         }
 
-        public async Task AddNewRangeAsync(IEnumerable<TModel> contents, bool autoCommit = true)
+        public async Task AddManyAsync(IEnumerable<TModel> contents, bool autoCommit = true)
         {
             if (contents == null)
             {
@@ -54,11 +62,11 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
             if (autoCommit)
             {
-                await SaveChangesAsync();
+                await Context.SaveChangesAsync();
             }
         }
 
-        public async Task AddNewRangeAsync(IEnumerable<IModel> contents, bool autoCommit = true)
+        public async Task AddManyAsync(IEnumerable<IModel> contents, bool autoCommit = true)
         {
             if (contents == null)
             {
@@ -80,7 +88,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
             if (autoCommit)
             {
-                await SaveChangesAsync();
+                await Context.SaveChangesAsync();
             }
         }
 
@@ -95,7 +103,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
             if (autoCommit)
             {
-                await SaveChangesAsync();
+                await Context.SaveChangesAsync();
             }
         }
 
@@ -127,7 +135,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
             if (autoCommit)
             {
-                await SaveChangesAsync();
+                await Context.SaveChangesAsync();
             }
         }
 
@@ -148,35 +156,35 @@ namespace FFCEI.Microservices.EntityFrameworkCore
             }
         }
 
-        public async Task RemoveMultiple(IList<TModel> content, bool autoCommit = true)
+        public async Task RemoveManyAsync(IEnumerable<TModel> contents, bool autoCommit = true)
         {
-            if (content == null)
+            if (contents == null)
             {
-                throw new ArgumentNullException(nameof(content));
+                throw new ArgumentNullException(nameof(contents));
             }
 
-            Set.RemoveRange(content);
+            Set.RemoveRange(contents);
 
             if (autoCommit)
             {
-                await SaveChangesAsync();
+                await Context.SaveChangesAsync();
             }
         }
-
-        public async Task RemoveMultiple(IList<IModel> content, bool autoCommit = true)
+        
+        public async Task RemoveManyAsync(IEnumerable<IModel> contents, bool autoCommit = true)
         {
-            if (content == null)
+            if (contents == null)
             {
-                throw new ArgumentNullException(nameof(content));
+                throw new ArgumentNullException(nameof(contents));
             }
 
-            if (content is IList<TModel> casted)
+            if (contents is IEnumerable<TModel> casted)
             {
-                await RemoveMultiple(casted, autoCommit);
+                await RemoveManyAsync(casted, autoCommit);
             }
             else
             {
-                throw new IncompatibleModelObjectTypeForDbSetException(typeof(IList<TModel>), content.GetType());
+                throw new IncompatibleModelObjectTypeForDbSetException(typeof(IEnumerable<TModel>), contents.GetType());
             }
         }
 
@@ -187,7 +195,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
                 throw new ArgumentNullException(nameof(keys));
             }
 
-            var content = await FirstOrDefaultByKey(keys);
+            var content = await FirstOrDefaultByKeyAsync(keys);
 
             if (content is not null)
             {
@@ -211,7 +219,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
             if (autoCommit)
             {
-                await SaveChangesAsync();
+                await Context.SaveChangesAsync();
             }
         }
 
@@ -270,13 +278,5 @@ namespace FFCEI.Microservices.EntityFrameworkCore
                 throw new IncompatibleModelObjectTypeForDbSetException(typeof(TModel), content.GetType());
             }
         }
-
-        public int SaveChanges() => Context.SaveChanges();
-
-        public int SaveChanges(bool acceptAllChangesOnSuccess) => Context.SaveChanges(acceptAllChangesOnSuccess);
-
-        public Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default) => Context.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-
-        public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) => Context.SaveChangesAsync(cancellationToken);
     }
 }

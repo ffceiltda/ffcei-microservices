@@ -2,6 +2,9 @@ using System.Reflection;
 
 namespace FFCEI.Microservices.Models
 {
+    /// <summary>
+    /// Abstract Model class
+    /// </summary>
     public abstract class Model : IModel
     {
         public static Guid UuidRelationPropertyGetOrDefault<TEntity>(Guid? storageProperty, TEntity entityFrameworkCoreNavigationEntity) where TEntity : class, IUuidAwareModel

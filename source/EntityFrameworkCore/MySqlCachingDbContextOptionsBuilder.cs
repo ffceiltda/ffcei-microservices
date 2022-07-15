@@ -6,11 +6,24 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 {
     public sealed class MySqlCachingDbContextOptionsBuilder<TDbModelRepositoryContext> : CachingDbContextOptionsBuilder<TDbModelRepositoryContext> where TDbModelRepositoryContext : DbContext
     {
-        public MySqlCachingDbContextOptionsBuilder(string database, string username, string password, string server, ushort port)
-            : base(MySqlConnectionStringBuilder.Build(database, username, password, server, port))
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        /// <param name="database">Initial database</param>
+        /// <param name="username">Username</param>
+        /// <param name="password">Password</param>
+        /// <param name="host">Host or IP address</param>
+        /// <param name="port">TCP port</param>
+        public MySqlCachingDbContextOptionsBuilder(string database, string username, string password, string host, ushort port)
+            : base(MySqlConnectionStringBuilder.Build(database, username, password, host, port))
         {
         }
-        public MySqlCachingDbContextOptionsBuilder(MySqlConfiguration configuration)
+
+        /// <summary>
+        /// Default constrctor
+        /// </summary>
+        /// <param name="configuration">MySqlConnectionConfiguration instance</param>
+        public MySqlCachingDbContextOptionsBuilder(MySqlConnectionConfiguration configuration)
             : base(MySqlConnectionStringBuilder.Build(configuration))
         {
         }

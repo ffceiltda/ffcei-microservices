@@ -1,6 +1,9 @@
 namespace FFCEI.Microservices.Models
 {
-    public abstract class EnabledAwareTimeStampedModel : TimeStampedModel, IEnabledAwareModel
+    /// <summary>
+    /// Model class with IsEnabled property and TimeStamping (created / updated) support
+    /// </summary>
+    public class EnabledAwareTimeStampedModel : TimeStampedModel, IEnabledAwareModel
     {
         public bool IsEnabled { get; set; } = true;
 

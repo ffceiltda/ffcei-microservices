@@ -1,7 +1,19 @@
 namespace FFCEI.Microservices.EntityFrameworkCore
 {
+    /// <summary>
+    /// Map Db Field Types do SQL language field types
+    /// </summary>
     public static class DbNativeFieldTypeMapping
     {
+        /// <summary>
+        /// Map Db Field Types do SQL language field types
+        /// </summary>
+        /// <param name="driverType">Database driver</param>
+        /// <param name="fieldType">Database field type</param>
+        /// <param name="precision">Field precision (if applicable)</param>
+        /// <param name="scale">Field scale (if applicable)</param>
+        /// <returns>SQL language field type</returns>
+        /// <exception cref="NotImplementedException">Throws if driver is invalid or unknown</exception>
         public static string GetNativeMapping(Type? driverType, DbFieldType fieldType, int? precision = null, int? scale = null)
         {
             if (driverType is not null)
