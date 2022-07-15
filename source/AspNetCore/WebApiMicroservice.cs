@@ -139,6 +139,7 @@ namespace FFCEI.Microservices.AspNetCore
             BuildSerilog(builder);
             BuildKestrel(builder);
             BuildWebApi(builder);
+            BuildAutoMapper(builder);
         }
 
         /// <summary>
@@ -198,16 +199,12 @@ namespace FFCEI.Microservices.AspNetCore
 
         private void CreateWebApi(WebApplication webApplication)
         {
-            bool generateSwagger = WebApiGenerateSwagger ?? false;
-
             if (webApplication.Environment.IsDevelopment())
             {
                 webApplication.UseDeveloperExceptionPage();
-
-                generateSwagger = WebApiGenerateSwagger ?? true;
             }
 
-            if (generateSwagger)
+            if (ShouldGenerateSwagger(Builder))
             {
                 webApplication.UseSwagger();
                 webApplication.UseSwaggerUI(options =>
@@ -230,6 +227,18 @@ namespace FFCEI.Microservices.AspNetCore
             webApplication.UseAuthorization();
 
             webApplication.MapControllers();
+        }
+
+        private bool ShouldGenerateSwagger(WebApplicationBuilder builder)
+        {
+            bool generateSwagger = WebApiGenerateSwagger ?? false;
+
+            if (builder.Environment.IsDevelopment())
+            {
+                generateSwagger = WebApiGenerateSwagger ?? true;
+            }
+
+            return generateSwagger;
         }
 
         private static void BuildSerilog(WebApplicationBuilder builder)
@@ -297,25 +306,41 @@ namespace FFCEI.Microservices.AspNetCore
         {
             builder.Services.AddHttpClient();
 
-            builder.Services
-                .AddControllers()
-                .AddJsonOptions(options =>
-                {
-                    options.JsonSerializerOptions.Converters.Add(new Json.TrimmingConverter());
-                    options.JsonSerializerOptions.Converters.Add(new Json.LooseStringEnumConverter());
-                    options.JsonSerializerOptions.Converters.Add(new Json.StringToDecimalConverter());
-                    options.JsonSerializerOptions.Converters.Add(new Json.StringToLongConverter());
-                    options.JsonSerializerOptions.Converters.Add(new Json.StringToIntegerConverter());
-                })
-                .AddFluentValidation(validators =>
-                {
-                    validators.RegisterValidatorsFromAssembly(Assembly.GetEntryAssembly());
-                });
+            var mvcBuilder = builder.Services.AddControllers();
 
-            if (builder.Environment.IsDevelopment())
+            BuildWebApiJsonOptions(mvcBuilder);
+            BuildWebApiFluentValidation(mvcBuilder);
+
+            if (ShouldGenerateSwagger(builder))
             {
                 BuildWebApiSwagger(builder);
             }
+        }
+
+        private static void BuildWebApiJsonOptions(IMvcBuilder builder)
+        {
+            builder.AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new Json.TrimmingConverter());
+                options.JsonSerializerOptions.Converters.Add(new Json.LooseStringEnumConverter());
+                options.JsonSerializerOptions.Converters.Add(new Json.StringToDecimalConverter());
+                options.JsonSerializerOptions.Converters.Add(new Json.StringToLongConverter());
+                options.JsonSerializerOptions.Converters.Add(new Json.StringToIntegerConverter());
+            });
+        }
+
+        private static void BuildWebApiFluentValidation(IMvcBuilder builder)
+        {
+            builder.AddFluentValidation(validators =>
+            {
+                validators.RegisterValidatorsFromAssembly(Assembly.GetEntryAssembly());
+            });
+        }
+
+        private static void BuildAutoMapper(WebApplicationBuilder builder)
+        {
+            builder.Services.AddAutoMapper(Assembly.GetEntryAssembly());
+
         }
 
         private void BuildWebApiSwagger(WebApplicationBuilder builder)

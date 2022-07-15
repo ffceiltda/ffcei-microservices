@@ -44,6 +44,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="11.0.1" />
+    <PackageReference Include="AutoMapper.Collection" Version="8.0.0" />
+    <PackageReference Include="AutoMapper.Collection.EntityFrameworkCore" Version="8.0.0" />
+    <PackageReference Include="AutoMapper.Extensions.EnumMapping" Version="2.0.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
     <PackageReference Include="Destructurama.Attributed" Version="3.0.0" />
     <PackageReference Include="Destructurama.ByIgnoring" Version="1.1.0" />
     <PackageReference Include="Destructurama.JsonNet" Version="2.0.0" />

@@ -86,6 +86,7 @@ namespace FFCEI.Microservices.Configuration
         {
             var stringBuilder = new StringBuilder();
 
+#pragma warning disable IDE0058 // Expression value is never used
 #pragma warning disable CA1305 // Specify IFormatProvider
             if (!string.IsNullOrEmpty(Host))
             {
@@ -128,6 +129,7 @@ namespace FFCEI.Microservices.Configuration
             stringBuilder.Append($"ConnectionTimeout={ConnectionTimeout};");
             stringBuilder.Append($"DefaultCommandTimeout={DefaultCommandTimeout};");
 #pragma warning restore CA1305 // Specify IFormatProvider
+#pragma warning restore IDE0058 // Expression value is never used
 
             return stringBuilder;
         }
