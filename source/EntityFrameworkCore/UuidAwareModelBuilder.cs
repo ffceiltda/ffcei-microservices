@@ -17,7 +17,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
         /// <exception cref="ArgumentNullException">Throw null if entityBuilder is null</exception>
         public static void Register<TEntity>(EntityTypeBuilder<TEntity> entityBuilder) where TEntity : class, IUuidAwareModel
         {
-            if (entityBuilder == null)
+            if (entityBuilder is null)
             {
                 throw new ArgumentNullException(nameof(entityBuilder));
             }

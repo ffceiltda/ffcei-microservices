@@ -1,4 +1,6 @@
 using Destructurama;
+using EFCoreSecondLevelCacheInterceptor;
+using FFCEI.Microservices.Configuration;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -22,6 +24,7 @@ namespace FFCEI.Microservices.AspNetCore
         private readonly string[] _args;
         private WebApplicationBuilder? _builder;
         private WebApplication? _application;
+        private RedisConnectionConfiguration? _entityFrameworkSecondLevelCacheRedisConfiguration;
         private static WeakReference<WebApiMicroservice> _instance = null!;
 
         /// <summary>
@@ -70,6 +73,11 @@ namespace FFCEI.Microservices.AspNetCore
         public bool WebApiIgnoreNullsOnJsonSerialization { get; set; } = true;
 
         /// <summary>
+        /// Entity Framework Core: which Second Level Cache method must be used
+        /// </summary>
+        public EntityFrameworkSecondLevelCache EntityFrameworkSecondLevelCache { get; set; } = EntityFrameworkSecondLevelCache.NoCache;
+
+        /// <summary>
         /// Microservice instance
         /// </summary>
 
@@ -77,7 +85,7 @@ namespace FFCEI.Microservices.AspNetCore
         {
             get
             {
-                if ((_instance != null) && _instance.TryGetTarget(out var result))
+                if ((_instance is not null) && _instance.TryGetTarget(out var result))
                 {
                     return result;
                 }
@@ -93,7 +101,7 @@ namespace FFCEI.Microservices.AspNetCore
         /// <exception cref="InvalidOperationException">Throws a invalid operation exception if you try to instantiante more than one instance</exception>
         public WebApiMicroservice(string[] args)
         {
-            if (_instance != null)
+            if (_instance is not null)
             {
                 throw new InvalidOperationException("WebApiMicroservice must be instantiated only once");
             }
@@ -135,7 +143,7 @@ namespace FFCEI.Microservices.AspNetCore
         /// <exception cref="ArgumentNullException">Throws when builder is null</exception>
         private void OnCreateBuilder(WebApplicationBuilder builder)
         {
-            if (builder == null)
+            if (builder is null)
             {
                 throw new ArgumentNullException(nameof(builder));
             }
@@ -146,6 +154,7 @@ namespace FFCEI.Microservices.AspNetCore
             BuildKestrel(builder);
             BuildWebApi(builder);
             BuildAutoMapper(builder);
+            BuildEntityFrameworkCoreSecondLevelCache(builder);
         }
 
         /// <summary>
@@ -155,7 +164,7 @@ namespace FFCEI.Microservices.AspNetCore
         /// <exception cref="ArgumentNullException">Throws when webApplication is null</exception>
         public void OnCreateApplication(WebApplication webApplication)
         {
-            if (webApplication == null)
+            if (webApplication is null)
             {
                 throw new ArgumentNullException(nameof(webApplication));
             }
@@ -163,6 +172,40 @@ namespace FFCEI.Microservices.AspNetCore
             CreateSerilog(webApplication);
             CreateKestrel(webApplication);
             CreateWebApi(webApplication);
+        }
+
+        public void UseMemoryEntityFrameworkSecondLevelCache()
+        {
+            EntityFrameworkSecondLevelCache = EntityFrameworkSecondLevelCache.MemoryCache;
+        }
+
+        public void UseRedisEntityFrameworkSecondLevelCache(RedisConnectionConfiguration? configuration = null)
+        {
+            if (configuration == null)
+            {
+                var standardConfiguration = ConfigurationManager.GetRedisConfiguration(
+                    hostSettingName: "Redis.Cache.Host",
+                    portSettingName: "Redis.Cache.Port",
+                    usernameSettingName: "Redis.Cache.Username",
+                    passwordSettingName: "Redis.Cache.Password",
+                    databaseSettingName: "Redis.Cache.Database");
+
+                if (standardConfiguration.Host is null)
+                {
+                    throw new ArgumentNullException(nameof(configuration));
+                }
+
+                configuration = standardConfiguration;
+            }
+
+            if (configuration.Database is null)
+            {
+                configuration.Database = 15;
+            }
+
+            EntityFrameworkSecondLevelCache = EntityFrameworkSecondLevelCache.RedisCache;
+
+            _entityFrameworkSecondLevelCacheRedisConfiguration = configuration;
         }
 
 #pragma warning disable CA1054 // URI-like parameters should not be strings
@@ -188,6 +231,7 @@ namespace FFCEI.Microservices.AspNetCore
 #pragma warning restore CA1054 // URI-like parameters should not be strings
 
 #pragma warning disable IDE0058 // Expression value is never used
+
         private static void CreateSerilog(WebApplication webApplication)
         {
             webApplication.UseSerilogRequestLogging();
@@ -342,15 +386,39 @@ namespace FFCEI.Microservices.AspNetCore
 
         private static void BuildWebApiFluentValidation(IMvcBuilder builder)
         {
+            var entryAssembly = Assembly.GetEntryAssembly();
+
+            if (entryAssembly is null)
+            {
+                return;
+            }
+
+            var assemblies = new List<Assembly> { entryAssembly };
+
+            var referencedAssemblies = entryAssembly.GetReferencedAssemblies();
+
+            if (referencedAssemblies is not null)
+            {
+                foreach (var referencedAssembly in referencedAssemblies)
+                {
+                    var assemblyName = referencedAssembly.Name ?? string.Empty;
+
+                    if (assemblyName.EndsWith(".Messages", StringComparison.InvariantCulture))
+                    {
+                        var assembly = Assembly.Load(assemblyName);
+
+                        if (assembly is not null)
+                        {
+                            assemblies.Add(assembly);
+                        }
+                    }
+                }
+            }
+
             builder.AddFluentValidation(validators =>
             {
-                validators.RegisterValidatorsFromAssembly(Assembly.GetEntryAssembly());
+                validators.RegisterValidatorsFromAssemblies(assemblies);
             });
-        }
-
-        private static void BuildAutoMapper(WebApplicationBuilder builder)
-        {
-            builder.Services.AddAutoMapper(Assembly.GetEntryAssembly());
         }
 
         private void BuildWebApiSwagger(WebApplicationBuilder builder)
@@ -367,7 +435,7 @@ namespace FFCEI.Microservices.AspNetCore
 
                 options.TagActionsBy(api =>
                 {
-                    if (api.GroupName != null)
+                    if (api.GroupName is not null)
                     {
                         return new[] { api.GroupName };
                     }
@@ -411,6 +479,120 @@ namespace FFCEI.Microservices.AspNetCore
                     }
 #pragma warning restore CA1031 // Do not catch general exception types
                 });
+            });
+        }
+
+        private static void BuildAutoMapper(WebApplicationBuilder builder)
+        {
+            var entryAssembly = Assembly.GetEntryAssembly();
+
+            if (entryAssembly is null)
+            {
+                return;
+            }
+
+            var assemblies = new List<Assembly> { entryAssembly };
+
+            var referencedAssemblies = entryAssembly.GetReferencedAssemblies();
+
+            if (referencedAssemblies is not null)
+            {
+                foreach (var referencedAssembly in referencedAssemblies)
+                {
+                    var assemblyName = referencedAssembly.Name ?? string.Empty;
+
+                    if (assemblyName.EndsWith(".Services", StringComparison.InvariantCulture))
+                    {
+                        var assembly = Assembly.Load(assemblyName);
+
+                        if (assembly is not null)
+                        {
+                            assemblies.Add(assembly);
+                        }
+                    }
+                }
+            }
+
+            foreach (var assembly in assemblies)
+            {
+                builder.Services.AddAutoMapper(assembly);
+            }
+        }
+
+
+        private void BuildEntityFrameworkCoreSecondLevelCache(WebApplicationBuilder builder)
+        {
+            switch (EntityFrameworkSecondLevelCache)
+            {
+            case EntityFrameworkSecondLevelCache.NoCache:
+                {
+                    break;
+                }
+            case EntityFrameworkSecondLevelCache.MemoryCache:
+                {
+                    BuildMemoryEntityFrameworkCoreSecondLevelCache(builder);
+
+                    break;
+                }
+            case EntityFrameworkSecondLevelCache.RedisCache:
+                {
+                    BuildRedisEntityFrameworkCoreSecondLevelCache(builder);
+
+                    break;
+                }
+            default:
+                {
+                    throw new InvalidOperationException(nameof(EntityFrameworkSecondLevelCache));
+                }
+            }
+        }
+
+        private static void BuildMemoryEntityFrameworkCoreSecondLevelCache(WebApplicationBuilder builder)
+        {
+            builder.Services.AddEFSecondLevelCache(options =>
+            {
+                options
+                    .UseMemoryCacheProvider()
+                    .UseCacheKeyPrefix("EF_")
+                    .CacheAllQueries(CacheExpirationMode.Absolute, TimeSpan.FromMinutes(1))
+                    .SkipCachingResults(result => (result.Value is null) || ((result.Value is EFTableRows rows) && (rows.RowsCount == 0)));
+
+                if (!builder.Environment.IsDevelopment())
+                {
+                    options.DisableLogging(true);
+                }
+            });
+        }
+
+        private void BuildRedisEntityFrameworkCoreSecondLevelCache(WebApplicationBuilder builder)
+        {
+
+            builder.Services.AddEFSecondLevelCache(options => {
+                options
+                    .UseEasyCachingCoreProvider("EFSecondLevelRedisCache")
+                    .UseCacheKeyPrefix("EF_")
+                    .CacheAllQueries(CacheExpirationMode.Absolute, TimeSpan.FromMinutes(1))
+                    .SkipCachingResults(result => (result.Value is null) || ((result.Value is EFTableRows rows) && (rows.RowsCount == 0)));
+
+                if (!builder.Environment.IsDevelopment())
+                {
+                    options.DisableLogging(true);
+                }
+            });
+
+            builder.Services.AddEasyCaching(option =>
+            {
+                option.WithJson();
+                option.UseRedisLock();
+                option.UseRedis(config =>
+                {
+                    if (_entityFrameworkSecondLevelCacheRedisConfiguration is null)
+                    {
+                        throw new InvalidOperationException("No Redis configuration for second level cache was specified");
+                    }
+
+                    _entityFrameworkSecondLevelCacheRedisConfiguration.Apply(config);
+                }, "EFSecondLevelRedisCache");
             });
         }
 #pragma warning restore IDE0058 // Expression value is never used

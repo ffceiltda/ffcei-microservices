@@ -7,7 +7,7 @@ namespace FFCEI.Microservices.AspNetCore.Json
     {
         public override bool CanConvert(Type typeToConvert)
         {
-            if (typeToConvert == null)
+            if (typeToConvert is null)
             {
                 throw new ArgumentNullException(nameof(typeToConvert));
             }

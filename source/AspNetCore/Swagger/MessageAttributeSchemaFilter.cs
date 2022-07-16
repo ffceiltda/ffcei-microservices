@@ -20,22 +20,22 @@ namespace FFCEI.Microservices.AspNetCore.Swagger
 
         public void Apply(OpenApiSchema schema, SchemaFilterContext context)
         {
-            if (_xmlComments == null)
+            if (_xmlComments is null)
             {
                 return;
             }
 
-            if (schema == null)
+            if (schema is null)
             {
                 throw new ArgumentNullException(nameof(schema));
             }
 
-            if (context == null)
+            if (context is null)
             {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            if (Attribute.GetCustomAttribute(context.Type, typeof(SwaggerMessageAttribute), false) != null)
+            if (Attribute.GetCustomAttribute(context.Type, typeof(SwaggerMessageAttribute), false) is not null)
             {
                 schema.Title = context.Type.Name;
             }

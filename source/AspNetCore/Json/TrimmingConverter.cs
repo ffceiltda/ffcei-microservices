@@ -9,7 +9,7 @@ namespace FFCEI.Microservices.AspNetCore.Json
 
         public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
         {
-            if (writer == null)
+            if (writer is null)
             {
                 throw new ArgumentNullException(nameof(writer));
             }

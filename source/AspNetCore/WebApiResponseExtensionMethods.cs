@@ -11,7 +11,7 @@ namespace FFCEI.Microservices.AspNetCore
         public static IActionResult ToHttpResponse<TWebApiResponse>(this TWebApiResponse response)
             where TWebApiResponse : WebApiResponse
         {
-            if (response == null)
+            if (response is null)
             {
                 return new NotFoundObjectResult(response);
             }
@@ -21,7 +21,7 @@ namespace FFCEI.Microservices.AspNetCore
 
         public static IActionResult ToHttpResponse(this WebApiResult response)
         {
-            if (response == null)
+            if (response is null)
             {
                 return new NotFoundObjectResult(response);
             }
@@ -40,7 +40,7 @@ namespace FFCEI.Microservices.AspNetCore
         public static IActionResult ToHttpResponse<TResult>(this WebApiResultWith<TResult> response)
             where TResult : class
         {
-            if (response == null)
+            if (response is null)
             {
                 throw new ArgumentNullException(nameof(response));
             }

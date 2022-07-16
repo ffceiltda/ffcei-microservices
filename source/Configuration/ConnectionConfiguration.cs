@@ -5,7 +5,7 @@ namespace FFCEI.Microservices.Configuration
     /// <summary>
     /// DbConnection configuration
     /// </summary>
-    public abstract class DbConnectionConfiguration
+    public abstract class ConnectionConfiguration
     {
         /// <summary>
         /// Basic connection string

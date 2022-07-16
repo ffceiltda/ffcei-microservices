@@ -34,7 +34,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
         /// <exception cref="ArgumentNullException">Throw if options is null</exception>
         public virtual void ApplyOptions(DbContextOptionsBuilder options, IServiceProvider? serviceProvider = null)
         {
-            if (options == null)
+            if (options is null)
             {
                 throw new ArgumentNullException(nameof(options));
             }

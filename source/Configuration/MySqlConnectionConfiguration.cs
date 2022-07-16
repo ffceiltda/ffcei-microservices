@@ -5,7 +5,7 @@ namespace FFCEI.Microservices.Configuration
     /// <summary>
     /// MySql connection configuration
     /// </summary>
-    public sealed class MySqlConnectionConfiguration : DbConnectionConfiguration
+    public sealed class MySqlConnectionConfiguration : ConnectionConfiguration
     {
         /// <summary>
         /// Hostname or IP address
@@ -93,7 +93,7 @@ namespace FFCEI.Microservices.Configuration
                 stringBuilder.Append($"Server={Host};");
             }
 
-            if ((Port != null) && (Port.Value != 0))
+            if ((Port is not null) && (Port.Value != 0))
             {
                 stringBuilder.Append($"Port={Port};");
             }

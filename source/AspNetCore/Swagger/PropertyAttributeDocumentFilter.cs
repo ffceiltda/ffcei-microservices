@@ -13,19 +13,19 @@ namespace FFCEI.Microservices.AspNetCore.Swagger
     {
         public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
         {
-            if (swaggerDoc == null)
+            if (swaggerDoc is null)
             {
                 throw new ArgumentNullException(nameof(swaggerDoc));
             }
 
-            if (context == null)
+            if (context is null)
             {
                 throw new ArgumentNullException(nameof(context));
             }
 
             foreach (var path in swaggerDoc.Paths.Values)
             {
-                foreach (var operation in path.Operations.Values.Where(op => op.Parameters != null && op.Parameters.Any()))
+                foreach (var operation in path.Operations.Values.Where(op => op.Parameters is not null && op.Parameters.Any()))
                 {
                     foreach (var parameter in operation.Parameters)
                     {
@@ -38,7 +38,7 @@ namespace FFCEI.Microservices.AspNetCore.Swagger
 
                         var schema = context.SchemaRepository.Schemas[schemaReferenceId];
 
-                        if ((schema.Enum == null) || (schema.Enum.Count == 0))
+                        if ((schema.Enum is null) || (schema.Enum.Count == 0))
                         {
                             continue;
                         }
@@ -52,7 +52,7 @@ namespace FFCEI.Microservices.AspNetCore.Swagger
                     }
                 }
 
-                foreach (var operation in path.Operations.Values.Where(x => x.RequestBody != null))
+                foreach (var operation in path.Operations.Values.Where(x => x.RequestBody is not null))
                 {
                     foreach (var content in operation.RequestBody.Content)
                     {
@@ -65,28 +65,28 @@ namespace FFCEI.Microservices.AspNetCore.Swagger
 
                         var schema = context.SchemaRepository.Schemas[schemaReferenceId];
 
-                        if (schema.Default == null)
+                        if (schema.Default is null)
                         {
                             continue;
                         }
 
                         var schemaType = (schema.Default as OpenApiString)?.Value;
 
-                        if (schemaType == null)
+                        if (schemaType is null)
                         {
                             continue;
                         }
 
                         var type = Type.GetType(schemaType);
 
-                        if (type == null)
+                        if (type is null)
                         {
                             continue;
                         }
 
                         var options = new JsonSerializerOptions { WriteIndented = true };
 
-                        if (Attribute.GetCustomAttribute(type, typeof(SwaggerMessageAttribute), false) != null)
+                        if (Attribute.GetCustomAttribute(type, typeof(SwaggerMessageAttribute), false) is not null)
                         {
                             content.Value.Examples = new ConcurrentDictionary<string, OpenApiExample>();
 
@@ -97,7 +97,7 @@ namespace FFCEI.Microservices.AspNetCore.Swagger
                             var expandoDictionary = miniObject as IDictionary<string, object>;
 
 #pragma warning disable CA1508 // Avoid dead conditional code
-                            if (expandoDictionary == null)
+                            if (expandoDictionary is null)
                             {
                                 continue;
                             }

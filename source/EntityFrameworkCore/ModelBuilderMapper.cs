@@ -19,7 +19,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
         /// <exception cref="ArgumentNullException"></exception>
         public static void MapModelBuilders(ModelBuilder modelBuilder, Assembly? initialAssembly)
         {
-            if (modelBuilder == null)
+            if (modelBuilder is null)
             {
                 throw new ArgumentNullException(nameof(modelBuilder));
             }

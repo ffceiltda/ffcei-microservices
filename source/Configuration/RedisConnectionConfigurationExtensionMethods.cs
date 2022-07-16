@@ -1,14 +1,17 @@
+using EasyCaching.Core.Configurations;
+using EasyCaching.Redis;
 using System.Globalization;
+using System.Text;
 
 namespace FFCEI.Microservices.Configuration
 {
     /// <summary>
-    /// Mysql Connection Configuration extension methods
+    /// Redis Connection Configuration extension methods
     /// </summary>
-    public static class MySqlConnectionConfigurationExtensionMethods
+    public static class RedisConnectionConfigurationExtensionMethods
     {
         /// <summary>
-        /// Get MySQL connection configuration from Configuration Manager
+        /// Get redis connection configuration from Configuration Manager
         /// </summary>
         /// <param name="configurationManager">Configuration Manager instance</param>
         /// <param name="hostSettingName">Host setting name in Configuration Manager</param>
@@ -21,34 +24,35 @@ namespace FFCEI.Microservices.Configuration
         /// <param name="username">Use this Username if specified</param>
         /// <param name="password">Use this Password if specified</param>
         /// <param name="database">Use this Database if specified</param>
-        /// <returns>MySqlConnectionConfiguration instance</returns>
+        /// <returns>redisConnectionConfiguration instance</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static MySqlConnectionConfiguration GetMySqlConfiguration(this ConfigurationManager configurationManager,
-            string hostSettingName = "MySql.Host",
-            string portSettingName = "MySql.Port",
-            string usernameSettingName = "MySql.Username",
-            string passwordSettingName = "MySql.Password",
-            string databaseSettingName = "MySql.Database",
+        public static RedisConnectionConfiguration GetRedisConfiguration(this ConfigurationManager configurationManager,
+            string hostSettingName = "Redis.Host",
+            string portSettingName = "Redis.Port",
+            string usernameSettingName = "Redis.Username",
+            string passwordSettingName = "Redis.Password",
+            string databaseSettingName = "Redism.Database",
             string? host = null,
             ushort? port = null,
             string? username = null,
             string? password = null,
-            string? database = null)
+            int? database = null)
         {
             if (configurationManager is null)
             {
                 throw new ArgumentNullException(nameof(configurationManager));
             }
 
-            var mySqlPort = configurationManager[portSettingName];
+            var redisPort = configurationManager[portSettingName];
+            var redisDatabase = configurationManager[databaseSettingName];
 
-            var result = new MySqlConnectionConfiguration
+            var result = new RedisConnectionConfiguration
             {
                 Host = configurationManager[hostSettingName],
-                Port = (mySqlPort is null) ? null : ushort.Parse(mySqlPort, NumberStyles.Integer, CultureInfo.InvariantCulture),
+                Port = (redisPort is null) ? null : ushort.Parse(redisPort, NumberStyles.Integer, CultureInfo.InvariantCulture),
                 Username = configurationManager[usernameSettingName],
                 Password = configurationManager[passwordSettingName],
-                Database = configurationManager[databaseSettingName]
+                Database = (redisDatabase is null) ? null : ushort.Parse(redisDatabase, NumberStyles.Integer, CultureInfo.InvariantCulture),
             };
 
             if (string.IsNullOrEmpty(result.Host) || (host is not null))
@@ -71,12 +75,12 @@ namespace FFCEI.Microservices.Configuration
                 result.Password = password;
             }
 
-            if (string.IsNullOrEmpty(result.Database) || (database is not null))
+            if (database is not null)
             {
                 result.Database = database;
             }
 
             return result;
         }
-    }
+    }    
 }

@@ -21,17 +21,17 @@ namespace FFCEI.Microservices.AspNetCore.Swagger
 
         public void Apply(OpenApiSchema schema, SchemaFilterContext context)
         {
-            if (_xmlComments == null)
+            if (_xmlComments is null)
             {
                 return;
             }
 
-            if (schema == null)
+            if (schema is null)
             {
                 throw new ArgumentNullException(nameof(schema));
             }
 
-            if (context == null)
+            if (context is null)
             {
                 throw new ArgumentNullException(nameof(context));
             }
@@ -46,7 +46,7 @@ namespace FFCEI.Microservices.AspNetCore.Swagger
 
             var fullTypeName = context.Type.FullName;
 
-            if (fullTypeName == null)
+            if (fullTypeName is null)
             {
                 return;
             }
@@ -55,15 +55,15 @@ namespace FFCEI.Microservices.AspNetCore.Swagger
 
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                enumType = assembly.GetTypes().Where(t => (t.FullName != null) && t.FullName.Contains(fullTypeName, StringComparison.InvariantCulture)).FirstOrDefault();
+                enumType = assembly.GetTypes().Where(t => (t.FullName is not null) && t.FullName.Contains(fullTypeName, StringComparison.InvariantCulture)).FirstOrDefault();
 
-                if (enumType != null)
+                if (enumType is not null)
                 {
                     break;
                 }
             }
 
-            if (enumType == null)
+            if (enumType is null)
             {
                 return;
             }
@@ -77,7 +77,7 @@ namespace FFCEI.Microservices.AspNetCore.Swagger
                 {
                     var attribute = m.Attribute("name");
 
-                    if (attribute == null)
+                    if (attribute is null)
                     {
                         return false;
                     }
@@ -87,7 +87,7 @@ namespace FFCEI.Microservices.AspNetCore.Swagger
 
                 var summary = enumMemberComments?.Descendants("summary").FirstOrDefault();
 
-                if (summary == null)
+                if (summary is null)
                 {
                     continue;
                 }

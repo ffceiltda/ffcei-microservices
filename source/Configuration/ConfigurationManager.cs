@@ -16,7 +16,7 @@ namespace FFCEI.Microservices.Configuration
 
         internal ConfigurationManager(WebApplicationBuilder builder)
         {
-            if (builder == null)
+            if (builder is null)
             {
                 throw new ArgumentNullException(nameof(builder));
             }

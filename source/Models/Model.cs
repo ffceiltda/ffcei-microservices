@@ -15,7 +15,7 @@ namespace FFCEI.Microservices.Models
         protected static long? GetRelationshipId<TModelRelationship>(long? idBackingField, TModelRelationship? modelRelationshipBackingField)
             where TModelRelationship : Model, IIdAwareModel
         {
-            return (modelRelationshipBackingField != null) ? modelRelationshipBackingField.Id : idBackingField;
+            return (modelRelationshipBackingField is not null) ? modelRelationshipBackingField.Id : idBackingField;
         }
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace FFCEI.Microservices.Models
         protected static void SetRelationshipId<TModelRelationship>(long? value, ref long? idBackingField, ref TModelRelationship? modelRelationshipBackingField)
             where TModelRelationship : Model, IIdAwareModel
         {
-            if ((value != null) && (modelRelationshipBackingField != null) && (modelRelationshipBackingField.Id == value))
+            if ((value is not null) && (modelRelationshipBackingField is not null) && (modelRelationshipBackingField.Id == value))
             {
                 return;
             }
@@ -48,7 +48,7 @@ namespace FFCEI.Microservices.Models
         protected static void SetRelationshipId<TModelRelationship>(long? value, ref long? idBackingField, ref Guid? uuidBackingField, ref TModelRelationship? modelRelationshipBackingField)
             where TModelRelationship : Model, IIdAwareModel
         {
-            if ((value != null) && (modelRelationshipBackingField != null) && (modelRelationshipBackingField.Id == value))
+            if ((value is not null) && (modelRelationshipBackingField is not null) && (modelRelationshipBackingField.Id == value))
             {
                 return;
             }
@@ -68,7 +68,7 @@ namespace FFCEI.Microservices.Models
         protected static Guid? GetRelationshipUuid<TModelRelationship>(Guid? uuidBackingField, TModelRelationship? modelRelationshipBackingField)
             where TModelRelationship : Model, IUuidAwareModel
         {
-            return (modelRelationshipBackingField != null) ? modelRelationshipBackingField.Uuid : uuidBackingField;
+            return (modelRelationshipBackingField is not null) ? modelRelationshipBackingField.Uuid : uuidBackingField;
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace FFCEI.Microservices.Models
         protected static void SetRelationshipUuid<TModelRelationship>(Guid? value, ref Guid? uuidBackingField, ref TModelRelationship? modelRelationshipBackingField)
             where TModelRelationship : Model, IUuidAwareModel
         {
-            if ((value != null) && (modelRelationshipBackingField != null) && (modelRelationshipBackingField.Uuid == value))
+            if ((value is not null) && (modelRelationshipBackingField is not null) && (modelRelationshipBackingField.Uuid == value))
             {
                 return;
             }
@@ -101,7 +101,7 @@ namespace FFCEI.Microservices.Models
         protected static void SetRelationshipUuid<TModelRelationship>(Guid? value, ref long? idBackingField, ref Guid? uuidBackingField, ref TModelRelationship? modelRelationshipBackingField)
             where TModelRelationship : Model, IUuidAwareModel
         {
-            if ((value != null) && (modelRelationshipBackingField != null) && (modelRelationshipBackingField.Uuid == value))
+            if ((value is not null) && (modelRelationshipBackingField is not null) && (modelRelationshipBackingField.Uuid == value))
             {
                 return;
             }
@@ -172,7 +172,7 @@ namespace FFCEI.Microservices.Models
 
         public virtual void CopyModelPropertiesFrom(IModel model)
         {
-            if (model == null)
+            if (model is null)
             {
                 throw new ArgumentNullException(nameof(model));
             }

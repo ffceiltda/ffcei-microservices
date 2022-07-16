@@ -21,7 +21,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
         public async Task AddNewAsync(TModel content, bool autoCommit = true)
         {
-            if (content == null)
+            if (content is null)
             {
                 throw new ArgumentNullException(nameof(content));
             }
@@ -36,7 +36,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
         public async Task AddNewAsync(IModel content, bool autoCommit = true)
         {
-            if (content == null)
+            if (content is null)
             {
                 throw new ArgumentNullException(nameof(content));
             }
@@ -53,7 +53,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
         public async Task AddManyAsync(IEnumerable<TModel> contents, bool autoCommit = true)
         {
-            if (contents == null)
+            if (contents is null)
             {
                 throw new ArgumentNullException(nameof(contents));
             }
@@ -68,7 +68,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
         public async Task AddManyAsync(IEnumerable<IModel> contents, bool autoCommit = true)
         {
-            if (contents == null)
+            if (contents is null)
             {
                 throw new ArgumentNullException(nameof(contents));
             }
@@ -94,7 +94,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
         public async Task UpdateExistingAsync(TModel content, bool autoCommit = true)
         {
-            if (content == null)
+            if (content is null)
             {
                 throw new ArgumentNullException(nameof(content));
             }
@@ -109,7 +109,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
         public async Task UpdateExistingAsync(IModel content, bool autoCommit = true)
         {
-            if (content == null)
+            if (content is null)
             {
                 throw new ArgumentNullException(nameof(content));
             }
@@ -126,7 +126,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
         public async Task RemoveExistingAsync(TModel content, bool autoCommit = true)
         {
-            if (content == null)
+            if (content is null)
             {
                 throw new ArgumentNullException(nameof(content));
             }
@@ -141,7 +141,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
         public async Task RemoveExistingAsync(IModel content, bool autoCommit = true)
         {
-            if (content == null)
+            if (content is null)
             {
                 throw new ArgumentNullException(nameof(content));
             }
@@ -158,7 +158,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
         public async Task RemoveManyAsync(IEnumerable<TModel> contents, bool autoCommit = true)
         {
-            if (contents == null)
+            if (contents is null)
             {
                 throw new ArgumentNullException(nameof(contents));
             }
@@ -173,7 +173,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
         public async Task RemoveManyAsync(IEnumerable<IModel> contents, bool autoCommit = true)
         {
-            if (contents == null)
+            if (contents is null)
             {
                 throw new ArgumentNullException(nameof(contents));
             }
@@ -190,7 +190,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
         public async Task RemoveByKeyAsync(bool autoCommit = true, params object[] keys)
         {
-            if (keys == null)
+            if (keys is null)
             {
                 throw new ArgumentNullException(nameof(keys));
             }
@@ -207,7 +207,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
         {
             var contents = await Set.Where(predicate).ToListAsync();
 
-            if (contents == null)
+            if (contents is null)
             {
                 throw new ArgumentNullException(nameof(predicate), "predicate returned null");
             }
@@ -225,7 +225,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
         public async Task ReloadExistingAsync(TModel content)
         {
-            if (content == null)
+            if (content is null)
             {
                 throw new ArgumentNullException(nameof(content));
             }
@@ -235,7 +235,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
         public async Task ReloadExistingAsync(IModel content)
         {
-            if (content == null)
+            if (content is null)
             {
                 throw new ArgumentNullException(nameof(content));
             }
@@ -254,7 +254,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
         public void Detach(TModel content)
         {
-            if (content == null)
+            if (content is null)
             {
                 throw new ArgumentNullException(nameof(content));
             }
@@ -264,7 +264,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
         public void Detach(IModel content)
         {
-            if (content == null)
+            if (content is null)
             {
                 throw new ArgumentNullException(nameof(content));
             }
