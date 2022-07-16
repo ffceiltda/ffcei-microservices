@@ -154,7 +154,6 @@ namespace FFCEI.Microservices.AspNetCore
             BuildKestrel(builder);
             BuildWebApi(builder);
             BuildAutoMapper(builder);
-            BuildEntityFrameworkCoreSecondLevelCache(builder);
         }
 
         /// <summary>
@@ -177,6 +176,8 @@ namespace FFCEI.Microservices.AspNetCore
         public void UseMemoryEntityFrameworkSecondLevelCache()
         {
             EntityFrameworkSecondLevelCache = EntityFrameworkSecondLevelCache.MemoryCache;
+
+            BuildEntityFrameworkCoreSecondLevelCache(Builder);
         }
 
         public void UseRedisEntityFrameworkSecondLevelCache(RedisConnectionConfiguration? configuration = null)
@@ -198,14 +199,11 @@ namespace FFCEI.Microservices.AspNetCore
                 configuration = standardConfiguration;
             }
 
-            if (configuration.Database is null)
-            {
-                configuration.Database = 15;
-            }
-
             EntityFrameworkSecondLevelCache = EntityFrameworkSecondLevelCache.RedisCache;
 
             _entityFrameworkSecondLevelCacheRedisConfiguration = configuration;
+
+            BuildEntityFrameworkCoreSecondLevelCache(Builder);
         }
 
 #pragma warning disable CA1054 // URI-like parameters should not be strings
@@ -547,37 +545,31 @@ namespace FFCEI.Microservices.AspNetCore
             }
         }
 
+        private static void BuildEntityFrameworkCoreSecondLevelCacheOptions(WebApplicationBuilder builder, EFCoreSecondLevelCacheOptions options)
+        {
+            var assemblyPrefix = Assembly.GetEntryAssembly()?.FullName?.Split(",")[0].Replace(".", "", StringComparison.InvariantCulture) ?? string.Empty;
+
+            options
+                .UseCacheKeyPrefix($"EFCoreSecondLevelCache_{assemblyPrefix}_")
+                .CacheAllQueries(CacheExpirationMode.Absolute, TimeSpan.FromMinutes(1))
+                .SkipCachingResults(result => (result.Value is null) || ((result.Value is EFTableRows rows) && (rows.RowsCount == 0)))
+                .DisableLogging(!builder.Environment.IsDevelopment());
+        }
+
         private static void BuildMemoryEntityFrameworkCoreSecondLevelCache(WebApplicationBuilder builder)
         {
             builder.Services.AddEFSecondLevelCache(options =>
             {
-                options
-                    .UseMemoryCacheProvider()
-                    .UseCacheKeyPrefix("EF_")
-                    .CacheAllQueries(CacheExpirationMode.Absolute, TimeSpan.FromMinutes(1))
-                    .SkipCachingResults(result => (result.Value is null) || ((result.Value is EFTableRows rows) && (rows.RowsCount == 0)));
-
-                if (!builder.Environment.IsDevelopment())
-                {
-                    options.DisableLogging(true);
-                }
+                BuildEntityFrameworkCoreSecondLevelCacheOptions(builder,
+                    options.UseMemoryCacheProvider());
             });
         }
 
         private void BuildRedisEntityFrameworkCoreSecondLevelCache(WebApplicationBuilder builder)
         {
-
             builder.Services.AddEFSecondLevelCache(options => {
-                options
-                    .UseEasyCachingCoreProvider("EFSecondLevelRedisCache")
-                    .UseCacheKeyPrefix("EF_")
-                    .CacheAllQueries(CacheExpirationMode.Absolute, TimeSpan.FromMinutes(1))
-                    .SkipCachingResults(result => (result.Value is null) || ((result.Value is EFTableRows rows) && (rows.RowsCount == 0)));
-
-                if (!builder.Environment.IsDevelopment())
-                {
-                    options.DisableLogging(true);
-                }
+                BuildEntityFrameworkCoreSecondLevelCacheOptions(builder,
+                    options.UseEasyCachingCoreProvider("EFSecondLevelRedisCache"));
             });
 
             builder.Services.AddEasyCaching(option =>
