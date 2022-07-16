@@ -26,7 +26,7 @@ namespace FFCEI.Microservices.AspNetCore
         {
             return new WebApiResultWith<TResult>()
             {
-                Detail = detail,
+                Detail = detail ?? DetailSuceeded,
                 Result = result
             };
         }
@@ -42,7 +42,7 @@ namespace FFCEI.Microservices.AspNetCore
             return new WebApiResultWith<TResult>()
             {
                 Status = StatusInternalError,
-                Detail = detail,
+                Detail = detail ?? DetailInternalError,
                 Result = result
             };
         }
@@ -59,7 +59,7 @@ namespace FFCEI.Microservices.AspNetCore
             return new WebApiResultWith<TResult>()
             {
                 Status = (status == 0 ? StatusInternalError : status),
-                Detail = detail,
+                Detail = detail ?? DetailInternalError,
                 Result = result
             };
         }

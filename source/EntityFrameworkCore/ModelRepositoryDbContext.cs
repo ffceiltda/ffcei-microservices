@@ -9,9 +9,12 @@ namespace FFCEI.Microservices.EntityFrameworkCore
     /// </summary>
     public abstract class ModelRepositoryDbContext : DbContext
     {
-        private static readonly PropertyInfo? UuidProperty = typeof(UuidAwareModel).GetProperty("Uuid");
         private static readonly PropertyInfo? CreatedAtProperty = typeof(TimeStampedModel).GetProperty("CreatedAt");
         private static readonly PropertyInfo? UpdatedAtProperty = typeof(TimeStampedModel).GetProperty("UpdatedAt");
+        private static readonly PropertyInfo? UuidEnabledTimeStampedProperty = typeof(UuidAwareEnabledAwareTimeStampedModel).GetProperty("Uuid");
+        private static readonly PropertyInfo? UuidTimeStampedProperty = typeof(UuidAwareTimeStampedModel).GetProperty("Uuid");
+        private static readonly PropertyInfo? UuidEnabledProperty = typeof(UuidAwareEnabledAwareModel).GetProperty("Uuid");
+        private static readonly PropertyInfo? UuidProperty = typeof(UuidAwareModel).GetProperty("Uuid");
 
         private bool _modelBuildersMapped;
 
@@ -68,8 +71,6 @@ namespace FFCEI.Microservices.EntityFrameworkCore
         /// <returns>Rows affected</returns>
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            DbModelUpdateCreatedAtUpdatedAtFields();
-
             return base.SaveChangesAsync(cancellationToken);
         }
 
@@ -80,26 +81,36 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
             foreach (var entity in entities)
             {
-                var now = DateTimeOffset.UtcNow;
-
-                if (UpdatedAtProperty is not null)
+                if (entity.Entity.GetType().IsSubclassOf(typeof(TimeStampedModel)))
                 {
+                    var now = DateTimeOffset.UtcNow;
+
                     if ((entity.State == EntityState.Added) || (RefreshUpdateAtFieldOnSaving))
                     {
-                        UpdatedAtProperty.SetValue(entity.Entity, now);
+                        UpdatedAtProperty?.SetValue(entity.Entity, now);
+                    }
+
+                    if (entity.State == EntityState.Added)
+                    {
+                        CreatedAtProperty?.SetValue(entity.Entity, now);
                     }
                 }
 
                 if (entity.State == EntityState.Added)
                 {
-                    if (UuidProperty is not null)
-                    {
-                        UuidProperty.SetValue(entity.Entity, Guid.NewGuid());
-                    }
+                    var uuidProperty = entity.Entity.GetType().IsSubclassOf(typeof(UuidAwareEnabledAwareTimeStampedModel)) ? UuidEnabledTimeStampedProperty :
+                        entity.Entity.GetType().IsSubclassOf(typeof(UuidAwareTimeStampedModel)) ? UuidTimeStampedProperty :
+                        entity.Entity.GetType().IsSubclassOf(typeof(UuidAwareEnabledAwareModel)) ? UuidEnabledProperty :
+                        entity.Entity.GetType().IsSubclassOf(typeof(UuidAwareModel)) ? UuidProperty :
+                        null;
 
-                    if (CreatedAtProperty is not null)
+                    var value = uuidProperty?.GetValue(entity.Entity);
+
+                    if (((value is Guid guid) && (guid == Guid.Empty)) || (value is null))
                     {
-                        CreatedAtProperty.SetValue(entity.Entity, now);
+                        value = Guid.NewGuid();
+
+                        uuidProperty?.SetValue(entity.Entity, value);
                     }
                 }
             }

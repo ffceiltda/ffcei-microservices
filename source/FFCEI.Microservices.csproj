@@ -7,9 +7,11 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>1591</NoWarn>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <Authors>Virgilio Alexandre Fornazin</Authors>
     <Company>Fornazin &amp; Fornazin Consultoria em Informática Ltda</Company>
     <Description>A free library for ASP.NET Core 6+ Microservices development, with Model, Model Repository, Entity Framework Core and common Web Api features like CORS, Json serialization fixes, Swagger generation, JWT Authentication for simple and objective microservices development</Description>
+    <Copyright>Copyright (C) Fornazin &amp; Fornazin Consultoria em Informática Ltda</Copyright>
     <PackageProjectUrl>https://github.com/ffceiltda/ffcei-microservices</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/ffceiltda/ffcei-microservices</RepositoryUrl>
@@ -19,17 +21,7 @@
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
     <AnalysisLevel>6.0-all</AnalysisLevel>
     <SignAssembly>False</SignAssembly>
-    <Version>0.0.4</Version>
-    <Copyright>Copyright (C) Fornazin &amp; Fornazin Consultoria em Informática Ltda</Copyright>
-    <RepositoryType>git</RepositoryType>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <Version>0.0.5</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,5 +1,3 @@
-using System.Reflection;
-
 namespace FFCEI.Microservices.Models
 {
     /// <summary>
@@ -7,110 +5,169 @@ namespace FFCEI.Microservices.Models
     /// </summary>
     public abstract class Model : IModel
     {
-        public static Guid UuidRelationPropertyGetOrDefault<TEntity>(Guid? storageProperty, TEntity entityFrameworkCoreNavigationEntity) where TEntity : class, IUuidAwareModel
+        /// <summary>
+        /// Get a Model (relationship) Id proparty
+        /// </summary>
+        /// <typeparam name="TModelRelationship">Model descendant relationship</typeparam>
+        /// <param name="idBackingField">Id backing field</param>
+        /// <param name="modelRelationshipBackingField">Model relationship backing field</param>
+        /// <returns>Model (relationship) Id proparty</returns>
+        protected static long? GetRelationshipId<TModelRelationship>(long? idBackingField, TModelRelationship? modelRelationshipBackingField)
+            where TModelRelationship : Model, IIdAwareModel
         {
-            if (entityFrameworkCoreNavigationEntity is not null)
-            {
-                return entityFrameworkCoreNavigationEntity.Uuid;
-            }
-
-            if (storageProperty.HasValue)
-            {
-                return storageProperty.Value;
-            }
-
-            return Guid.Empty;
+            return (modelRelationshipBackingField != null) ? modelRelationshipBackingField.Id : idBackingField;
         }
 
-        public static Guid? UuidRelationPropertyGetOrNull<TEntity>(Guid? storageProperty, TEntity entityFrameworkCoreNavigationEntity)
-            where TEntity : class, IUuidAwareModel
+        /// <summary>
+        /// Set a Model (relationship) Id proparty
+        /// </summary>
+        /// <typeparam name="TModelRelationship">Model descendant relationship</typeparam>
+        /// <param name="value"></param>
+        /// <param name="idBackingField">Id backing field</param>
+        /// <param name="modelRelationshipBackingField">Model relationship backing field</param>
+        protected static void SetRelationshipId<TModelRelationship>(long? value, ref long? idBackingField, ref TModelRelationship? modelRelationshipBackingField)
+            where TModelRelationship : Model, IIdAwareModel
         {
-            if (entityFrameworkCoreNavigationEntity is not null)
+            if ((value != null) && (modelRelationshipBackingField != null) && (modelRelationshipBackingField.Id == value))
             {
-                return entityFrameworkCoreNavigationEntity.Uuid;
+                return;
             }
 
-            if (storageProperty.HasValue)
-            {
-                return storageProperty.Value;
-            }
-
-            return null;
+            idBackingField = value;
+            modelRelationshipBackingField = null;
         }
 
-        public void UuidRelationPropertySet<TEntity>(ref Guid? storageProperty, PropertyInfo? entityFrameworkCoreNavigationEntityProperty, Guid newValue)
-            where TEntity : class, IUuidAwareModel
+        /// <summary>
+        /// Set a Model (relationship) Id proparty
+        /// </summary>
+        /// <typeparam name="TModelRelationship">Model descendant relationship</typeparam>
+        /// <param name="value"></param>
+        /// <param name="idBackingField">Id backing field</param>
+        /// <param name="uuidBackingField">Uuid backing field</param>
+        /// <param name="modelRelationshipBackingField">Model relationship backing field</param>
+        protected static void SetRelationshipId<TModelRelationship>(long? value, ref long? idBackingField, ref Guid? uuidBackingField, ref TModelRelationship? modelRelationshipBackingField)
+            where TModelRelationship : Model, IIdAwareModel
         {
-            if (entityFrameworkCoreNavigationEntityProperty is null)
+            if ((value != null) && (modelRelationshipBackingField != null) && (modelRelationshipBackingField.Id == value))
             {
-                throw new ArgumentNullException(nameof(entityFrameworkCoreNavigationEntityProperty));
+                return;
             }
 
-            if ((entityFrameworkCoreNavigationEntityProperty.GetValue(this) is not TEntity propertyValue) || (propertyValue.Uuid != newValue))
-            {
-                storageProperty = newValue;
-                entityFrameworkCoreNavigationEntityProperty.SetValue(this, null);
-            }
+            idBackingField = value;
+            uuidBackingField = null;
+            modelRelationshipBackingField = null;
         }
 
-        public void UuidRelationPropertySet<TEntity>(ref Guid? storageProperty, PropertyInfo? entityFrameworkCoreNavigationEntityProperty, Guid? newValue)
-            where TEntity : class, IUuidAwareModel
+        /// <summary>
+        /// Get a Model (relationship) Uuid proparty
+        /// </summary>
+        /// <typeparam name="TModelRelationship">Model descendant relationship</typeparam>
+        /// <param name="uuidBackingField">Uuid backing field</param>
+        /// <param name="modelRelationshipBackingField">Model relationship backing field</param>
+        /// <returns>Model (relationship) Uuid proparty</returns>
+        protected static Guid? GetRelationshipUuid<TModelRelationship>(Guid? uuidBackingField, TModelRelationship? modelRelationshipBackingField)
+            where TModelRelationship : Model, IUuidAwareModel
         {
-            if (entityFrameworkCoreNavigationEntityProperty is null)
-            {
-                throw new ArgumentNullException(nameof(entityFrameworkCoreNavigationEntityProperty));
-            }
-
-            if (!newValue.HasValue)
-            {
-                storageProperty = newValue;
-                entityFrameworkCoreNavigationEntityProperty.SetValue(this, null);
-            }
-            else
-            {
-                if ((entityFrameworkCoreNavigationEntityProperty.GetValue(this) is not TEntity propertyValue) || (propertyValue.Uuid != newValue))
-                {
-                    storageProperty = newValue;
-                    entityFrameworkCoreNavigationEntityProperty.SetValue(this, null);
-                }
-            }
+            return (modelRelationshipBackingField != null) ? modelRelationshipBackingField.Uuid : uuidBackingField;
         }
 
-        public void UuidRelationPropertyCopyFrom<TEntity, TSource>(TSource source, Guid? sourceUuid, PropertyInfo? property, PropertyInfo? propertyId, PropertyInfo? propertyUuid)
-            where TEntity : class, IIdAwareModel, IUuidAwareModel
-            where TSource : class, IModel
+        /// <summary>
+        /// Set a Model (relationship) Uuid proparty
+        /// </summary>
+        /// <typeparam name="TModelRelationship">Model descendant relationship</typeparam>
+        /// <param name="value"></param>
+        /// <param name="uuidBackingField">Uuid backing field</param>
+        /// <param name="modelRelationshipBackingField">Model relationship backing field</param>
+        protected static void SetRelationshipUuid<TModelRelationship>(Guid? value, ref Guid? uuidBackingField, ref TModelRelationship? modelRelationshipBackingField)
+            where TModelRelationship : Model, IUuidAwareModel
         {
-            if (property is null)
+            if ((value != null) && (modelRelationshipBackingField != null) && (modelRelationshipBackingField.Uuid == value))
             {
-                throw new ArgumentNullException(nameof(property));
+                return;
             }
 
-            if (propertyId is null)
+            uuidBackingField = value;
+            modelRelationshipBackingField = null;
+        }
+
+        /// <summary>
+        /// Set a Model (relationship) Uuid proparty
+        /// </summary>
+        /// <typeparam name="TModelRelationship">Model descendant relationship</typeparam>
+        /// <param name="value"></param>
+        /// <param name="idBackingField">Id backing field</param>
+        /// <param name="uuidBackingField">Uuid backing field</param>
+        /// <param name="modelRelationshipBackingField">Model relationship backing field</param>
+        protected static void SetRelationshipUuid<TModelRelationship>(Guid? value, ref long? idBackingField, ref Guid? uuidBackingField, ref TModelRelationship? modelRelationshipBackingField)
+            where TModelRelationship : Model, IUuidAwareModel
+        {
+            if ((value != null) && (modelRelationshipBackingField != null) && (modelRelationshipBackingField.Uuid == value))
             {
-                throw new ArgumentNullException(nameof(propertyId));
+                return;
             }
 
-            if (propertyUuid is null)
+            idBackingField = null;
+            uuidBackingField = value;
+            modelRelationshipBackingField = null;
+        }
+
+        /// <summary>
+        /// Set a Model (relationship) navigation property
+        /// </summary>
+        /// <typeparam name="TModelRelationship">Model descendant relationship</typeparam>
+        /// <param name="value">Model relationship instance</param>
+        /// <param name="idBackingField">Id backing field</param>
+        /// <param name="uuidBackingField">Uuid backing field</param>
+        /// <param name="modelRelationshipBackingField">Model relationship backing field</param>
+        protected static void SetRelationshipModel<TModelRelationship>(TModelRelationship? value, ref long? idBackingField, ref Guid? uuidBackingField, ref TModelRelationship? modelRelationshipBackingField)
+            where TModelRelationship : Model, IIdAwareModel, IUuidAwareModel
+        {
+            if (modelRelationshipBackingField == value)
             {
-                throw new ArgumentNullException(nameof(propertyUuid));
+                return;
             }
 
-            if (source is TEntity entity)
+            idBackingField = value?.Id;
+            uuidBackingField = value?.Uuid;
+            modelRelationshipBackingField = value;
+        }
+
+        /// <summary>
+        /// Set a Model (relationship) navigation property
+        /// </summary>
+        /// <typeparam name="TModelRelationship">Model descendant relationship</typeparam>
+        /// <param name="value">Model relationship instance</param>
+        /// <param name="idBackingField">Id backing field</param>
+        /// <param name="modelRelationshipBackingField">Model relationship backing field</param>
+        protected static void SetRelationshipModel<TModelRelationship>(TModelRelationship? value, ref long? idBackingField, ref TModelRelationship? modelRelationshipBackingField)
+            where TModelRelationship : Model, IIdAwareModel
+        {
+            if (modelRelationshipBackingField == value)
             {
-                property.SetValue(this, entity);
-                propertyId.SetValue(this, entity.Id);
+                return;
             }
-            else
+
+            idBackingField = value?.Id;
+            modelRelationshipBackingField = value;
+        }
+
+        /// <summary>
+        /// Set a Model (relationship) navigation property
+        /// </summary>
+        /// <typeparam name="TModelRelationship">Model descendant relationship</typeparam>
+        /// <param name="value">Model relationship instance</param>
+        /// <param name="uuidBackingField">Uuid backing field</param>
+        /// <param name="modelRelationshipBackingField">Model relationship backing field</param>
+        protected static void SetRelationshipModel<TModelRelationship>(TModelRelationship? value, ref Guid? uuidBackingField, ref TModelRelationship? modelRelationshipBackingField)
+            where TModelRelationship : Model, IUuidAwareModel
+        {
+            if (modelRelationshipBackingField == value)
             {
-                if (sourceUuid.HasValue && sourceUuid != Guid.Empty)
-                {
-                    propertyUuid.SetValue(this, sourceUuid.Value);
-                }
-                else
-                {
-                    propertyUuid.SetValue(this, null);
-                }
+                return;
             }
+
+            uuidBackingField = value?.Uuid;
+            modelRelationshipBackingField = value;
         }
 
         public virtual void CopyModelPropertiesFrom(IModel model)

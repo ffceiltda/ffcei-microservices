@@ -6,6 +6,8 @@ namespace FFCEI.Microservices.AspNetCore
     public class WebApiResultBase : WebApiResponse
     {
         internal const int StatusInternalError = -2147483648;
+        internal const string DetailSuceeded = "Succeeded";
+        internal const string DetailInternalError = "A unexpected error has ocurred";
 
         /// <summary>
         /// Status code

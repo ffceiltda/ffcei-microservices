@@ -10,6 +10,7 @@ using Serilog;
 using Serilog.Events;
 using Swashbuckle.AspNetCore.Filters;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace FFCEI.Microservices.AspNetCore
 {
@@ -62,6 +63,11 @@ namespace FFCEI.Microservices.AspNetCore
         /// Web Api: generate swagger documentation (defaults to Development environment only)
         /// </summary>
         public bool? WebApiGenerateSwagger { get; set; }
+
+        /// <summary>
+        /// Web Api: ignore null values on Json serialization (default to true)
+        /// </summary>
+        public bool WebApiIgnoreNullsOnJsonSerialization { get; set; } = true;
 
         /// <summary>
         /// Microservice instance
@@ -317,7 +323,7 @@ namespace FFCEI.Microservices.AspNetCore
             }
         }
 
-        private static void BuildWebApiJsonOptions(IMvcBuilder builder)
+        private void BuildWebApiJsonOptions(IMvcBuilder builder)
         {
             builder.AddJsonOptions(options =>
             {
@@ -326,6 +332,11 @@ namespace FFCEI.Microservices.AspNetCore
                 options.JsonSerializerOptions.Converters.Add(new Json.StringToDecimalConverter());
                 options.JsonSerializerOptions.Converters.Add(new Json.StringToLongConverter());
                 options.JsonSerializerOptions.Converters.Add(new Json.StringToIntegerConverter());
+
+                if (WebApiIgnoreNullsOnJsonSerialization)
+                {
+                    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+                }
             });
         }
 

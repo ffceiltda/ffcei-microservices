@@ -28,10 +28,10 @@ namespace FFCEI.Microservices.AspNetCore
 
             var httpResponse = response.Status switch
             {
-                0 => new OkObjectResult(response),
-                > 0 => new BadRequestObjectResult(response),
-                WebApiResultBase.StatusInternalError => new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError },
-                _ => new ObjectResult(response) { StatusCode = StatusCodes.Status406NotAcceptable }
+                0 => new OkObjectResult(response) { Value = response },
+                > 0 => new BadRequestObjectResult(response) { Value = response },
+                WebApiResultBase.StatusInternalError => new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError, Value = response },
+                _ => new ObjectResult(response) { StatusCode = StatusCodes.Status406NotAcceptable, Value = response }
             };
 
             return httpResponse;
@@ -48,9 +48,9 @@ namespace FFCEI.Microservices.AspNetCore
             var httpResponse = response.Status switch
             {
                 0 => new OkObjectResult(response.Result),
-                > 0 => new BadRequestObjectResult(response) { Value = $"[{response.Status}] {response.Detail}" },
-                WebApiResultBase.StatusInternalError => new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError, Value = $"[{response.Status}] {response.Detail}" },
-                _ => new ObjectResult(response) { StatusCode = StatusCodes.Status406NotAcceptable, Value = $"[{response.Status}] {response.Detail}" }
+                > 0 => new BadRequestObjectResult(response) { Value = response },
+                WebApiResultBase.StatusInternalError => new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError, Value = response },
+                _ => new ObjectResult(response) { StatusCode = StatusCodes.Status406NotAcceptable, Value = response }
             };
 
             return httpResponse;
