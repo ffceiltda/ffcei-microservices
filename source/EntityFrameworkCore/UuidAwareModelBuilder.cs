@@ -14,8 +14,9 @@ namespace FFCEI.Microservices.EntityFrameworkCore
         /// </summary>
         /// <typeparam name="TEntity">Model entity type</typeparam>
         /// <param name="entityBuilder">Entity builder</param>
+        /// <param name="databaseEngine">Database engine</param>
         /// <exception cref="ArgumentNullException">Throw null if entityBuilder is null</exception>
-        public static void Register<TEntity>(EntityTypeBuilder<TEntity> entityBuilder) where TEntity : class, IUuidAwareModel
+        public static void Register<TEntity>(EntityTypeBuilder<TEntity> entityBuilder, DatabaseEngine databaseEngine) where TEntity : class, IUuidAwareModel
         {
             if (entityBuilder is null)
             {

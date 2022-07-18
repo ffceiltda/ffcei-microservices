@@ -120,7 +120,10 @@ namespace FFCEI.Microservices.EntityFrameworkCore
         {
             if (!_modelBuildersMapped)
             {
-                ModelBuilderMapper.MapModelBuilders(modelBuilder, _modelAssembly);
+                var providerName = Database.ProviderName;
+                var databaseEngine = providerName?.IndexOf("MySql", StringComparison.InvariantCulture) != -1 ? DatabaseEngine.MySql : DatabaseEngine.Unknown;
+
+                ModelBuilderMapper.MapModelBuilders(modelBuilder, databaseEngine, _modelAssembly);
 
                 _modelBuildersMapped = true;
             }

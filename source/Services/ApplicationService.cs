@@ -7,17 +7,15 @@ namespace FFCEI.Microservices.Services
     /// </summary>
     public abstract class ApplicationService : IApplicationService
     {
-        private readonly ILogger _logger;
-
         /// <summary>
         /// Protected base constructor
         /// </summary>
         /// <param name="logger">Service logger</param>
         protected ApplicationService(ILogger logger)
         {
-            _logger = logger;
+            Logger = logger;
         }
 
-        public ILogger Logger => _logger;
+        public ILogger Logger { get; private set; }
     }
 }

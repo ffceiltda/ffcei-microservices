@@ -15,9 +15,10 @@ namespace FFCEI.Microservices.EntityFrameworkCore
         /// Map model builders from a assembly
         /// </summary>
         /// <param name="modelBuilder">ModelBuilder instance</param>
+        /// <param name="databaseEngine">Database engine</param>
         /// <param name="initialAssembly">Initial assembly</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public static void MapModelBuilders(ModelBuilder modelBuilder, Assembly? initialAssembly)
+        public static void MapModelBuilders(ModelBuilder modelBuilder, DatabaseEngine databaseEngine, Assembly? initialAssembly)
         {
             if (modelBuilder is null)
             {
@@ -118,14 +119,35 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
             foreach (var method in methods)
             {
-                var parameters = new object[1] { modelBuilder };
+                var parameters = new object[2] { modelBuilder, databaseEngine };
                 var _ = method.Invoke(null, parameters);
             }
 
-            MapValueConverters(modelBuilder);
+            MapValueConverters(modelBuilder, databaseEngine);
+        }
+        
+        private static void MapValueConverters(ModelBuilder modelBuilder, DatabaseEngine databaseEngine)
+        {
+            switch (databaseEngine)
+            {
+            case DatabaseEngine.Unknown:
+                {
+                    break;
+                }
+            case DatabaseEngine.MySql:
+                {
+                    MapValueConvertersMySql(modelBuilder);
+
+                    break;
+                }
+            default:
+                {
+                    break;
+                }
+            }
         }
 
-        private static void MapValueConverters(ModelBuilder modelBuilder)
+        private static void MapValueConvertersMySql(ModelBuilder modelBuilder)
         {
             var properties = modelBuilder.Model.GetEntityTypes().SelectMany(t => t.GetProperties()).ToList();
 
@@ -161,6 +183,38 @@ namespace FFCEI.Microservices.EntityFrameworkCore
                 ));
             }
 
+            foreach (var property in properties.Where(p => p.ClrType == typeof(bool)))
+            {
+                property.SetValueConverter(new ValueConverter<bool, long>(
+                    convertToProviderExpression: source => source == true ? 1 : 0,
+                    convertFromProviderExpression: source => source == 0 ? false : true
+                ));
+            }
+
+            foreach (var property in properties.Where(p => p.ClrType == typeof(bool?)))
+            {
+                property.SetValueConverter(new ValueConverter<bool?, long?>(
+                    convertToProviderExpression: source => source == null ? null : source.Value == true ? 1 : 0,
+                    convertFromProviderExpression: source => source == null ? null : source.Value == 0 ? false : true
+                ));
+            }
+
+            foreach (var property in properties.Where(p => p.ClrType == typeof(ushort)))
+            {
+                property.SetValueConverter(new ValueConverter<ushort, long>(
+                    convertToProviderExpression: source => (long)source,
+                    convertFromProviderExpression: source => (ushort)source
+                ));
+            }
+
+            foreach (var property in properties.Where(p => p.ClrType == typeof(ushort?)))
+            {
+                property.SetValueConverter(new ValueConverter<ushort?, long?>(
+                    convertToProviderExpression: source => source == null ? null : (long)source.Value,
+                    convertFromProviderExpression: source => source == null ? null : (ushort)source.Value
+                ));
+            }
+
             foreach (var property in properties.Where(p => p.ClrType == typeof(uint)))
             {
                 property.SetValueConverter(new ValueConverter<uint, long>(
@@ -185,7 +239,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
                 ));
             }
 
-            foreach (var property in modelBuilder.Model.GetEntityTypes().SelectMany(t => t.GetProperties()).Where(p => p.ClrType == typeof(ulong?)))
+            foreach (var property in properties.Where(p => p.ClrType == typeof(ulong?)))
             {
                 property.SetValueConverter(new ValueConverter<ulong?, long?>(
                     convertToProviderExpression: source => source == null ? null : (long)source.Value,

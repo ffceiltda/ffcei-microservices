@@ -41,10 +41,9 @@ namespace FFCEI.Microservices.EntityFrameworkCore
                 parameters =>
                 {
                     parameters.DefaultDataTypeMappings(m => m.WithClrBoolean(MySqlBooleanType.Bit1));
-                    parameters.DefaultDataTypeMappings(m => m.WithClrDateTimeOffset(MySqlDateTimeType.DateTime));
-                    parameters.DefaultDataTypeMappings(m => m.WithClrDateTimeOffset(MySqlDateTimeType.DateTime6));
-                    parameters.DefaultDataTypeMappings(m => m.WithClrDateTimeOffset(MySqlDateTimeType.Timestamp));
+                    parameters.DefaultDataTypeMappings(m => m.WithClrDateTime(MySqlDateTimeType.DateTime));
                     parameters.DefaultDataTypeMappings(m => m.WithClrDateTimeOffset(MySqlDateTimeType.Timestamp6));
+                    parameters.DefaultDataTypeMappings(m => m.WithClrTimeSpan(MySqlTimeSpanType.Time6));
                     parameters.EnableStringComparisonTranslations();
                     parameters.EnableRetryOnFailure().CommandTimeout(60);
                     parameters.UseMicrosoftJson();
