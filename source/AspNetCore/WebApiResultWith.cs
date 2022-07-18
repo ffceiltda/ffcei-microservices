@@ -26,6 +26,7 @@ namespace FFCEI.Microservices.AspNetCore
         {
             return new WebApiResultWith<TResult>()
             {
+                Status = StatusSucceeded,
                 Detail = detail ?? DetailSuceeded,
                 Result = result
             };
@@ -48,17 +49,33 @@ namespace FFCEI.Microservices.AspNetCore
         }
 
         /// <summary>
+        /// Creates a 'not found' Web Api result response
+        /// </summary>
+        /// <param name="result">Result date</param>
+        /// <param name="detail">Detail message</param>
+        /// <returns>WebApiResult instance</returns>
+        public static WebApiResultWith<TResult> NotFound(TResult? result = null, string? detail = null)
+        {
+            return new WebApiResultWith<TResult>()
+            {
+                Status = StatusNotFound,
+                Detail = detail ?? DetailInternalError,
+                Result = result
+            };
+        }
+
+        /// <summary>
         /// Creates a 'error' Web Api result response
         /// </summary>
         /// <param name="status">Status code</param>
         /// <param name="result">Result date</param>
         /// <param name="detail">Detail message</param>
         /// <returns>WebApiResultWith&lt;TResult&gt; instance</returns>
-        public static WebApiResultWith<TResult> Error(int status, TResult? result = null, string? detail = null)
+        public static WebApiResultWith<TResult> Error(TResult? result = null, string? detail = null, int? status = null)
         {
             return new WebApiResultWith<TResult>()
             {
-                Status = (status == 0 ? StatusInternalError : status),
+                Status = (status == null || status == 0 ? StatusInternalError : status),
                 Detail = detail ?? DetailInternalError,
                 Result = result
             };

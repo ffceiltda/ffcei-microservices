@@ -1,11 +1,14 @@
 using Destructurama;
 using EFCoreSecondLevelCacheInterceptor;
+using FFCEI.Microservices.AspNetCore.StaticFiles;
 using FFCEI.Microservices.Configuration;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -22,9 +25,12 @@ namespace FFCEI.Microservices.AspNetCore
     public class WebApiMicroservice
     {
         private readonly string[] _args;
+        private WebApplicationBuilder? _initialBuilder;
         private WebApplicationBuilder? _builder;
         private WebApplication? _application;
+        private ConfigurationManager? _configurationManager;
         private RedisConnectionConfiguration? _entityFrameworkSecondLevelCacheRedisConfiguration;
+        private SortedDictionary<string, FolderMapping> _staticFolderMappings = new();
         private static WeakReference<WebApiMicroservice> _instance = null!;
 
         /// <summary>
@@ -40,7 +46,7 @@ namespace FFCEI.Microservices.AspNetCore
         /// <summary>
         /// Configuration Manager (with support for system environment, environment files and ASP.NET Core appSettings)
         /// </summary>
-        public FFCEI.Microservices.Configuration.ConfigurationManager ConfigurationManager { get; private set; } = null!;
+        public ConfigurationManager ConfigurationManager => _configurationManager ??= CreateConfigurationManager();
 
         /// <summary>
         /// HTTP settings: Web Api use CORS (defaults to true)
@@ -71,6 +77,16 @@ namespace FFCEI.Microservices.AspNetCore
         /// Web Api: ignore null values on Json serialization (default to true)
         /// </summary>
         public bool WebApiIgnoreNullsOnJsonSerialization { get; set; } = true;
+
+        /// <summary>
+        /// Web Api: require authorization on controller and methods (defaults to false on web api microservices, true on web api jwt authenticated microservices)
+        /// </summary>
+        public bool WebApiUseAuthorization { get; set; } = true;
+
+        /// <summary>
+        /// Web Api: require authorization by default, defaults to false
+        /// </summary>
+        public bool WebApiUseAuthorizationByDefault { get; set; }
 
         /// <summary>
         /// Entity Framework Core: which Second Level Cache method must be used
@@ -108,76 +124,79 @@ namespace FFCEI.Microservices.AspNetCore
 
             _args = args;
             _instance = new WeakReference<WebApiMicroservice>(this);
+            _initialBuilder = WebApplication.CreateBuilder(_args);
         }
 
-        /// <summary>
-        /// Create Web Application Builder and apply internal builder settings
-        /// </summary>
-        /// <returns>WebApplicationBuilder instance</returns>
-        protected virtual WebApplicationBuilder CreateBuilder()
+        private WebApplicationBuilder CreateBuilder()
         {
-            var builder = WebApplication.CreateBuilder(_args);
+            if ((_builder is not null) || (_initialBuilder is null))
+            {
+                throw new InvalidOperationException("WebApiMicroservice CreateBuilder() was already called before");
+            }
 
-            OnCreateBuilder(builder);
+            _builder = _initialBuilder;
+            _initialBuilder = null;
 
-            return builder;
-        }
+            OnCreateBuilder();
 
-        /// <summary>
-        /// Create Web Application and apply internal application settings
-        /// </summary>
-        /// <returns>WebApplication instance</returns>
-        protected virtual WebApplication CreateApplication()
-        {
-            var webApplication = Builder.Build();
-
-            OnCreateApplication(webApplication);
-
-            return webApplication;
+            return _builder;
         }
 
         /// <summary>
         /// Create Web Application builder settings
         /// </summary>
-        /// <param name="builder">WebApplicationBuilder instance</param>
         /// <exception cref="ArgumentNullException">Throws when builder is null</exception>
-        private void OnCreateBuilder(WebApplicationBuilder builder)
+        protected virtual void OnCreateBuilder()
         {
-            if (builder is null)
+            BuildSerilog();
+            BuildKestrel();
+            BuildWebApi();
+            BuildEntityFramework();
+            BuildAutoMapper();
+        }
+
+        private WebApplication CreateApplication()
+        {
+            if (_application is not null)
             {
-                throw new ArgumentNullException(nameof(builder));
+                throw new InvalidOperationException("WebApiMicroservice CreateApplication() was already called before");
             }
 
-            ConfigurationManager = new FFCEI.Microservices.Configuration.ConfigurationManager(builder);
+            _application = Builder.Build();
 
-            BuildSerilog(builder);
-            BuildKestrel(builder);
-            BuildWebApi(builder);
-            BuildAutoMapper(builder);
+            OnCreateApplication();
+
+            return _application;
         }
 
         /// <summary>
         /// Create Web Application settings
         /// </summary>
-        /// <param name="webApplication">WebApplication instance</param>
         /// <exception cref="ArgumentNullException">Throws when webApplication is null</exception>
-        public void OnCreateApplication(WebApplication webApplication)
+        protected virtual void OnCreateApplication()
         {
-            if (webApplication is null)
+            CreateSerilog();
+            CreateKestrel();
+            CreateWebApi();
+        }
+
+        private ConfigurationManager CreateConfigurationManager()
+        {
+            var builder = _builder ?? _initialBuilder;
+
+            if (builder is null)
             {
-                throw new ArgumentNullException(nameof(webApplication));
+                throw new InvalidOperationException("WebApiMicroservice CreateConfigurationManager() internal error");
             }
 
-            CreateSerilog(webApplication);
-            CreateKestrel(webApplication);
-            CreateWebApi(webApplication);
+            _configurationManager = new ConfigurationManager(builder);
+
+            return _configurationManager;
         }
 
         public void UseMemoryEntityFrameworkSecondLevelCache()
         {
             EntityFrameworkSecondLevelCache = EntityFrameworkSecondLevelCache.MemoryCache;
-
-            BuildEntityFrameworkCoreSecondLevelCache(Builder);
         }
 
         public void UseRedisEntityFrameworkSecondLevelCache(RedisConnectionConfiguration? configuration = null)
@@ -202,8 +221,61 @@ namespace FFCEI.Microservices.AspNetCore
             EntityFrameworkSecondLevelCache = EntityFrameworkSecondLevelCache.RedisCache;
 
             _entityFrameworkSecondLevelCacheRedisConfiguration = configuration;
+        }
 
-            BuildEntityFrameworkCoreSecondLevelCache(Builder);
+        /// <summary>
+        /// Add a Static Folder Mapping, and apply authorization policies
+        /// </summary>
+        /// <param name="webPath">HTTP path</param>
+        /// <param name="physicalPath">Physical operating system path</param>
+        /// <param name="directoryBrowsing">Enables directory browsing</param>
+        /// <param name="authorizationPolicy">Authorization policy</param>
+        /// <param name="authorizedRoles">Authorized roles (if applies)</param>
+        /// <exception cref="InvalidOperationException">Throws if webPath is already mapped</exception>
+        public void UseStaticFolderMapping(string webPath, string physicalPath, bool directoryBrowsing = false,
+            StaticFolderMappingAuthorizationPolicy authorizationPolicy = StaticFolderMappingAuthorizationPolicy.PublicAccess,
+            IEnumerable<string>? authorizedRoles = null)
+        {
+            if (webPath == null)
+            {
+                throw new ArgumentNullException(nameof(webPath));
+            }
+
+            if (physicalPath == null)
+            {
+                throw new ArgumentNullException(nameof(physicalPath));
+            }
+
+            if (!Directory.Exists(physicalPath))
+            {
+                throw new InvalidOperationException($"Directory {physicalPath} cannot be accessed or does not exists");
+            }
+
+            while (webPath.StartsWith("/", StringComparison.InvariantCulture))
+            {
+                webPath = webPath.Substring(1);
+            }
+
+            while (webPath.EndsWith("/", StringComparison.InvariantCulture))
+            {
+                webPath = webPath.Substring(0, webPath.Length - 1);
+            }
+
+            if (_staticFolderMappings.ContainsKey(webPath))
+            {
+                throw new InvalidOperationException($"WebApi Static Path {webPath} already configured");
+            }
+
+            var mapping = new FolderMapping()
+            {
+                WebPath = $"/{webPath}/",
+                PhysicalPath = physicalPath,
+                DirectoryBrowsing = directoryBrowsing,
+                AuthorizationPolicy = authorizationPolicy, 
+                AuthorizedRoles = authorizedRoles?.ToHashSet()
+            };
+
+            _staticFolderMappings.Add(webPath, mapping);
         }
 
 #pragma warning disable CA1054 // URI-like parameters should not be strings
@@ -229,59 +301,11 @@ namespace FFCEI.Microservices.AspNetCore
 #pragma warning restore CA1054 // URI-like parameters should not be strings
 
 #pragma warning disable IDE0058 // Expression value is never used
-
-        private static void CreateSerilog(WebApplication webApplication)
-        {
-            webApplication.UseSerilogRequestLogging();
-        }
-
-        private void CreateKestrel(WebApplication webApplication)
-        {
-            webApplication.UseCors();
-
-            if (HttpRedirectToHttps)
-            {
-                webApplication.UseHttpsRedirection();
-            }
-        }
-
-        private void CreateWebApi(WebApplication webApplication)
-        {
-            if (webApplication.Environment.IsDevelopment())
-            {
-                webApplication.UseDeveloperExceptionPage();
-            }
-
-            if (ShouldGenerateSwagger(Builder))
-            {
-                webApplication.UseSwagger();
-                webApplication.UseSwaggerUI(options =>
-                {
-                    options.RoutePrefix = "swagger";
-                    options.SwaggerEndpoint($"/swagger/{WebApiVersion}/swagger.json", $"{webApplication.Environment.ApplicationName} ({WebApiVersion})");
-                });
-            }
-
-            /*
-            webApplication.UseMiddleware<AcceptRequestMidleware>();
-            webApplication.UseMiddleware<TokenValidationMiddleware>();
-            webApplication.UseMiddleware<AutoRenewTokenMiddleware>();
-            webApplication.UseMiddleware<LogRequestAndResponseMiddleware>();
-            */
-
-            webApplication.UseRouting();
-
-            webApplication.UseAuthentication();
-            webApplication.UseAuthorization();
-
-            webApplication.MapControllers();
-        }
-
-        private bool ShouldGenerateSwagger(WebApplicationBuilder builder)
+        private bool ShouldGenerateSwagger()
         {
             bool generateSwagger = WebApiGenerateSwagger ?? false;
 
-            if (builder.Environment.IsDevelopment())
+            if (Builder.Environment.IsDevelopment())
             {
                 generateSwagger = WebApiGenerateSwagger ?? true;
             }
@@ -289,13 +313,13 @@ namespace FFCEI.Microservices.AspNetCore
             return generateSwagger;
         }
 
-        private static void BuildSerilog(WebApplicationBuilder builder)
+        private void BuildSerilog()
         {
             Serilog.Debugging.SelfLog.Enable(Console.Error);
 
-            Log.Logger = BuildSeriLogConfiguration(builder, new LoggerConfiguration()).CreateBootstrapLogger();
+            Log.Logger = BuildSeriLogConfiguration(Builder, new LoggerConfiguration()).CreateBootstrapLogger();
 
-            builder.Host.UseSerilog((context, serviceProvider, configuration) => BuildSeriLogConfiguration(builder, configuration));
+            Builder.Host.UseSerilog((context, serviceProvider, configuration) => BuildSeriLogConfiguration(Builder, configuration));
         }
 
         private static LoggerConfiguration BuildSeriLogConfiguration(WebApplicationBuilder builder, LoggerConfiguration configuration)
@@ -329,17 +353,22 @@ namespace FFCEI.Microservices.AspNetCore
             return configuration;
         }
 
-        private void BuildKestrel(WebApplicationBuilder builder)
+        private void CreateSerilog()
+        {
+            Application.UseSerilogRequestLogging();
+        }
+
+        private void BuildKestrel()
         {
             if (HttpUseCors)
             {
-                builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
+                Builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
                     .AllowAnyOrigin()
                     .AllowAnyHeader()
                     .AllowAnyMethod()));
             }
 
-            builder.Host.ConfigureServices((context, services) =>
+            Builder.Host.ConfigureServices((context, services) =>
             {
                 services.Configure<KestrelServerOptions>(options =>
                 {
@@ -347,27 +376,50 @@ namespace FFCEI.Microservices.AspNetCore
                 });
             });
 
-            builder.Services.AddHttpContextAccessor();
+            Builder.Services.AddHttpContextAccessor();
         }
 
-        private void BuildWebApi(WebApplicationBuilder builder)
+        private void CreateKestrel()
         {
-            builder.Services.AddHttpClient();
+            Application.UseCors();
 
-            var mvcBuilder = builder.Services.AddControllers();
+            if (HttpRedirectToHttps)
+            {
+                Application.UseHttpsRedirection();
+            }
+        }
+
+        private void BuildWebApi()
+        {
+            Builder.Services.AddHttpClient();
+
+            if (WebApiUseAuthorization)
+            {
+                Builder.Services.AddAuthorization(options =>
+                {
+                    if (WebApiUseAuthorizationByDefault)
+                    {
+                        options.FallbackPolicy = new AuthorizationPolicyBuilder()
+                            .RequireAuthenticatedUser()
+                            .Build();
+                    }
+                });
+            }
+
+            var mvcBuilder = Builder.Services.AddControllers();
 
             BuildWebApiJsonOptions(mvcBuilder);
             BuildWebApiFluentValidation(mvcBuilder);
 
-            if (ShouldGenerateSwagger(builder))
+            if (ShouldGenerateSwagger())
             {
-                BuildWebApiSwagger(builder);
+                BuildWebApiSwagger();
             }
         }
 
-        private void BuildWebApiJsonOptions(IMvcBuilder builder)
+        private void BuildWebApiJsonOptions(IMvcBuilder mvcBuilder)
         {
-            builder.AddJsonOptions(options =>
+            mvcBuilder.AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new Json.TrimmingConverter());
                 options.JsonSerializerOptions.Converters.Add(new Json.LooseStringEnumConverter());
@@ -382,7 +434,7 @@ namespace FFCEI.Microservices.AspNetCore
             });
         }
 
-        private static void BuildWebApiFluentValidation(IMvcBuilder builder)
+        private void BuildWebApiFluentValidation(IMvcBuilder mvcBuilder)
         {
             var entryAssembly = Assembly.GetEntryAssembly();
 
@@ -413,16 +465,18 @@ namespace FFCEI.Microservices.AspNetCore
                 }
             }
 
-            builder.AddFluentValidation(validators =>
+            mvcBuilder.AddFluentValidation(validators =>
             {
                 validators.RegisterValidatorsFromAssemblies(assemblies);
             });
+
+            Builder.Services.AddFluentValidationAutoValidation();
         }
 
-        private void BuildWebApiSwagger(WebApplicationBuilder builder)
+        private void BuildWebApiSwagger()
         {
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(options =>
+            Builder.Services.AddEndpointsApiExplorer();
+            Builder.Services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc(WebApiVersion,
                     new OpenApiInfo
@@ -480,7 +534,143 @@ namespace FFCEI.Microservices.AspNetCore
             });
         }
 
-        private static void BuildAutoMapper(WebApplicationBuilder builder)
+        private void CreateWebApi()
+        {
+            if (Application.Environment.IsDevelopment())
+            {
+                Application.UseDeveloperExceptionPage();
+            }
+
+            if (ShouldGenerateSwagger())
+            {
+                Application.UseSwagger();
+                Application.UseSwaggerUI(options =>
+                {
+                    options.RoutePrefix = "swagger";
+                    options.SwaggerEndpoint($"/swagger/{WebApiVersion}/swagger.json", $"{Application.Environment.ApplicationName} ({WebApiVersion})");
+                });
+            }
+
+            Application.UseRouting();
+
+            CreateWebApiStaticFolderMappings();
+
+            if (WebApiUseAuthorization)
+            {
+                Application.UseAuthentication();
+                Application.UseAuthorization();
+            }
+
+            Application.MapControllers();
+        }
+
+        private void CreateWebApiStaticFolderMappings()
+        {
+            if (_staticFolderMappings.Count == 0)
+            {
+                return;
+            }
+
+            Application.UseMiddleware<FolderMappingMiddleware>(_staticFolderMappings);
+
+            foreach (var mapping in _staticFolderMappings.Values)
+            {
+                var requestPath = mapping.WebPath.Substring(0, mapping.WebPath.Length - 1);
+
+                Application.UseStaticFiles(options: new StaticFileOptions()
+                {
+                    RequestPath = requestPath,
+                    FileProvider = new PhysicalFileProvider(mapping.PhysicalPath),
+                    ServeUnknownFileTypes = true,
+                    DefaultContentType = "application/octet-stream"
+                });
+
+                if (mapping.DirectoryBrowsing)
+                {
+                    Application.UseDirectoryBrowser(options: new DirectoryBrowserOptions()
+                    {
+                        RequestPath = requestPath,
+                        FileProvider = new PhysicalFileProvider(mapping.PhysicalPath)
+                    });
+                }
+            }
+        }
+
+        private void BuildEntityFramework()
+        {
+            BuildEntityFrameworkCoreSecondLevelCache();
+        }
+
+        private void BuildEntityFrameworkCoreSecondLevelCache()
+        {
+            switch (EntityFrameworkSecondLevelCache)
+            {
+            case EntityFrameworkSecondLevelCache.NoCache:
+                {
+                    break;
+                }
+            case EntityFrameworkSecondLevelCache.MemoryCache:
+                {
+                    BuildMemoryEntityFrameworkCoreSecondLevelCache();
+
+                    break;
+                }
+            case EntityFrameworkSecondLevelCache.RedisCache:
+                {
+                    BuildRedisEntityFrameworkCoreSecondLevelCache();
+
+                    break;
+                }
+            default:
+                {
+                    throw new InvalidOperationException(nameof(EntityFrameworkSecondLevelCache));
+                }
+            }
+        }
+
+        private void BuildEntityFrameworkCoreSecondLevelCacheOptions(EFCoreSecondLevelCacheOptions options)
+        {
+            var assemblyPrefix = Assembly.GetEntryAssembly()?.FullName?.Split(",")[0].Replace(".", "", StringComparison.InvariantCulture) ?? string.Empty;
+
+            options
+                .UseCacheKeyPrefix($"EFCoreSecondLevelCache_{assemblyPrefix}_")
+                .CacheAllQueries(CacheExpirationMode.Absolute, TimeSpan.FromMinutes(1))
+                .SkipCachingResults(result => (result.Value is null) || ((result.Value is EFTableRows rows) && (rows.RowsCount == 0)))
+                .DisableLogging(!Builder.Environment.IsDevelopment());
+        }
+
+        private void BuildMemoryEntityFrameworkCoreSecondLevelCache()
+        {
+            Builder.Services.AddEFSecondLevelCache(options =>
+            {
+                BuildEntityFrameworkCoreSecondLevelCacheOptions(options.UseMemoryCacheProvider());
+            });
+        }
+
+        private void BuildRedisEntityFrameworkCoreSecondLevelCache()
+        {
+            Builder.Services.AddEFSecondLevelCache(options =>
+            {
+                BuildEntityFrameworkCoreSecondLevelCacheOptions(options.UseEasyCachingCoreProvider("EFSecondLevelRedisCache"));
+            });
+
+            Builder.Services.AddEasyCaching(option =>
+            {
+                option.WithJson();
+                option.UseRedisLock();
+                option.UseRedis(config =>
+                {
+                    if (_entityFrameworkSecondLevelCacheRedisConfiguration is null)
+                    {
+                        throw new InvalidOperationException("No Redis configuration for second level cache was specified");
+                    }
+
+                    _entityFrameworkSecondLevelCacheRedisConfiguration.Apply(config);
+                }, "EFSecondLevelRedisCache");
+            });
+        }
+
+        private void BuildAutoMapper()
         {
             var entryAssembly = Assembly.GetEntryAssembly();
 
@@ -513,79 +703,8 @@ namespace FFCEI.Microservices.AspNetCore
 
             foreach (var assembly in assemblies)
             {
-                builder.Services.AddAutoMapper(assembly);
+                Builder.Services.AddAutoMapper(assembly);
             }
-        }
-
-
-        private void BuildEntityFrameworkCoreSecondLevelCache(WebApplicationBuilder builder)
-        {
-            switch (EntityFrameworkSecondLevelCache)
-            {
-            case EntityFrameworkSecondLevelCache.NoCache:
-                {
-                    break;
-                }
-            case EntityFrameworkSecondLevelCache.MemoryCache:
-                {
-                    BuildMemoryEntityFrameworkCoreSecondLevelCache(builder);
-
-                    break;
-                }
-            case EntityFrameworkSecondLevelCache.RedisCache:
-                {
-                    BuildRedisEntityFrameworkCoreSecondLevelCache(builder);
-
-                    break;
-                }
-            default:
-                {
-                    throw new InvalidOperationException(nameof(EntityFrameworkSecondLevelCache));
-                }
-            }
-        }
-
-        private static void BuildEntityFrameworkCoreSecondLevelCacheOptions(WebApplicationBuilder builder, EFCoreSecondLevelCacheOptions options)
-        {
-            var assemblyPrefix = Assembly.GetEntryAssembly()?.FullName?.Split(",")[0].Replace(".", "", StringComparison.InvariantCulture) ?? string.Empty;
-
-            options
-                .UseCacheKeyPrefix($"EFCoreSecondLevelCache_{assemblyPrefix}_")
-                .CacheAllQueries(CacheExpirationMode.Absolute, TimeSpan.FromMinutes(1))
-                .SkipCachingResults(result => (result.Value is null) || ((result.Value is EFTableRows rows) && (rows.RowsCount == 0)))
-                .DisableLogging(!builder.Environment.IsDevelopment());
-        }
-
-        private static void BuildMemoryEntityFrameworkCoreSecondLevelCache(WebApplicationBuilder builder)
-        {
-            builder.Services.AddEFSecondLevelCache(options =>
-            {
-                BuildEntityFrameworkCoreSecondLevelCacheOptions(builder,
-                    options.UseMemoryCacheProvider());
-            });
-        }
-
-        private void BuildRedisEntityFrameworkCoreSecondLevelCache(WebApplicationBuilder builder)
-        {
-            builder.Services.AddEFSecondLevelCache(options => {
-                BuildEntityFrameworkCoreSecondLevelCacheOptions(builder,
-                    options.UseEasyCachingCoreProvider("EFSecondLevelRedisCache"));
-            });
-
-            builder.Services.AddEasyCaching(option =>
-            {
-                option.WithJson();
-                option.UseRedisLock();
-                option.UseRedis(config =>
-                {
-                    if (_entityFrameworkSecondLevelCacheRedisConfiguration is null)
-                    {
-                        throw new InvalidOperationException("No Redis configuration for second level cache was specified");
-                    }
-
-                    _entityFrameworkSecondLevelCacheRedisConfiguration.Apply(config);
-                }, "EFSecondLevelRedisCache");
-            });
         }
 #pragma warning restore IDE0058 // Expression value is never used
     }

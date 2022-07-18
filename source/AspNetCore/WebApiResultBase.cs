@@ -5,14 +5,18 @@ namespace FFCEI.Microservices.AspNetCore
     /// </summary>
     public class WebApiResultBase : WebApiResponse
     {
+        internal static int? StatusNotFound { get { return null; } }
+        internal const int StatusSucceeded = 0;
         internal const int StatusInternalError = -2147483648;
+        internal const string DetailNotFound = "Content not found on server";
         internal const string DetailSuceeded = "Succeeded";
         internal const string DetailInternalError = "A unexpected error has ocurred";
+        internal const string DetailStatusForbidden = "Access to resource was denied";
 
         /// <summary>
         /// Status code
         /// </summary>
-        public int Status { get; set; }
+        public int? Status { get; set; }
 
         /// <summary>
         /// Detail message

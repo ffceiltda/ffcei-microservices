@@ -27,36 +27,31 @@ namespace FFCEI.Microservices.AspNetCore
         public WebApiJwtAuthenticatedMicroservice(string[] args)
             : base(args)
         {
+            WebApiUseAuthorizationByDefault = true;
         }
 
-        protected override WebApplicationBuilder CreateBuilder()
+        protected override void OnCreateBuilder()
         {
-            var builder = base.CreateBuilder();
+            base.OnCreateBuilder();
 
-            BuildJwtAuthenticator(builder);
-
-            return builder;
+            BuildJwtAuthenticator();
         }
 
-        protected override WebApplication CreateApplication()
+        protected override void OnCreateApplication()
         {
-            var application = base.CreateApplication();
+            base.OnCreateApplication();
 
-            return application;
+            CreateJwtAuthorization();
         }
 
-        /// <summary>
-        /// Build Jwt Authentication support
-        /// </summary>
-        /// <param name="builder"></param>
 #pragma warning disable IDE0058 // Expression value is never used
-        private void BuildJwtAuthenticator(WebApplicationBuilder builder)
+        private void BuildJwtAuthenticator()
         {
             var tokenSecret = new Jwt.TokenSecret(ConfigurationManager);
 
-            builder.Services.AddSingleton(tokenSecret);
+            Builder.Services.AddSingleton(tokenSecret);
 
-            builder.Services.AddAuthentication(options =>
+            Builder.Services.AddAuthentication(options =>
                 {
                     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -81,5 +76,11 @@ namespace FFCEI.Microservices.AspNetCore
                 });
         }
 #pragma warning restore IDE0058 // Expression value is never used
+
+
+        private static void CreateJwtAuthorization()
+        {
+            // TODO
+        }
     }
 }

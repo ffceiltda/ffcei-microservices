@@ -26,9 +26,14 @@ namespace FFCEI.Microservices.AspNetCore
                 return new NotFoundObjectResult(response);
             }
 
+            if (response.Status == WebApiResultBase.StatusNotFound)
+            {
+                return new NotFoundObjectResult(response) { Value = response };
+            }
+
             var httpResponse = response.Status switch
             {
-                0 => new OkObjectResult(response) { Value = response },
+                WebApiResultBase.StatusSucceeded => new OkObjectResult(response) { Value = response },
                 > 0 => new BadRequestObjectResult(response) { Value = response },
                 WebApiResultBase.StatusInternalError => new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError, Value = response },
                 _ => new ObjectResult(response) { StatusCode = StatusCodes.Status406NotAcceptable, Value = response }
@@ -45,9 +50,14 @@ namespace FFCEI.Microservices.AspNetCore
                 throw new ArgumentNullException(nameof(response));
             }
 
+            if (response.Status == WebApiResultBase.StatusNotFound)
+            {
+                return new NotFoundObjectResult(response) { Value = response };
+            }
+
             var httpResponse = response.Status switch
             {
-                0 => new OkObjectResult(response.Result),
+                WebApiResultBase.StatusSucceeded => new OkObjectResult(response.Result),
                 > 0 => new BadRequestObjectResult(response) { Value = response },
                 WebApiResultBase.StatusInternalError => new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError, Value = response },
                 _ => new ObjectResult(response) { StatusCode = StatusCodes.Status406NotAcceptable, Value = response }
