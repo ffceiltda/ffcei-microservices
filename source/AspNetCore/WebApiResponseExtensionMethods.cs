@@ -23,20 +23,40 @@ namespace FFCEI.Microservices.AspNetCore
         {
             if (response is null)
             {
-                return new NotFoundObjectResult(response);
+                return new NotFoundObjectResult(response)
+                {
+                    Value = WebApiResultBase.DetailNotFound
+                };
             }
 
             if (response.Status == WebApiResultBase.StatusNotFound)
             {
-                return new NotFoundObjectResult(response) { Value = response };
+                return new NotFoundObjectResult(response)
+                {
+                    Value = response
+                };
             }
 
             var httpResponse = response.Status switch
             {
-                WebApiResultBase.StatusSucceeded => new OkObjectResult(response) { Value = response },
-                > 0 => new BadRequestObjectResult(response) { Value = response },
-                WebApiResultBase.StatusInternalError => new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError, Value = response },
-                _ => new ObjectResult(response) { StatusCode = StatusCodes.Status406NotAcceptable, Value = response }
+                WebApiResultBase.StatusSucceeded => new OkObjectResult(response)
+                {
+                    Value = response
+                },
+                WebApiResultBase.StatusInternalError => new ObjectResult(response)
+                {
+                    StatusCode = StatusCodes.Status500InternalServerError,
+                    Value = response
+                },
+                > 0 => new BadRequestObjectResult(response)
+                {
+                    Value = response
+                },
+                _ => new ObjectResult(response)
+                {
+                    StatusCode = StatusCodes.Status406NotAcceptable,
+                    Value = response
+                }
             };
 
             return httpResponse;
@@ -47,20 +67,40 @@ namespace FFCEI.Microservices.AspNetCore
         {
             if (response is null)
             {
-                throw new ArgumentNullException(nameof(response));
+                return new NotFoundObjectResult(response)
+                {
+                    Value = WebApiResultBase.DetailNotFound
+                };
             }
 
             if (response.Status == WebApiResultBase.StatusNotFound)
             {
-                return new NotFoundObjectResult(response) { Value = response };
+                return new NotFoundObjectResult(response)
+                {
+                    Value = response
+                };
             }
 
             var httpResponse = response.Status switch
             {
-                WebApiResultBase.StatusSucceeded => new OkObjectResult(response.Result),
-                > 0 => new BadRequestObjectResult(response) { Value = response },
-                WebApiResultBase.StatusInternalError => new ObjectResult(response) { StatusCode = StatusCodes.Status500InternalServerError, Value = response },
-                _ => new ObjectResult(response) { StatusCode = StatusCodes.Status406NotAcceptable, Value = response }
+                WebApiResultBase.StatusSucceeded => new OkObjectResult(response)
+                {
+                    Value = response.Result
+                },
+                WebApiResultBase.StatusInternalError => new ObjectResult(response)
+                {
+                    StatusCode = StatusCodes.Status500InternalServerError,
+                    Value = response
+                },
+                > 0 => new BadRequestObjectResult(response)
+                {
+                    Value = response
+                },
+                _ => new ObjectResult(response)
+                {
+                    StatusCode = StatusCodes.Status406NotAcceptable,
+                    Value = response
+                }
             };
 
             return httpResponse;

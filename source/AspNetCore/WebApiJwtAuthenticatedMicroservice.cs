@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using System.Diagnostics;
 
 namespace FFCEI.Microservices.AspNetCore
 {
@@ -12,6 +14,64 @@ namespace FFCEI.Microservices.AspNetCore
     public class WebApiJwtAuthenticatedMicroservice<TWebApiClaims> : WebApiMicroservice
         where TWebApiClaims : WebApiClaims
     {
+        /// <summary>
+        /// Javascript Web Token: token authority
+        /// </summary>
+        public string? JwtTokenAuthority { get; set; }
+
+        /// <summary>
+        /// Javascript Web Token: validate token issuer
+        /// </summary>
+        public bool JwtValidateIssuer { get; set; }
+
+        /// <summary>
+        /// Javascript Web Token: valid token issuer list
+        /// </summary>
+#pragma warning disable CA1002 // Do not expose generic lists
+#pragma warning disable CA2227 // Collection properties should be read only
+        public List<string> JwtValidIssuers { get; set; } = new();
+#pragma warning restore CA2227 // Collection properties should be read only
+#pragma warning restore CA1002 // Do not expose generic lists
+
+        /// <summary>
+        /// Javascript Web Token: validate token issuer signing key if using and x.509 certificate for signing
+        /// </summary>
+        public bool JwtValidateIssuerSigningKey { get; set; } = true;
+
+        /// <summary>
+        /// Javascript Web Token: validate audience
+        /// </summary>
+        public bool JwtValidateAudience { get; set; }
+
+        /// <summary>
+        /// Javascript Web Token: valid token audience list
+        /// </summary>
+#pragma warning disable CA1002 // Do not expose generic lists
+#pragma warning disable CA2227 // Collection properties should be read only
+        public List<string> JwtValidAudiences { get; set; } = new();
+#pragma warning restore CA2227 // Collection properties should be read only
+#pragma warning restore CA1002 // Do not expose generic lists
+
+        /// <summary>
+        /// Javascript Web Token: validate token lifetime
+        /// </summary>
+        public bool JwtValidateLifetime { get; set; } = true;
+
+        /// <summary>
+        /// Javascript Web Token: clock skew to validate token lifetime
+        /// </summary>
+        public int JwtLifetimeClockSkew { get; set; } = 120;
+
+        /// <summary>
+        /// Javascript Web Token: save sign-in web token
+        /// </summary>
+        public bool JwtSaveSigninToken { get; set; } = true;
+
+        /// <summary>
+        /// Javascript Web Token: require HTTPS for web token
+        /// </summary>
+        public bool JwtRequireHttpsMetadata { get; set; }
+
 #pragma warning disable CA1000
         /// <summary>
         /// Microservice instance (singleton)
@@ -27,60 +87,58 @@ namespace FFCEI.Microservices.AspNetCore
         public WebApiJwtAuthenticatedMicroservice(string[] args)
             : base(args)
         {
+            WebApiUseAuthorization = true;
             WebApiUseAuthorizationByDefault = true;
         }
 
         protected override void OnCreateBuilder()
         {
-            base.OnCreateBuilder();
-
             BuildJwtAuthenticator();
-        }
 
-        protected override void OnCreateApplication()
-        {
-            base.OnCreateApplication();
-
-            CreateJwtAuthorization();
+            base.OnCreateBuilder();
         }
 
 #pragma warning disable IDE0058 // Expression value is never used
         private void BuildJwtAuthenticator()
         {
-            var tokenSecret = new Jwt.TokenSecret(ConfigurationManager);
+            var signingKeyFactory = new Jwt.SigningKeyFactory(this.ConfigurationManager);
+            var encryptionKeyFactory = new Jwt.EncryptionKeyFactory(this.ConfigurationManager);
 
-            Builder.Services.AddSingleton(tokenSecret);
+            Builder.Services.AddSingleton(signingKeyFactory);
+            Builder.Services.AddSingleton(encryptionKeyFactory);
 
             Builder.Services.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, jwt =>
-                {
-                    jwt.SaveToken = true;
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, jwt =>
+            {
+                jwt.Authority = JwtTokenAuthority;
+                jwt.SaveToken = JwtSaveSigninToken;
+                jwt.IncludeErrorDetails = Debugger.IsAttached || Builder.Environment.IsDevelopment();
 #pragma warning disable CA5404 // Do not disable token validation checks
-                    jwt.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        IssuerSigningKey = new SymmetricSecurityKey(tokenSecret.KeyBytes),
-                        ValidateIssuer = false,
-                        ValidateIssuerSigningKey = false,
-                        ValidateAudience = false,
-                        ValidateLifetime = true,
-                        ValidateTokenReplay = true,
-                        RequireExpirationTime = true,
-                        ClockSkew = TimeSpan.Zero
-                    };
+                jwt.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ClockSkew = TimeSpan.FromSeconds(JwtLifetimeClockSkew),
+                    RequireSignedTokens = true,
+                    IssuerSigningKey = signingKeyFactory.SecurityKey,
+                    ValidateIssuer = JwtValidateIssuer && (JwtValidIssuers.Count > 0),
+                    ValidIssuers = JwtValidateIssuer && (JwtValidIssuers.Count > 0) ? JwtValidIssuers : null,
+                    ValidateIssuerSigningKey = JwtValidateIssuer && (JwtValidIssuers.Count > 0) && JwtValidateIssuerSigningKey && signingKeyFactory.SecurityKeyIsX509,
+                    RequireAudience = JwtValidateAudience && (JwtValidAudiences.Count > 0),
+                    ValidateAudience = JwtValidateAudience && (JwtValidAudiences.Count > 0),
+                    ValidAudiences = JwtValidateAudience && (JwtValidAudiences.Count > 0) ? JwtValidAudiences : null,
+                    ValidateLifetime = JwtValidateLifetime,
+                    ValidateTokenReplay = JwtValidateLifetime,
+                    RequireExpirationTime = JwtValidateLifetime,
+                    TokenDecryptionKey = encryptionKeyFactory.SecurityKey,
+                    SaveSigninToken = JwtSaveSigninToken,
+                };
 #pragma warning restore CA5404 // Do not disable token validation checks
-                });
+            });
         }
 #pragma warning restore IDE0058 // Expression value is never used
-
-
-        private static void CreateJwtAuthorization()
-        {
-            // TODO
-        }
     }
 }

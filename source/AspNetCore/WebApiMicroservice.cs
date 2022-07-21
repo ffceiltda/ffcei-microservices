@@ -5,6 +5,7 @@ using FFCEI.Microservices.Configuration;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,9 +29,10 @@ namespace FFCEI.Microservices.AspNetCore
         private WebApplicationBuilder? _initialBuilder;
         private WebApplicationBuilder? _builder;
         private WebApplication? _application;
+        private bool _controllersMapped;
         private ConfigurationManager? _configurationManager;
         private RedisConnectionConfiguration? _entityFrameworkSecondLevelCacheRedisConfiguration;
-        private SortedDictionary<string, FolderMapping> _staticFolderMappings = new();
+        private readonly SortedDictionary<string, FolderMapping> _staticFolderMappings = new();
         private static WeakReference<WebApiMicroservice> _instance = null!;
 
         /// <summary>
@@ -91,7 +93,17 @@ namespace FFCEI.Microservices.AspNetCore
         /// <summary>
         /// Entity Framework Core: which Second Level Cache method must be used
         /// </summary>
-        public EntityFrameworkSecondLevelCache EntityFrameworkSecondLevelCache { get; set; } = EntityFrameworkSecondLevelCache.NoCache;
+        public EntityFrameworkSecondLevelCacheType EntityFrameworkSecondLevelCacheType { get; set; } = EntityFrameworkSecondLevelCacheType.NoCache;
+
+        /// <summary>
+        /// Entity Framework Core: second level cache expiration mode
+        /// </summary>
+        public CacheExpirationMode EntityFrameworkSecondLevelCacheExpirationMode { get; set; } = CacheExpirationMode.Absolute;
+
+        /// <summary>
+        /// Entity Framework Core: second level cache expiration period
+        /// </summary>
+        public TimeSpan EntityFrameworkSecondLevelCacheExpirationPeriod { get; set; } = TimeSpan.FromSeconds(60);
 
         /// <summary>
         /// Microservice instance
@@ -196,11 +208,21 @@ namespace FFCEI.Microservices.AspNetCore
 
         public void UseMemoryEntityFrameworkSecondLevelCache()
         {
-            EntityFrameworkSecondLevelCache = EntityFrameworkSecondLevelCache.MemoryCache;
+            if (_builder != null)
+            {
+                throw new InvalidOperationException("UseRedisEntityFrameworkSecondLevelCache must be used before access WebApiMicroservice.Builder property");
+            }
+
+            EntityFrameworkSecondLevelCacheType = EntityFrameworkSecondLevelCacheType.MemoryCache;
         }
 
         public void UseRedisEntityFrameworkSecondLevelCache(RedisConnectionConfiguration? configuration = null)
         {
+            if (_builder != null)
+            {
+                throw new InvalidOperationException("UseRedisEntityFrameworkSecondLevelCache must be used before access WebApiMicroservice.Builder property");
+            }
+
             if (configuration == null)
             {
                 var standardConfiguration = ConfigurationManager.GetRedisConfiguration(
@@ -218,7 +240,7 @@ namespace FFCEI.Microservices.AspNetCore
                 configuration = standardConfiguration;
             }
 
-            EntityFrameworkSecondLevelCache = EntityFrameworkSecondLevelCache.RedisCache;
+            EntityFrameworkSecondLevelCacheType = EntityFrameworkSecondLevelCacheType.RedisCache;
 
             _entityFrameworkSecondLevelCacheRedisConfiguration = configuration;
         }
@@ -253,12 +275,12 @@ namespace FFCEI.Microservices.AspNetCore
 
             while (webPath.StartsWith("/", StringComparison.InvariantCulture))
             {
-                webPath = webPath.Substring(1);
+                webPath = webPath[1..];
             }
 
             while (webPath.EndsWith("/", StringComparison.InvariantCulture))
             {
-                webPath = webPath.Substring(0, webPath.Length - 1);
+                webPath = webPath[..^1];
             }
 
             if (_staticFolderMappings.ContainsKey(webPath))
@@ -278,6 +300,23 @@ namespace FFCEI.Microservices.AspNetCore
             _staticFolderMappings.Add(webPath, mapping);
         }
 
+        /// <summary>
+        /// Map Controolers
+        /// </summary>
+        public void MapControllers()
+        {
+            if (_controllersMapped)
+            {
+                return;
+            }
+
+#pragma warning disable IDE0058 // Expression value is never used
+            Application.MapControllers();
+#pragma warning restore IDE0058 // Expression value is never used
+
+            _controllersMapped = true;
+        }
+
 #pragma warning disable CA1054 // URI-like parameters should not be strings
         /// <summary>
         /// Run microservice
@@ -285,6 +324,8 @@ namespace FFCEI.Microservices.AspNetCore
         /// <param name="url">The URL to listen to if the server hasn't been configured directly</param>
         public void Run(string? url = null)
         {
+            MapControllers();
+
             Application.Run(url);
         }
 
@@ -294,6 +335,8 @@ namespace FFCEI.Microservices.AspNetCore
         /// <param name="url">The URL to listen to if the server hasn't been configured directly</param>
         public async Task RunAsync(string? url = null)
         {
+            MapControllers();
+
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
             await Application.RunAsync(url);
 #pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
@@ -362,10 +405,8 @@ namespace FFCEI.Microservices.AspNetCore
         {
             if (HttpUseCors)
             {
-                Builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
-                    .AllowAnyOrigin()
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()));
+                Builder.Services.AddCors(options => options
+                    .AddDefaultPolicy(policy => CreateKestrelCorsPolicy(policy)));
             }
 
             Builder.Host.ConfigureServices((context, services) =>
@@ -381,12 +422,23 @@ namespace FFCEI.Microservices.AspNetCore
 
         private void CreateKestrel()
         {
-            Application.UseCors();
+            if (HttpUseCors)
+            {
+                Application.UseCors(policy => CreateKestrelCorsPolicy(policy));
+            }
 
             if (HttpRedirectToHttps)
             {
                 Application.UseHttpsRedirection();
             }
+        }
+
+        private static CorsPolicyBuilder CreateKestrelCorsPolicy(CorsPolicyBuilder policy)
+        {
+            return policy
+                .AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
         }
 
         private void BuildWebApi()
@@ -502,13 +554,30 @@ namespace FFCEI.Microservices.AspNetCore
 
                 options.DocInclusionPredicate((docName, apiDesc) => true);
 
-                options.AddSecurityDefinition("oauth2",
+                options.AddSecurityDefinition("Bearer",
                     new OpenApiSecurityScheme
                     {
-                        Description = "Standard Authorization header using the Bearer Scheme. Use the format \"Bearer {token}\"",
-                        In = ParameterLocation.Header,
                         Name = "Authorization",
-                        Type = SecuritySchemeType.ApiKey
+                        Type = SecuritySchemeType.ApiKey,
+                        Scheme = "Bearer",
+                        BearerFormat = "JWT",
+                        Description = "JWT Authorization header using the Bearer scheme.\r\n\r\nPlease, enter 'Bearer'[space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 12345abcdef\"\r\n\r\n",
+                        In = ParameterLocation.Header
+                    });
+
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                    {
+                        {
+                            new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Type=ReferenceType.SecurityScheme,
+                                    Id="Bearer"
+                                }
+                            },
+                            Array.Empty<string>()
+                        }
                     });
 
                 var xmlFiles = Directory.GetFiles(AppContext.BaseDirectory, "*.xml", SearchOption.TopDirectoryOnly).ToList();
@@ -541,6 +610,16 @@ namespace FFCEI.Microservices.AspNetCore
                 Application.UseDeveloperExceptionPage();
             }
 
+            CreateWebApiSwagger();
+
+            Application.UseRouting();
+
+            CreateWebApiStaticFolderMappings();
+            CreateWebApiAuthenticationAndAuthorization();
+        }
+
+        private void CreateWebApiSwagger()
+        {
             if (ShouldGenerateSwagger())
             {
                 Application.UseSwagger();
@@ -550,18 +629,6 @@ namespace FFCEI.Microservices.AspNetCore
                     options.SwaggerEndpoint($"/swagger/{WebApiVersion}/swagger.json", $"{Application.Environment.ApplicationName} ({WebApiVersion})");
                 });
             }
-
-            Application.UseRouting();
-
-            CreateWebApiStaticFolderMappings();
-
-            if (WebApiUseAuthorization)
-            {
-                Application.UseAuthentication();
-                Application.UseAuthorization();
-            }
-
-            Application.MapControllers();
         }
 
         private void CreateWebApiStaticFolderMappings()
@@ -575,7 +642,7 @@ namespace FFCEI.Microservices.AspNetCore
 
             foreach (var mapping in _staticFolderMappings.Values)
             {
-                var requestPath = mapping.WebPath.Substring(0, mapping.WebPath.Length - 1);
+                var requestPath = mapping.WebPath[..^1];
 
                 Application.UseStaticFiles(options: new StaticFileOptions()
                 {
@@ -596,6 +663,16 @@ namespace FFCEI.Microservices.AspNetCore
             }
         }
 
+        private void CreateWebApiAuthenticationAndAuthorization()
+        {
+            Application.UseAuthentication();
+
+            if (WebApiUseAuthorization)
+            {
+                Application.UseAuthorization();
+            }
+        }
+
         private void BuildEntityFramework()
         {
             BuildEntityFrameworkCoreSecondLevelCache();
@@ -603,19 +680,19 @@ namespace FFCEI.Microservices.AspNetCore
 
         private void BuildEntityFrameworkCoreSecondLevelCache()
         {
-            switch (EntityFrameworkSecondLevelCache)
+            switch (EntityFrameworkSecondLevelCacheType)
             {
-            case EntityFrameworkSecondLevelCache.NoCache:
+            case EntityFrameworkSecondLevelCacheType.NoCache:
                 {
                     break;
                 }
-            case EntityFrameworkSecondLevelCache.MemoryCache:
+            case EntityFrameworkSecondLevelCacheType.MemoryCache:
                 {
                     BuildMemoryEntityFrameworkCoreSecondLevelCache();
 
                     break;
                 }
-            case EntityFrameworkSecondLevelCache.RedisCache:
+            case EntityFrameworkSecondLevelCacheType.RedisCache:
                 {
                     BuildRedisEntityFrameworkCoreSecondLevelCache();
 
@@ -623,7 +700,7 @@ namespace FFCEI.Microservices.AspNetCore
                 }
             default:
                 {
-                    throw new InvalidOperationException(nameof(EntityFrameworkSecondLevelCache));
+                    throw new InvalidOperationException(nameof(EntityFrameworkSecondLevelCacheType));
                 }
             }
         }
@@ -634,7 +711,7 @@ namespace FFCEI.Microservices.AspNetCore
 
             options
                 .UseCacheKeyPrefix($"EFCoreSecondLevelCache_{assemblyPrefix}_")
-                .CacheAllQueries(CacheExpirationMode.Absolute, TimeSpan.FromMinutes(1))
+                .CacheAllQueries(EntityFrameworkSecondLevelCacheExpirationMode, EntityFrameworkSecondLevelCacheExpirationPeriod)
                 .SkipCachingResults(result => (result.Value is null) || ((result.Value is EFTableRows rows) && (rows.RowsCount == 0)))
                 .DisableLogging(!Builder.Environment.IsDevelopment());
         }

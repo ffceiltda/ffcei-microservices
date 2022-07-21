@@ -3,12 +3,12 @@ using Microsoft.Extensions.Logging;
 namespace FFCEI.Microservices.Services
 {
     /// <summary>
-    /// Application service interface
+    /// Apí service interface
     /// </summary>
-    public interface IApplicationService
+    public interface IApiService
     {
         /// <summary>
-        /// Application service logger
+        /// Apí service logger
         /// </summary>
         ILogger Logger { get; }
     }

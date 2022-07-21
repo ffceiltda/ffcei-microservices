@@ -1,4 +1,5 @@
 using FFCEI.Microservices.Configuration;
+using FFCEI.Microservices.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FFCEI.Microservices.EntityFrameworkCore
@@ -33,7 +34,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
             where TDbContext : ModelRepositoryDbContext
             where TIModelRepositoryContainer : class, IModelRepositoryContainer
             where TModelRepositoryContainer : ModelRepositoryContainer<TDbContext>, TIModelRepositoryContainer
-        => serviceCollection.AddScoped<TIModelRepositoryContainer, TModelRepositoryContainer>();
+        => serviceCollection.AddTransient<TIModelRepositoryContainer, TModelRepositoryContainer>();
 
         /// <summary>
         /// Add DbContext for MySql and add ModelRepositoryContainer associated
@@ -51,5 +52,17 @@ namespace FFCEI.Microservices.EntityFrameworkCore
             where TModelRepositoryContainer : ModelRepositoryContainer<TDbContext>, TIModelRepositoryContainer
         => serviceCollection.AddMySqlDbContext<TDbContext>(mySqlConnectionConfiguration).
             AddModelRepositoryContainer<TDbContext, TIModelRepositoryContainer, TModelRepositoryContainer>();
+
+        /// <summary>
+        /// Add Api service
+        /// </summary>
+        /// <typeparam name="TIApiService">Api service interface</typeparam>
+        /// <typeparam name="TApiService">Api service implemmentation</typeparam>
+        /// <param name="serviceCollection">IServiceCollection instance</param>
+        /// <returns>IServiceCollection instance</returns>
+        public static IServiceCollection AddApiService<TIApiService, TApiService>(this IServiceCollection serviceCollection)
+            where TIApiService : class, IApiService
+            where TApiService : ApiService, TIApiService
+        => serviceCollection.AddTransient<TIApiService, TApiService>();
     }
 }

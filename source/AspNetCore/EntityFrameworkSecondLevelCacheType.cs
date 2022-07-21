@@ -1,6 +1,6 @@
 namespace FFCEI.Microservices.AspNetCore
 {
-    public enum EntityFrameworkSecondLevelCache
+    public enum EntityFrameworkSecondLevelCacheType
     {
         NoCache,
         MemoryCache,
