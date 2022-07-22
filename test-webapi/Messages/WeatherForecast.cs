@@ -1,6 +1,6 @@
 using FFCEI.Microservices.AspNetCore;
 
-namespace Messages;
+namespace TestWebApi.Messages;
 
 /// <summary>
 /// Weather forecast response

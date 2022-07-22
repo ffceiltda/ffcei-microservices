@@ -1,9 +1,11 @@
 using FFCEI.Microservices.AspNetCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Messages;
+using TestWebApi.Messages;
 
-namespace Controllers;
+namespace TestWebApi.Controllers;
 
+[AllowAnonymous]
 [ApiExplorerSettings(GroupName = "Weather actions")]
 [Route("[controller]")]
 public class WeatherForecastController : WebApiController
@@ -13,11 +15,9 @@ public class WeatherForecastController : WebApiController
         "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
     };
 
-    private readonly ILogger<WeatherForecastController> _logger;
-
     public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        : base(logger)
     {
-        _logger = logger;
     }
 
     /// <summary>
