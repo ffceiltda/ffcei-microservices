@@ -1,7 +1,4 @@
-using EasyCaching.Core.Configurations;
-using EasyCaching.Redis;
 using System.Globalization;
-using System.Text;
 
 namespace FFCEI.Microservices.Configuration
 {
@@ -82,5 +79,5 @@ namespace FFCEI.Microservices.Configuration
 
             return result;
         }
-    }    
+    }
 }

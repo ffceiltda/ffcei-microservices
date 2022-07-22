@@ -7,11 +7,20 @@ using System.Text;
 
 namespace FFCEI.Microservices.AspNetCore.Middlewares
 {
+    /// <summary>
+    /// Middleware for handling post-JWT validation custom authorization rules
+    /// </summary>
     public sealed class JwtPostAuthorizationMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly JwtPostAuthorizationDelegateMethod? _delegateMethod;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="next">Next middleware</param>
+        /// <param name="options">Options</param>
+        /// <exception cref="ArgumentNullException">throw if options is null</exception>
         public JwtPostAuthorizationMiddleware(RequestDelegate next, IOptions<JwtPostAuthorizationMiddlewareOptions> options)
         {
             if (options is null)
@@ -23,16 +32,21 @@ namespace FFCEI.Microservices.AspNetCore.Middlewares
             _delegateMethod = options.Value.JwtPostAuthorization;
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        /// <summary>
+        /// Handle a HTTP request
+        /// </summary>
+        /// <param name="httpContext">HTTP context</param>
+        /// <returns>Continuation</returns>
+        public async Task InvokeAsync(HttpContext httpContext)
         {
-            if (context is null)
+            if (httpContext is null)
             {
-                throw new ArgumentNullException(nameof(context));
+                throw new ArgumentNullException(nameof(httpContext));
             }
 
             var authorized = false;
 
-            var controllerActionDescriptor = context.GetEndpoint()?.Metadata.GetMetadata<ControllerActionDescriptor>();
+            var controllerActionDescriptor = httpContext.GetEndpoint()?.Metadata.GetMetadata<ControllerActionDescriptor>();
             var hasAllowAnonymousAttributeOnAction = controllerActionDescriptor?.MethodInfo?
                 .GetCustomAttributes(inherit: true)?.Any(a => a.GetType() == typeof(AllowAnonymousAttribute)) ?? false;
             var hasAllowAnonymousAttributeOnController = controllerActionDescriptor?.ControllerTypeInfo?
@@ -42,27 +56,27 @@ namespace FFCEI.Microservices.AspNetCore.Middlewares
             {
                 authorized = true;
             }
-            else 
+            else
             {
-                var authenticated = context.User?.Identity?.IsAuthenticated ?? false;
+                var authenticated = httpContext.User?.Identity?.IsAuthenticated ?? false;
 
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
                 if (authenticated)
                 {
-                    authorized = (_delegateMethod is null) ? authenticated : await _delegateMethod(context);
+                    authorized = (_delegateMethod is null) ? authenticated : await _delegateMethod(httpContext);
                 }
             }
 
             if (authorized)
             {
-                await _next(context);
+                await _next(httpContext);
             }
             else
             {
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                context.Response.ContentType = "text/plain";
+                httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                httpContext.Response.ContentType = "text/plain";
 
-                await context.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(WebApiResultBase.DetailStatusUnauthorized));
+                await httpContext.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(WebApiResultBase.DetailStatusUnauthorized));
             }
 #pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
         }

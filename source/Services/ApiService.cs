@@ -16,6 +16,9 @@ namespace FFCEI.Microservices.Services
             Logger = logger;
         }
 
+        /// <summary>
+        /// Logger instance
+        /// </summary>
         public ILogger Logger { get; private set; }
     }
 }

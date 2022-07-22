@@ -125,7 +125,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
             MapValueConverters(modelBuilder, databaseEngine);
         }
-        
+
         private static void MapValueConverters(ModelBuilder modelBuilder, DatabaseEngine databaseEngine)
         {
             switch (databaseEngine)

@@ -4,12 +4,21 @@ using System.Text;
 
 namespace FFCEI.Microservices.AspNetCore.StaticFiles
 {
+    /// <summary>
+    /// Middleware for folder mapping for static file serving
+    /// </summary>
     public sealed class FolderMappingMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<FolderMappingMiddleware> _logger;
         private readonly SortedDictionary<string, FolderMapping> _staticFolderMappings;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="next">Next middleware in chain</param>
+        /// <param name="logger">Logger</param>
+        /// <param name="staticFolderMappings">Folder mappings</param>
         public FolderMappingMiddleware(RequestDelegate next, ILogger<FolderMappingMiddleware> logger, SortedDictionary<string, FolderMapping> staticFolderMappings)
         {
             _next = next;
@@ -18,6 +27,12 @@ namespace FFCEI.Microservices.AspNetCore.StaticFiles
         }
 
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
+        /// <summary>
+        /// Handle a HTTP request
+        /// </summary>
+        /// <param name="httpContext">HTTP context</param>
+        /// <returns>Continuation</returns>
+        /// <exception cref="ArgumentNullException">throw if httpContext is null</exception>
         public async Task InvokeAsync(HttpContext httpContext)
         {
             if (httpContext is null)

@@ -7,8 +7,6 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
-using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +17,6 @@ using Serilog;
 using Serilog.Events;
 using Swashbuckle.AspNetCore.Filters;
 using System.Reflection;
-using System.Text;
 using System.Text.Json.Serialization;
 
 namespace FFCEI.Microservices.AspNetCore
@@ -224,6 +221,10 @@ namespace FFCEI.Microservices.AspNetCore
             return _configurationManager;
         }
 
+        /// <summary>
+        /// Use In-Memory Entity Framework Second Level Cache Provider
+        /// </summary>
+        /// <exception cref="InvalidOperationException">if HostBuilder is already created</exception>
         public void UseMemoryEntityFrameworkSecondLevelCache()
         {
             if (_builder is not null)
@@ -234,6 +235,12 @@ namespace FFCEI.Microservices.AspNetCore
             EntityFrameworkSecondLevelCacheType = EntityFrameworkSecondLevelCacheType.MemoryCache;
         }
 
+        /// <summary>
+        /// Use In-Memory Entity Framework Second Level Cache Provider
+        /// </summary>
+        /// <param name="configuration">Redis configuration (optional)</param>
+        /// <exception cref="InvalidOperationException">throws if HostBuilder is already created</exception>
+        /// <exception cref="ArgumentNullException">throws if redis configuration host or port is null</exception>
         public void UseRedisEntityFrameworkSecondLevelCache(RedisConnectionConfiguration? configuration = null)
         {
             if (_builder is not null)
@@ -250,7 +257,7 @@ namespace FFCEI.Microservices.AspNetCore
                     passwordSettingName: "Redis.Cache.Password",
                     databaseSettingName: "Redis.Cache.Database");
 
-                if (standardConfiguration.Host is null)
+                if ((standardConfiguration.Host is null) || (standardConfiguration.Port is null))
                 {
                     throw new ArgumentNullException(nameof(configuration));
                 }

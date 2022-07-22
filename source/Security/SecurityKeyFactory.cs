@@ -7,6 +7,9 @@ using System.Text;
 
 namespace FFCEI.Microservices.Security
 {
+    /// <summary>
+    /// Base security key factory implementation
+    /// </summary>
     public class SecurityKeyFactory
     {
         private readonly SecurityKey? _securityKey;
@@ -40,23 +43,30 @@ namespace FFCEI.Microservices.Security
         /// </summary>
         public EncryptingCredentials? EncryptingCredentials => _encryptingCredentials;
 
-        public SecurityKeyFactory(ConfigurationManager configurationManager, string keyPrefix, ILogger? logger = null)
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        /// <param name="configurationManager">ConfigurationManager</param>
+        /// <param name="configurationKeyStringPrefix">Configuration key string prefix</param>
+        /// <param name="logger">Logger</param>
+        /// <exception cref="ArgumentNullException">throw is configurationManager is null of configurationKeyStringPrefis is null or empty</exception>
+        public SecurityKeyFactory(ConfigurationManager configurationManager, string configurationKeyStringPrefix, ILogger? logger = null)
         {
             if (configurationManager == null)
             {
                 throw new ArgumentNullException(nameof(configurationManager));
             }
 
-            if (string.IsNullOrEmpty(keyPrefix))
+            if (string.IsNullOrEmpty(configurationKeyStringPrefix))
             {
-                throw new ArgumentNullException(nameof(keyPrefix));
+                throw new ArgumentNullException(nameof(configurationKeyStringPrefix));
             }
 
 #pragma warning disable CA1031 // Do not catch general exception types
             if (_securityKey == null)
             {
-                var x509certificateFilename = configurationManager[$"{keyPrefix}X509Certificate.Filename"];
-                var x509certificatePassword = configurationManager[$"{keyPrefix}X509Certificate.Password"];
+                var x509certificateFilename = configurationManager[$"{configurationKeyStringPrefix}X509Certificate.Filename"];
+                var x509certificatePassword = configurationManager[$"{configurationKeyStringPrefix}X509Certificate.Password"];
 
                 if (!string.IsNullOrEmpty(x509certificateFilename) && File.Exists(x509certificateFilename))
                 {
@@ -94,7 +104,7 @@ namespace FFCEI.Microservices.Security
 
                             try
                             {
-                                var x509certificateSubject = configurationManager[$"{keyPrefix}X509Certificate.Subject"];
+                                var x509certificateSubject = configurationManager[$"{configurationKeyStringPrefix}X509Certificate.Subject"];
 
                                 if (!string.IsNullOrEmpty(x509certificateSubject))
                                 {
@@ -109,7 +119,7 @@ namespace FFCEI.Microservices.Security
                                     }
                                 }
 
-                                var x509certificateSubjectKeyIdentifier = configurationManager[$"{keyPrefix}X509Certificate.SubjectKeyIdentifier"];
+                                var x509certificateSubjectKeyIdentifier = configurationManager[$"{configurationKeyStringPrefix}X509Certificate.SubjectKeyIdentifier"];
 
                                 if (!string.IsNullOrEmpty(x509certificateSubjectKeyIdentifier))
                                 {
@@ -124,7 +134,7 @@ namespace FFCEI.Microservices.Security
                                     }
                                 }
 
-                                var x509certificateSubjectDistinguishedName = configurationManager[$"{keyPrefix}X509Certificate.SubjectDistinguishedName"];
+                                var x509certificateSubjectDistinguishedName = configurationManager[$"{configurationKeyStringPrefix}X509Certificate.SubjectDistinguishedName"];
 
                                 if (!string.IsNullOrEmpty(x509certificateSubjectDistinguishedName))
                                 {
@@ -139,7 +149,7 @@ namespace FFCEI.Microservices.Security
                                     }
                                 }
 
-                                var x509certificateSerialNumber = configurationManager[$"{keyPrefix}X509Certificate.SerialNumber"];
+                                var x509certificateSerialNumber = configurationManager[$"{configurationKeyStringPrefix}X509Certificate.SerialNumber"];
 
                                 if (!string.IsNullOrEmpty(x509certificateSerialNumber))
                                 {
@@ -183,10 +193,10 @@ namespace FFCEI.Microservices.Security
 
             if (_securityKey == null)
             {
-                var symmetricSecurityKey = configurationManager[$"{keyPrefix}Symmetric.Key"];
-                var symmetricSecuritySignatureAlgorithm = configurationManager[$"{keyPrefix}Symmetric.SignatureAlgorithm"];
-                var symmetricEncryptionKeyIdentifier = configurationManager[$"{keyPrefix}Symmetric.KeyIdentifier"];
-                var symmetricEncryptionAlgorithm = configurationManager[$"{keyPrefix}Symmetric.Algorithm"];
+                var symmetricSecurityKey = configurationManager[$"{configurationKeyStringPrefix}Symmetric.Key"];
+                var symmetricSecuritySignatureAlgorithm = configurationManager[$"{configurationKeyStringPrefix}Symmetric.SignatureAlgorithm"];
+                var symmetricEncryptionKeyIdentifier = configurationManager[$"{configurationKeyStringPrefix}Symmetric.KeyIdentifier"];
+                var symmetricEncryptionAlgorithm = configurationManager[$"{configurationKeyStringPrefix}Symmetric.Algorithm"];
 
                 if (!string.IsNullOrEmpty(symmetricSecurityKey))
                 {

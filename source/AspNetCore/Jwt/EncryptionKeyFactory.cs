@@ -4,8 +4,16 @@ using Microsoft.Extensions.Logging;
 
 namespace FFCEI.Microservices.AspNetCore.Jwt
 {
+    /// <summary>
+    /// Javascript Web Token encryption key factory
+    /// </summary>
     public sealed class EncryptionKeyFactory : SecurityKeyFactory
     {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="configurationManager">ConfigurationManager</param>
+        /// <param name="logger">Logger</param>
         public EncryptionKeyFactory(ConfigurationManager configurationManager, ILogger? logger = null)
             : base(configurationManager, "Jwt.Encryption.", logger)
         {

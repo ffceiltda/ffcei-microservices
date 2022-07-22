@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-
 namespace FFCEI.Microservices.AspNetCore
 {
     /// <summary>

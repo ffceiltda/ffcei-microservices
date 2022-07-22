@@ -35,6 +35,11 @@ namespace FFCEI.Microservices.Configuration
         public int? Database { get; set; }
 
         /// <summary>
+        /// Serializer name
+        /// </summary>
+        public string? SerializerName { get; set; }
+
+        /// <summary>
         /// Connection name
         /// </summary>
         public string? ConnectionName { get; set; }
@@ -119,6 +124,12 @@ namespace FFCEI.Microservices.Configuration
             return stringBuilder;
         }
 
+        /// <summary>
+        /// Apply configuration to options
+        /// </summary>
+        /// <param name="options"></param>
+        /// <exception cref="ArgumentNullException">throw if options is null</exception>
+        /// <exception cref="InvalidOperationException">throw if Host or port is null</exception>
         public void Apply(RedisOptions options)
         {
             if (options is null)
@@ -126,7 +137,7 @@ namespace FFCEI.Microservices.Configuration
                 throw new ArgumentNullException(nameof(options));
             }
 
-            options.SerializerName = "json";
+            options.SerializerName = SerializerName ?? "json";
 
             if (Host is null)
             {
@@ -152,5 +163,5 @@ namespace FFCEI.Microservices.Configuration
             options.DBConfig.SyncTimeout = SyncTimeout;
             options.DBConfig.AsyncTimeout = AsyncTimeout;
         }
-    }    
+    }
 }

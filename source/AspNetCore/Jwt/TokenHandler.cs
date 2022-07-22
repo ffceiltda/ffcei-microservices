@@ -11,7 +11,7 @@ namespace FFCEI.Microservices.AspNetCore.Jwt
     public static class TokenHandler
     {
         /// <summary>
-        /// Create a Security Token
+        /// Create a security Javascript Web Token
         /// </summary>
         /// <param name="expiration">Expires after</param>
         /// <param name="subjectClaims">Claims</param>
@@ -21,7 +21,7 @@ namespace FFCEI.Microservices.AspNetCore.Jwt
         /// <param name="issuer">Issuer</param>
         /// <param name="audience">Audience</param>
         /// <returns>SecurityToken instance</returns>
-        public static SecurityToken CreateToken(TimeSpan expiration, IEnumerable<KeyValuePair<string, string>>? subjectClaims = null, SigningCredentials? signingCredentials = null, IEnumerable<string>? roles = null, EncryptingCredentials? encryptingCredentials = null, string? issuer = null, string? audience = null)
+        public static SecurityToken CreateJwtToken(TimeSpan expiration, IEnumerable<KeyValuePair<string, string>>? subjectClaims = null, SigningCredentials? signingCredentials = null, IEnumerable<string>? roles = null, EncryptingCredentials? encryptingCredentials = null, string? issuer = null, string? audience = null)
         {
             if (subjectClaims is null)
             {
@@ -103,7 +103,12 @@ namespace FFCEI.Microservices.AspNetCore.Jwt
             return jwtTokenHandler.CreateToken(jwtTokenDescriptor);
         }
 
-        public static string BearerTokenString(this SecurityToken securityToken)
+        /// <summary>
+        /// Get security token string representation
+        /// </summary>
+        /// <param name="securityToken">Security Token</param>
+        /// <returns></returns>
+        public static string SecurityTokenString(this SecurityToken securityToken)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
             var jwtTokenString = jwtTokenHandler.WriteToken(securityToken);

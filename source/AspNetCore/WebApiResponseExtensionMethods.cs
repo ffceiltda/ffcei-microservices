@@ -8,6 +8,12 @@ namespace FFCEI.Microservices.AspNetCore
     /// </summary>
     public static class WebApiResponseExtensionMethods
     {
+        /// <summary>
+        /// Returns a IActionResult from a WebApiResponse
+        /// </summary>
+        /// <typeparam name="TWebApiResponse">WebApiResponse derived class</typeparam>
+        /// <param name="response">Response</param>
+        /// <returns>NotFound if response is null, OK if response is not null</returns>
         public static IActionResult ToHttpResponse<TWebApiResponse>(this TWebApiResponse response)
             where TWebApiResponse : WebApiResponse
         {
@@ -19,6 +25,11 @@ namespace FFCEI.Microservices.AspNetCore
             return new OkObjectResult(response);
         }
 
+        /// <summary>
+        /// Returns a IActionResult from a WebApiResponse
+        /// </summary>
+        /// <param name="response">Response</param>
+        /// <returns>NotFound if response is null or Status is null, OK if response status is 0, InternalError if status if 500, BadRequest if status &gt; 0, NotAcceptable if status &lt; 0</returns>
         public static IActionResult ToHttpResponse(this WebApiResult response)
         {
             if (response is null)
@@ -62,6 +73,12 @@ namespace FFCEI.Microservices.AspNetCore
             return httpResponse;
         }
 
+        /// <summary>
+        /// Returns a IActionResult from a WebApiResponseWith&lt;TResult&gt;
+        /// </summary>
+        /// <typeparam name="TResult">Response type</typeparam>
+        /// <param name="response">Response</param>
+        /// <returns>NotFound if response is null or Status is null, OK if response status is 0, InternalError if status if 500, BadRequest if status &gt; 0, NotAcceptable if status &lt; 0</returns>
         public static IActionResult ToHttpResponse<TResult>(this WebApiResultWith<TResult> response)
             where TResult : class
         {
