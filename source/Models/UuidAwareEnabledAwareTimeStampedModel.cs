@@ -1,9 +1,9 @@
 namespace FFCEI.Microservices.Models
 {
     /// <summary>
-    /// Model interface with Uuid property and IsEnabled property and TimeStamping (created / updated) support
+    /// Model interface with Uuid property and IsEnabled property and Timestamping (created / updated) support
     /// </summary>
-    public class UuidAwareEnabledAwareTimeStampedModel : EnabledAwareTimeStampedModel, IUuidAwareModel
+    public class UuidAwareEnabledAwareTimestampedModel : EnabledAwareTimestampedModel, IUuidAwareModel
     {
         public Guid Uuid { get; set; }
 
@@ -60,7 +60,7 @@ namespace FFCEI.Microservices.Models
         /// <param name="left">left instance</param>
         /// <param name="right">right instance</param>
         /// <returns>true if equals, false otherwise</returns>
-        public static bool operator ==(UuidAwareEnabledAwareTimeStampedModel left, UuidAwareEnabledAwareTimeStampedModel right)
+        public static bool operator ==(UuidAwareEnabledAwareTimestampedModel left, UuidAwareEnabledAwareTimestampedModel right)
         {
             if (ReferenceEquals(left, null))
             {
@@ -76,7 +76,7 @@ namespace FFCEI.Microservices.Models
         /// <param name="left">left instance</param>
         /// <param name="right">right instance</param>
         /// <returns>true if different, false otherwise</returns>
-        public static bool operator !=(UuidAwareEnabledAwareTimeStampedModel left, UuidAwareEnabledAwareTimeStampedModel right)
+        public static bool operator !=(UuidAwareEnabledAwareTimestampedModel left, UuidAwareEnabledAwareTimestampedModel right)
         {
             return !(left == right);
         }
@@ -87,7 +87,7 @@ namespace FFCEI.Microservices.Models
         /// <param name="left">left instance</param>
         /// <param name="right">right instance</param>
         /// <returns>true if left is less than right, false otherwise</returns>
-        public static bool operator <(UuidAwareEnabledAwareTimeStampedModel left, UuidAwareEnabledAwareTimeStampedModel right)
+        public static bool operator <(UuidAwareEnabledAwareTimestampedModel left, UuidAwareEnabledAwareTimestampedModel right)
         {
             return ReferenceEquals(left, null) ? !ReferenceEquals(right, null) : left.CompareTo(right) < 0;
         }
@@ -98,7 +98,7 @@ namespace FFCEI.Microservices.Models
         /// <param name="left">left instance</param>
         /// <param name="right">right instance</param>
         /// <returns>true if left is less or equals than right, false otherwise</returns>
-        public static bool operator <=(UuidAwareEnabledAwareTimeStampedModel left, UuidAwareEnabledAwareTimeStampedModel right)
+        public static bool operator <=(UuidAwareEnabledAwareTimestampedModel left, UuidAwareEnabledAwareTimestampedModel right)
         {
             return ReferenceEquals(left, null) || left.CompareTo(right) <= 0;
         }
@@ -109,7 +109,7 @@ namespace FFCEI.Microservices.Models
         /// <param name="left">left instance</param>
         /// <param name="right">right instance</param>
         /// <returns>true if left is greater than right, false otherwise</returns>
-        public static bool operator >(UuidAwareEnabledAwareTimeStampedModel left, UuidAwareEnabledAwareTimeStampedModel right)
+        public static bool operator >(UuidAwareEnabledAwareTimestampedModel left, UuidAwareEnabledAwareTimestampedModel right)
         {
             return !ReferenceEquals(left, null) && left.CompareTo(right) > 0;
         }
@@ -120,7 +120,7 @@ namespace FFCEI.Microservices.Models
         /// <param name="left">left instance</param>
         /// <param name="right">right instance</param>
         /// <returns>true if left is greater or equals than right, false otherwise</returns>
-        public static bool operator >=(UuidAwareEnabledAwareTimeStampedModel left, UuidAwareEnabledAwareTimeStampedModel right)
+        public static bool operator >=(UuidAwareEnabledAwareTimestampedModel left, UuidAwareEnabledAwareTimestampedModel right)
         {
             return ReferenceEquals(left, null) ? ReferenceEquals(right, null) : left.CompareTo(right) >= 0;
         }

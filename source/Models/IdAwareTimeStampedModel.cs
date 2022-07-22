@@ -1,9 +1,9 @@
 namespace FFCEI.Microservices.Models
 {
     /// <summary>
-    /// Model interface with Id property and TimeStamping (created / updated) support
+    /// Model interface with Id property and Timestamping (created / updated) support
     /// </summary>
-    public class IdAwareTimeStampedModel : TimeStampedModel, IIdAwareModel
+    public class IdAwareTimestampedModel : TimestampedModel, IIdAwareModel
     {
         public long Id { get; set; }
 
@@ -60,7 +60,7 @@ namespace FFCEI.Microservices.Models
         /// <param name="left">left instance</param>
         /// <param name="right">right instance</param>
         /// <returns>true if equals, false otherwise</returns>
-        public static bool operator ==(IdAwareTimeStampedModel left, IdAwareTimeStampedModel right)
+        public static bool operator ==(IdAwareTimestampedModel left, IdAwareTimestampedModel right)
         {
             if (ReferenceEquals(left, null))
             {
@@ -76,7 +76,7 @@ namespace FFCEI.Microservices.Models
         /// <param name="left">left instance</param>
         /// <param name="right">right instance</param>
         /// <returns>true if different, false otherwise</returns>
-        public static bool operator !=(IdAwareTimeStampedModel left, IdAwareTimeStampedModel right)
+        public static bool operator !=(IdAwareTimestampedModel left, IdAwareTimestampedModel right)
         {
             return !(left == right);
         }
@@ -87,7 +87,7 @@ namespace FFCEI.Microservices.Models
         /// <param name="left">left instance</param>
         /// <param name="right">right instance</param>
         /// <returns>true if left is less than right, false otherwise</returns>
-        public static bool operator <(IdAwareTimeStampedModel left, IdAwareTimeStampedModel right)
+        public static bool operator <(IdAwareTimestampedModel left, IdAwareTimestampedModel right)
         {
             return ReferenceEquals(left, null) ? !ReferenceEquals(right, null) : left.CompareTo(right) < 0;
         }
@@ -98,7 +98,7 @@ namespace FFCEI.Microservices.Models
         /// <param name="left">left instance</param>
         /// <param name="right">right instance</param>
         /// <returns>true if left is less or equals than right, false otherwise</returns>
-        public static bool operator <=(IdAwareTimeStampedModel left, IdAwareTimeStampedModel right)
+        public static bool operator <=(IdAwareTimestampedModel left, IdAwareTimestampedModel right)
         {
             return ReferenceEquals(left, null) || left.CompareTo(right) <= 0;
         }
@@ -109,7 +109,7 @@ namespace FFCEI.Microservices.Models
         /// <param name="left">left instance</param>
         /// <param name="right">right instance</param>
         /// <returns>true if left is greater than right, false otherwise</returns>
-        public static bool operator >(IdAwareTimeStampedModel left, IdAwareTimeStampedModel right)
+        public static bool operator >(IdAwareTimestampedModel left, IdAwareTimestampedModel right)
         {
             return !ReferenceEquals(left, null) && left.CompareTo(right) > 0;
         }
@@ -120,7 +120,7 @@ namespace FFCEI.Microservices.Models
         /// <param name="left">left instance</param>
         /// <param name="right">right instance</param>
         /// <returns>true if left is greater or equals than right, false otherwise</returns>
-        public static bool operator >=(IdAwareTimeStampedModel left, IdAwareTimeStampedModel right)
+        public static bool operator >=(IdAwareTimestampedModel left, IdAwareTimestampedModel right)
         {
             return ReferenceEquals(left, null) ? ReferenceEquals(right, null) : left.CompareTo(right) >= 0;
         }

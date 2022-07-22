@@ -20,7 +20,7 @@ namespace FFCEI.Microservices.AspNetCore.StaticFiles
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
         public async Task InvokeAsync(HttpContext httpContext)
         {
-            if (httpContext == null)
+            if (httpContext is null)
             {
                 throw new ArgumentNullException(nameof(httpContext));
             }
@@ -110,7 +110,7 @@ namespace FFCEI.Microservices.AspNetCore.StaticFiles
         {
             if (await CheckAuthentication(httpContext))
             {
-                if (authorizedRoles != null)
+                if (authorizedRoles is not null)
                 {
                     bool isInRole = false;
 

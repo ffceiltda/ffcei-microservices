@@ -21,22 +21,20 @@ namespace FFCEI.Microservices.EntityFrameworkCore
         /// <param name="context">Model Repository DbContext instance</param>
         public ReadOnlyModelRepository(ModelRepositoryDbContext context) => Context = context;
 
-        /// <summary>
-        /// Return queryable object
-        /// </summary>
-        /// <returns>Queryable object</returns>
-        public IQueryable<TModel> Query() => Set;
+        public IQueryable<TModel> Where(Expression<Func<TModel, bool>> predicate) => Set.Where(predicate);
+
+        public IQueryable<TModel> WhereAll() => Set;
 
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
-        public async Task<IEnumerable<TModel>> AllAsync() => await Set.ToListAsync();
+        public async Task<IEnumerable<TModel>> AllAsync() => await WhereAll().ToListAsync();
 
         public async Task<IEnumerable<IModel>> AllModelsAsync() => await AllAsync();
 
         public async ValueTask<IModel?> FirstOrDefaultByKeyAsync(params object[] keys) => await Set.FindAsync(keys);
 
-        public async ValueTask<TModel?> FirstOrDefaultByPredicateAsync(Expression<Func<TModel, bool>> predicate) => await Set.Where(predicate).FirstOrDefaultAsync();
+        public async ValueTask<TModel?> FirstOrDefaultByPredicateAsync(Expression<Func<TModel, bool>> predicate) => await Where(predicate).FirstOrDefaultAsync();
 
-        public async Task<IEnumerable<TModel>> ManyByPredicateAsync(Expression<Func<TModel, bool>> predicate) => await Set.Where(predicate).ToListAsync();
+        public async Task<IEnumerable<TModel>> ManyByPredicateAsync(Expression<Func<TModel, bool>> predicate) => await Where(predicate).ToListAsync();
 #pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
     }
 }

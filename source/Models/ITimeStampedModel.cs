@@ -1,9 +1,9 @@
 namespace FFCEI.Microservices.Models
 {
     /// <summary>
-    /// Model interface with TimeStamping (created / updated) support
+    /// Model interface with Timestamping (created / updated) support
     /// </summary>
-    public interface ITimeStampedModel : IModel
+    public interface ITimestampedModel : IModel
     {
         /// <summary>
         /// CreatedAt property

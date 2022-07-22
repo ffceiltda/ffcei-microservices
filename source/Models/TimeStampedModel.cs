@@ -1,9 +1,9 @@
 namespace FFCEI.Microservices.Models
 {
     /// <summary>
-    /// Model class with TimeStamping (created / updated) support
+    /// Model class with Timestamping (created / updated) support
     /// </summary>
-    public class TimeStampedModel : Model, ITimeStampedModel
+    public class TimestampedModel : Model, ITimestampedModel
     {
         public DateTimeOffset? CreatedAt { get; protected internal set; }
 

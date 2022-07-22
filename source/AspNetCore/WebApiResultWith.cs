@@ -75,7 +75,7 @@ namespace FFCEI.Microservices.AspNetCore
         {
             return new WebApiResultWith<TResult>()
             {
-                Status = (status == null || status == 0 ? StatusInternalError : status),
+                Status = (status is null || status == 0 ? StatusInternalError : status),
                 Detail = detail ?? DetailInternalError,
                 Result = result
             };

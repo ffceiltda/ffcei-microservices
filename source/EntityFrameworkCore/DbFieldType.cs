@@ -28,11 +28,11 @@ namespace FFCEI.Microservices.EntityFrameworkCore
         /// <summary>
         /// Precision date and time
         /// </summary>
-        TimeStamp,
+        Timestamp,
         /// <summary>
         /// High resolution precision date and time
         /// </summary>
-        HighResolutionTimeStamp,
+        HighResolutionTimestamp,
         /// <summary>
         /// 64-bit integer
         /// </summary>

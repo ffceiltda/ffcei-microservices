@@ -23,12 +23,12 @@ namespace FFCEI.Microservices.AspNetCore.Jwt
         /// <returns>SecurityToken instance</returns>
         public static SecurityToken CreateToken(TimeSpan expiration, IEnumerable<KeyValuePair<string, string>>? subjectClaims = null, SigningCredentials? signingCredentials = null, IEnumerable<string>? roles = null, EncryptingCredentials? encryptingCredentials = null, string? issuer = null, string? audience = null)
         {
-            if (subjectClaims == null)
+            if (subjectClaims is null)
             {
                 throw new ArgumentNullException(nameof(subjectClaims));
             }
 
-            if (signingCredentials == null)
+            if (signingCredentials is null)
             {
                 throw new ArgumentNullException(nameof(signingCredentials));
             }

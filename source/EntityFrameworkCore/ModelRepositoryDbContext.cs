@@ -9,10 +9,10 @@ namespace FFCEI.Microservices.EntityFrameworkCore
     /// </summary>
     public abstract class ModelRepositoryDbContext : DbContext
     {
-        private static readonly PropertyInfo? CreatedAtProperty = typeof(TimeStampedModel).GetProperty("CreatedAt");
-        private static readonly PropertyInfo? UpdatedAtProperty = typeof(TimeStampedModel).GetProperty("UpdatedAt");
-        private static readonly PropertyInfo? UuidEnabledTimeStampedProperty = typeof(UuidAwareEnabledAwareTimeStampedModel).GetProperty("Uuid");
-        private static readonly PropertyInfo? UuidTimeStampedProperty = typeof(UuidAwareTimeStampedModel).GetProperty("Uuid");
+        private static readonly PropertyInfo? CreatedAtProperty = typeof(TimestampedModel).GetProperty("CreatedAt");
+        private static readonly PropertyInfo? UpdatedAtProperty = typeof(TimestampedModel).GetProperty("UpdatedAt");
+        private static readonly PropertyInfo? UuidEnabledTimestampedProperty = typeof(UuidAwareEnabledAwareTimestampedModel).GetProperty("Uuid");
+        private static readonly PropertyInfo? UuidTimestampedProperty = typeof(UuidAwareTimestampedModel).GetProperty("Uuid");
         private static readonly PropertyInfo? UuidEnabledProperty = typeof(UuidAwareEnabledAwareModel).GetProperty("Uuid");
         private static readonly PropertyInfo? UuidProperty = typeof(UuidAwareModel).GetProperty("Uuid");
 
@@ -76,12 +76,12 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
         private void DbModelUpdateCreatedAtUpdatedAtFields()
         {
-            var entities = ChangeTracker.Entries().Where(entity => (entity.Entity is TimeStampedModel) &&
+            var entities = ChangeTracker.Entries().Where(entity => (entity.Entity is TimestampedModel) &&
                 ((entity.State == EntityState.Added) || (entity.State == EntityState.Modified)));
 
             foreach (var entity in entities)
             {
-                if (entity.Entity.GetType().IsSubclassOf(typeof(TimeStampedModel)))
+                if (entity.Entity.GetType().IsSubclassOf(typeof(TimestampedModel)))
                 {
                     var now = DateTimeOffset.UtcNow;
 
@@ -98,8 +98,8 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
                 if (entity.State == EntityState.Added)
                 {
-                    var uuidProperty = entity.Entity.GetType().IsSubclassOf(typeof(UuidAwareEnabledAwareTimeStampedModel)) ? UuidEnabledTimeStampedProperty :
-                        entity.Entity.GetType().IsSubclassOf(typeof(UuidAwareTimeStampedModel)) ? UuidTimeStampedProperty :
+                    var uuidProperty = entity.Entity.GetType().IsSubclassOf(typeof(UuidAwareEnabledAwareTimestampedModel)) ? UuidEnabledTimestampedProperty :
+                        entity.Entity.GetType().IsSubclassOf(typeof(UuidAwareTimestampedModel)) ? UuidTimestampedProperty :
                         entity.Entity.GetType().IsSubclassOf(typeof(UuidAwareEnabledAwareModel)) ? UuidEnabledProperty :
                         entity.Entity.GetType().IsSubclassOf(typeof(UuidAwareModel)) ? UuidProperty :
                         null;

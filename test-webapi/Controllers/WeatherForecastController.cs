@@ -1,8 +1,8 @@
 using FFCEI.Microservices.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
-using Navi.Backend.RegistrationService.Messages;
+using Messages;
 
-namespace Navi.Backend.RegistrationService.Controllers;
+namespace Controllers;
 
 [ApiExplorerSettings(GroupName = "Weather actions")]
 [Route("[controller]")]

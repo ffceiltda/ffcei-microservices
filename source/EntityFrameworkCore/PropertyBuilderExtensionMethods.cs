@@ -54,7 +54,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
         /// <typeparam name="TProperty">Model Property</typeparam>
         /// <param name="property">PropertyBuilder instance</param>
         /// <returns>PropertyBuilder instance</returns>
-        public static PropertyBuilder<TProperty> IsTimestampColumn<TProperty>(this PropertyBuilder<TProperty> property) => property.HasColumnType(DbNativeFieldTypeMapping.GetNativeMapping(null, DbFieldType.TimeStamp));
+        public static PropertyBuilder<TProperty> IsTimestampColumn<TProperty>(this PropertyBuilder<TProperty> property) => property.HasColumnType(DbNativeFieldTypeMapping.GetNativeMapping(null, DbFieldType.Timestamp));
 
         /// <summary>
         /// Define a High Resolution Timestamp column
@@ -62,7 +62,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
         /// <typeparam name="TProperty">Model Property</typeparam>
         /// <param name="property">PropertyBuilder instance</param>
         /// <returns>PropertyBuilder instance</returns>
-        public static PropertyBuilder<TProperty> IsHighResolutionTimestampColumn<TProperty>(this PropertyBuilder<TProperty> property) => property.HasColumnType(DbNativeFieldTypeMapping.GetNativeMapping(null, DbFieldType.HighResolutionTimeStamp));
+        public static PropertyBuilder<TProperty> IsHighResolutionTimestampColumn<TProperty>(this PropertyBuilder<TProperty> property) => property.HasColumnType(DbNativeFieldTypeMapping.GetNativeMapping(null, DbFieldType.HighResolutionTimestamp));
 
         /// <summary>
         /// Define a long integer column

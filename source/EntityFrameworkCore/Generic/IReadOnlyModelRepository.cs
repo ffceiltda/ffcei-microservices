@@ -10,6 +10,19 @@ namespace FFCEI.Microservices.EntityFrameworkCore.Generic
     public interface IReadOnlyModelRepository<TModel> : IReadOnlyModelRepository where TModel : IModel
     {
         /// <summary>
+        /// Create queryable expression by predicate
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns>A queryable instance</returns>
+        IQueryable<TModel> Where(Expression<Func<TModel, bool>> predicate);
+
+        /// <summary>
+        /// Create queryable expression
+        /// </summary>
+        /// <returns>A queryable instance</returns>
+        IQueryable<TModel> WhereAll();
+
+        /// <summary>
         /// Return all models in repository
         /// </summary>
         /// <returns>All models in repository</returns>

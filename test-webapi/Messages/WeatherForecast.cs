@@ -1,6 +1,6 @@
 using FFCEI.Microservices.AspNetCore;
 
-namespace Navi.Backend.RegistrationService.Messages;
+namespace Messages;
 
 /// <summary>
 /// Weather forecast response
@@ -11,19 +11,19 @@ public class WeatherForecastRequest
     /// <summary>
     /// Timestamp of message
     /// </summary>
-    [SwaggerProperty]
+    [SwaggerRequiredProperty]
     public DateTimeOffset Date { get; set; }
 
     /// <summary>
     /// Degress Celsius
     /// </summary>
-    [SwaggerProperty]
+    [SwaggerRequiredProperty]
     public int TemperatureC { get; set; }
 
     /// <summary>
     /// Summary
     /// </summary>
-    [SwaggerProperty]
+    [SwaggerRequiredProperty]
     public string? Summary { get; set; }
 }
 
@@ -36,24 +36,24 @@ public class WeatherForecastResponse
     /// <summary>
     /// Timestamp of message
     /// </summary>
-    [SwaggerProperty]
+    [SwaggerRequiredProperty]
     public DateTimeOffset Date { get; set; }
 
     /// <summary>
     /// Degress Celsius
     /// </summary>
-    [SwaggerProperty]
+    [SwaggerRequiredProperty]
     public int TemperatureC { get; set; }
 
     /// <summary>
     /// Degrees Farenheit
     /// </summary>
-    [SwaggerProperty]
+    [SwaggerRequiredProperty]
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 
     /// <summary>
     /// Summary
     /// </summary>
-    [SwaggerProperty]
+    [SwaggerRequiredProperty]
     public string? Summary { get; set; }
 }

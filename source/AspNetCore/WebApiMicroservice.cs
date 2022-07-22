@@ -1,11 +1,14 @@
 using Destructurama;
 using EFCoreSecondLevelCacheInterceptor;
+using FFCEI.Microservices.AspNetCore.Middlewares;
 using FFCEI.Microservices.AspNetCore.StaticFiles;
 using FFCEI.Microservices.Configuration;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,6 +19,7 @@ using Serilog;
 using Serilog.Events;
 using Swashbuckle.AspNetCore.Filters;
 using System.Reflection;
+using System.Text;
 using System.Text.Json.Serialization;
 
 namespace FFCEI.Microservices.AspNetCore
@@ -51,9 +55,19 @@ namespace FFCEI.Microservices.AspNetCore
         public ConfigurationManager ConfigurationManager => _configurationManager ??= CreateConfigurationManager();
 
         /// <summary>
+        /// Set shutting down to true make all new requests to reply with HTTP Code 503 - Service unavailable, for load balancers
+        /// </summary>
+        public bool ShuttingDown { get; set; }
+
+        /// <summary>
         /// HTTP settings: Web Api use CORS (defaults to true)
         /// </summary>
         public bool HttpUseCors { get; set; } = true;
+
+        /// <summary>
+        /// HTTP settings: Web Api use HSTS (defaults to false )
+        /// </summary>
+        public bool HttpUseHsts { get; set; }
 
         /// <summary>
         /// HTTP settings: Web Api redirect to HTTPS (defaults to false)
@@ -176,6 +190,10 @@ namespace FFCEI.Microservices.AspNetCore
 
             _application = Builder.Build();
 
+#pragma warning disable IDE0058 // Expression value is never used
+            Application.UseShuttingDownHandler();
+#pragma warning restore IDE0058 // Expression value is never used
+
             OnCreateApplication();
 
             return _application;
@@ -208,7 +226,7 @@ namespace FFCEI.Microservices.AspNetCore
 
         public void UseMemoryEntityFrameworkSecondLevelCache()
         {
-            if (_builder != null)
+            if (_builder is not null)
             {
                 throw new InvalidOperationException("UseRedisEntityFrameworkSecondLevelCache must be used before access WebApiMicroservice.Builder property");
             }
@@ -218,12 +236,12 @@ namespace FFCEI.Microservices.AspNetCore
 
         public void UseRedisEntityFrameworkSecondLevelCache(RedisConnectionConfiguration? configuration = null)
         {
-            if (_builder != null)
+            if (_builder is not null)
             {
                 throw new InvalidOperationException("UseRedisEntityFrameworkSecondLevelCache must be used before access WebApiMicroservice.Builder property");
             }
 
-            if (configuration == null)
+            if (configuration is null)
             {
                 var standardConfiguration = ConfigurationManager.GetRedisConfiguration(
                     hostSettingName: "Redis.Cache.Host",
@@ -258,12 +276,12 @@ namespace FFCEI.Microservices.AspNetCore
             StaticFolderMappingAuthorizationPolicy authorizationPolicy = StaticFolderMappingAuthorizationPolicy.PublicAccess,
             IEnumerable<string>? authorizedRoles = null)
         {
-            if (webPath == null)
+            if (webPath is null)
             {
                 throw new ArgumentNullException(nameof(webPath));
             }
 
-            if (physicalPath == null)
+            if (physicalPath is null)
             {
                 throw new ArgumentNullException(nameof(physicalPath));
             }
@@ -293,7 +311,7 @@ namespace FFCEI.Microservices.AspNetCore
                 WebPath = $"/{webPath}/",
                 PhysicalPath = physicalPath,
                 DirectoryBrowsing = directoryBrowsing,
-                AuthorizationPolicy = authorizationPolicy, 
+                AuthorizationPolicy = authorizationPolicy,
                 AuthorizedRoles = authorizedRoles?.ToHashSet()
             };
 
@@ -427,6 +445,11 @@ namespace FFCEI.Microservices.AspNetCore
                 Application.UseCors(policy => CreateKestrelCorsPolicy(policy));
             }
 
+            if (HttpUseHsts)
+            {
+                Application.UseHsts();
+            }
+
             if (HttpRedirectToHttps)
             {
                 Application.UseHttpsRedirection();
@@ -444,6 +467,11 @@ namespace FFCEI.Microservices.AspNetCore
         private void BuildWebApi()
         {
             Builder.Services.AddHttpClient();
+
+            if (!Builder.Environment.IsDevelopment())
+            {
+                Builder.Services.AddTransient<ExceptionHandlerMiddeware>();
+            }
 
             if (WebApiUseAuthorization)
             {
@@ -608,6 +636,20 @@ namespace FFCEI.Microservices.AspNetCore
             if (Application.Environment.IsDevelopment())
             {
                 Application.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                Application.UseExceptionHandler(a => a.Run(async context =>
+                {
+                    var exceptionHandlerMiddeware = Application.Services.GetService<ExceptionHandlerMiddeware>();
+
+                    if (exceptionHandlerMiddeware is not null)
+                    {
+#pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
+                        await exceptionHandlerMiddeware.InvokeAsync(context);
+#pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
+                    }
+                }));
             }
 
             CreateWebApiSwagger();

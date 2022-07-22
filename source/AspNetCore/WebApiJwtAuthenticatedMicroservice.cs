@@ -1,3 +1,5 @@
+using FFCEI.Microservices.AspNetCore.Jwt;
+using FFCEI.Microservices.AspNetCore.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -72,6 +74,11 @@ namespace FFCEI.Microservices.AspNetCore
         /// </summary>
         public bool JwtRequireHttpsMetadata { get; set; }
 
+        /// <summary>
+        /// Javascript Web Token: late authorization delegate for validating claims or anything you needed after Jwt validation
+        /// </summary>
+        public JwtPostAuthorizationDelegateMethod? JwtPostAuthorization { get; set; }
+
 #pragma warning disable CA1000
         /// <summary>
         /// Microservice instance (singleton)
@@ -96,6 +103,13 @@ namespace FFCEI.Microservices.AspNetCore
             BuildJwtAuthenticator();
 
             base.OnCreateBuilder();
+        }
+
+        protected override void OnCreateApplication()
+        {
+            base.OnCreateApplication();
+
+            CreateJwtPostAuthenticator();
         }
 
 #pragma warning disable IDE0058 // Expression value is never used
@@ -138,7 +152,25 @@ namespace FFCEI.Microservices.AspNetCore
                 };
 #pragma warning restore CA5404 // Do not disable token validation checks
             });
+
+            if (WebApiUseAuthorization)
+            {
+                Builder.Services.AddJwtPostAuthorization(options =>
+                {
+                    options.JwtPostAuthorization = JwtPostAuthorization;
+                });
+            }
         }
 #pragma warning restore IDE0058 // Expression value is never used
+
+        private void CreateJwtPostAuthenticator()
+        {
+            if (WebApiUseAuthorization)
+            {
+#pragma warning disable IDE0058 // Expression value is never used
+                Application.UseJwtPostAuthorization();
+#pragma warning restore IDE0058 // Expression value is never used
+            }
+        }
     }
 }

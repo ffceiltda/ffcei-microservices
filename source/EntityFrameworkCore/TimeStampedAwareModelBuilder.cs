@@ -4,18 +4,18 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace FFCEI.Microservices.EntityFrameworkCore
 {
     /// <summary>
-    /// Model Builder for ITimeStampedModel derived model classes
+    /// Model Builder for ITimestampedModel derived model classes
     /// </summary>
-    public static class TimeStampedAwareModelBuilder
+    public static class TimestampedAwareModelBuilder
     {
         /// <summary>
-        /// Register ITimeStampedModel properties
+        /// Register ITimestampedModel properties
         /// </summary>
         /// <typeparam name="TEntity">Model entity type</typeparam>
         /// <param name="entityBuilder">Entity builder</param>
         /// <param name="databaseEngine">Database engine</param>
         /// <exception cref="ArgumentNullException">Throw null if entityBuilder is null</exception>
-        public static void Register<TEntity>(EntityTypeBuilder<TEntity> entityBuilder, DatabaseEngine databaseEngine) where TEntity : class, ITimeStampedModel
+        public static void Register<TEntity>(EntityTypeBuilder<TEntity> entityBuilder, DatabaseEngine databaseEngine) where TEntity : class, ITimestampedModel
         {
             if (entityBuilder is null)
             {
