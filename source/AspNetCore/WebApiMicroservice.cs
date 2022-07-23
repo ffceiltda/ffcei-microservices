@@ -1,7 +1,7 @@
 using Destructurama;
 using EFCoreSecondLevelCacheInterceptor;
 using FFCEI.Microservices.AspNetCore.Middlewares;
-using FFCEI.Microservices.AspNetCore.StaticFiles;
+using FFCEI.Microservices.AspNetCore.StaticFolderMappings;
 using FFCEI.Microservices.Configuration;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Events;
@@ -33,7 +34,6 @@ namespace FFCEI.Microservices.AspNetCore
         private bool _controllersMapped;
         private ConfigurationManager? _configurationManager;
         private RedisConnectionConfiguration? _entityFrameworkSecondLevelCacheRedisConfiguration;
-        private readonly SortedDictionary<string, FolderMapping> _staticFolderMappings = new();
         private static WeakReference<WebApiMicroservice> _instance = null!;
 
         /// <summary>
@@ -271,61 +271,6 @@ namespace FFCEI.Microservices.AspNetCore
         }
 
         /// <summary>
-        /// Add a Static Folder Mapping, and apply authorization policies
-        /// </summary>
-        /// <param name="webPath">HTTP path</param>
-        /// <param name="physicalPath">Physical operating system path</param>
-        /// <param name="directoryBrowsing">Enables directory browsing</param>
-        /// <param name="authorizationPolicy">Authorization policy</param>
-        /// <param name="authorizedRoles">Authorized roles (if applies)</param>
-        /// <exception cref="InvalidOperationException">Throws if webPath is already mapped</exception>
-        public void UseStaticFolderMapping(string webPath, string physicalPath, bool directoryBrowsing = false,
-            StaticFolderMappingAuthorizationPolicy authorizationPolicy = StaticFolderMappingAuthorizationPolicy.PublicAccess,
-            IEnumerable<string>? authorizedRoles = null)
-        {
-            if (webPath is null)
-            {
-                throw new ArgumentNullException(nameof(webPath));
-            }
-
-            if (physicalPath is null)
-            {
-                throw new ArgumentNullException(nameof(physicalPath));
-            }
-
-            if (!Directory.Exists(physicalPath))
-            {
-                throw new InvalidOperationException($"Directory {physicalPath} cannot be accessed or does not exists");
-            }
-
-            while (webPath.StartsWith("/", StringComparison.InvariantCulture))
-            {
-                webPath = webPath[1..];
-            }
-
-            while (webPath.EndsWith("/", StringComparison.InvariantCulture))
-            {
-                webPath = webPath[..^1];
-            }
-
-            if (_staticFolderMappings.ContainsKey(webPath))
-            {
-                throw new InvalidOperationException($"WebApi Static Path {webPath} already configured");
-            }
-
-            var mapping = new FolderMapping()
-            {
-                WebPath = $"/{webPath}/",
-                PhysicalPath = physicalPath,
-                DirectoryBrowsing = directoryBrowsing,
-                AuthorizationPolicy = authorizationPolicy,
-                AuthorizedRoles = authorizedRoles?.ToHashSet()
-            };
-
-            _staticFolderMappings.Add(webPath, mapping);
-        }
-
-        /// <summary>
         /// Map Controolers
         /// </summary>
         public void MapControllers()
@@ -508,11 +453,11 @@ namespace FFCEI.Microservices.AspNetCore
         {
             mvcBuilder.AddJsonOptions(options =>
             {
-                options.JsonSerializerOptions.Converters.Add(new Json.TrimmingConverter());
-                options.JsonSerializerOptions.Converters.Add(new Json.LooseStringEnumConverter());
-                options.JsonSerializerOptions.Converters.Add(new Json.StringToDecimalConverter());
-                options.JsonSerializerOptions.Converters.Add(new Json.StringToLongConverter());
-                options.JsonSerializerOptions.Converters.Add(new Json.StringToIntegerConverter());
+                options.JsonSerializerOptions.Converters.Add(new Json.JsonTrimmingConverter());
+                options.JsonSerializerOptions.Converters.Add(new Json.JsonLooseStringEnumConverter());
+                options.JsonSerializerOptions.Converters.Add(new Json.JsonStringToDecimalConverter());
+                options.JsonSerializerOptions.Converters.Add(new Json.JsonStringToLongConverter());
+                options.JsonSerializerOptions.Converters.Add(new Json.JsonStringToIntegerConverter());
 
                 if (WebApiIgnoreNullsOnJsonSerialization)
                 {
@@ -682,14 +627,25 @@ namespace FFCEI.Microservices.AspNetCore
 
         private void CreateWebApiStaticFolderMappings()
         {
-            if (_staticFolderMappings.Count == 0)
+            var configuration = Application.Services.GetService<IConfigureOptions<StaticFolderMappingMiddlewareOptions>>();
+
+            if (configuration == null)
             {
                 return;
             }
 
-            Application.UseMiddleware<FolderMappingMiddleware>(_staticFolderMappings);
+            var options = new StaticFolderMappingMiddlewareOptions();
 
-            foreach (var mapping in _staticFolderMappings.Values)
+            configuration.Configure(options);
+
+            if (options.Empty)
+            {
+                return;
+            }
+
+            Application.UseStaticFolderMappings();
+
+            foreach (var mapping in options.MappedFolders.Values)
             {
                 var requestPath = mapping.WebPath[..^1];
 

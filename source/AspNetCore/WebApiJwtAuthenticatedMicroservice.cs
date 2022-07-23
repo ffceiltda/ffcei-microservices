@@ -114,8 +114,8 @@ namespace FFCEI.Microservices.AspNetCore
 #pragma warning disable IDE0058 // Expression value is never used
         private void BuildJwtAuthenticator()
         {
-            var signingKeyFactory = new Jwt.SigningKeyFactory(this.ConfigurationManager);
-            var encryptionKeyFactory = new Jwt.EncryptionKeyFactory(this.ConfigurationManager);
+            var signingKeyFactory = new JwtSigningKeyFactory(this.ConfigurationManager);
+            var encryptionKeyFactory = new JwtEncryptionKeyFactory(this.ConfigurationManager);
 
             Builder.Services.AddSingleton(signingKeyFactory);
             Builder.Services.AddSingleton(encryptionKeyFactory);

@@ -2,13 +2,14 @@ using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
 
 namespace FFCEI.Microservices.AspNetCore.Jwt
 {
     /// <summary>
     /// Javascript Web Token handler helper class
     /// </summary>
-    public static class TokenHandler
+    public static class JwtTokenHandler
     {
         /// <summary>
         /// Create a security Javascript Web Token
@@ -21,7 +22,7 @@ namespace FFCEI.Microservices.AspNetCore.Jwt
         /// <param name="issuer">Issuer</param>
         /// <param name="audience">Audience</param>
         /// <returns>SecurityToken instance</returns>
-        public static SecurityToken CreateJwtToken(TimeSpan expiration, IEnumerable<KeyValuePair<string, string>>? subjectClaims = null, SigningCredentials? signingCredentials = null, IEnumerable<string>? roles = null, EncryptingCredentials? encryptingCredentials = null, string? issuer = null, string? audience = null)
+        public static JwtSecurityToken CreateJwtSecurityToken(TimeSpan expiration, IEnumerable<KeyValuePair<string, string>>? subjectClaims = null, SigningCredentials? signingCredentials = null, IEnumerable<string>? roles = null, EncryptingCredentials? encryptingCredentials = null, string? issuer = null, string? audience = null)
         {
             if (subjectClaims is null)
             {
@@ -99,21 +100,36 @@ namespace FFCEI.Microservices.AspNetCore.Jwt
             }
 
             var jwtTokenHandler = new JwtSecurityTokenHandler();
+            var jwtToken = jwtTokenHandler.CreateJwtSecurityToken(jwtTokenDescriptor);
 
-            return jwtTokenHandler.CreateToken(jwtTokenDescriptor);
+            return jwtToken;
         }
 
         /// <summary>
         /// Get security token string representation
         /// </summary>
-        /// <param name="securityToken">Security Token</param>
+        /// <param name="jwtToken">Jwt Security Token</param>
+        /// <param name="bearerTokenPrefix">Bearer token string prefix</param>
         /// <returns></returns>
-        public static string SecurityTokenString(this SecurityToken securityToken)
+        public static string BearerToken(this JwtSecurityToken jwtToken, string? bearerTokenPrefix = null)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
-            var jwtTokenString = jwtTokenHandler.WriteToken(securityToken);
 
-            return jwtTokenString;
+            var jwtTokenStringBuilder = new StringBuilder();
+
+#pragma warning disable IDE0058 // Expression value is never used
+            if (!string.IsNullOrEmpty(bearerTokenPrefix))
+            {
+                jwtTokenStringBuilder.Append(bearerTokenPrefix);
+                jwtTokenStringBuilder.Append(' ');
+            }
+
+            var jwtTokenString = jwtTokenHandler.WriteToken(jwtToken);
+
+            jwtTokenStringBuilder.Append(jwtTokenString);
+#pragma warning restore IDE0058 // Expression value is never used
+
+            return jwtTokenStringBuilder.ToString();
         }
     }
 }

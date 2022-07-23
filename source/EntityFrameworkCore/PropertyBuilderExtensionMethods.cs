@@ -14,7 +14,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
         /// <typeparam name="TProperty">Model Property</typeparam>
         /// <param name="property">PropertyBuilder instance</param>
         /// <returns>PropertyBuilder instance</returns>
-        public static PropertyBuilder<TProperty> IsUuidColumn<TProperty>(this PropertyBuilder<TProperty> property) => property.HasColumnType(DbNativeFieldTypeMapping.GetNativeMapping(null, DbFieldType.BinaryUuid)).HasMaxLength(16).IsFixedLength(true);
+        public static PropertyBuilder<TProperty> IsUuidColumn<TProperty>(this PropertyBuilder<TProperty> property) => property.HasColumnType(DbNativeFieldTypeMapping.GetNativeMapping(null, DbFieldType.Uuid)).HasMaxLength(36).IsFixedLength(true);
 
         /// <summary>
         /// Define a Boolean column
@@ -33,12 +33,12 @@ namespace FFCEI.Microservices.EntityFrameworkCore
         public static PropertyBuilder<TProperty> IsDateColumn<TProperty>(this PropertyBuilder<TProperty> property) => property.HasColumnType(DbNativeFieldTypeMapping.GetNativeMapping(null, DbFieldType.Date));
 
         /// <summary>
-        /// Define a DateTime column
+        /// Define a Time column
         /// </summary>
         /// <typeparam name="TProperty">Model Property</typeparam>
         /// <param name="property">PropertyBuilder instance</param>
         /// <returns>PropertyBuilder instance</returns>
-        public static PropertyBuilder<TProperty> IsDateTimeColumn<TProperty>(this PropertyBuilder<TProperty> property) => property.HasColumnType(DbNativeFieldTypeMapping.GetNativeMapping(null, DbFieldType.DateTime));
+        public static PropertyBuilder<TProperty> IsTimeColumn<TProperty>(this PropertyBuilder<TProperty> property) => property.HasColumnType(DbNativeFieldTypeMapping.GetNativeMapping(null, DbFieldType.Time));
 
         /// <summary>
         /// Define a TimeSpan column
@@ -49,20 +49,20 @@ namespace FFCEI.Microservices.EntityFrameworkCore
         public static PropertyBuilder<TProperty> IsTimeSpanColumn<TProperty>(this PropertyBuilder<TProperty> property) => property.HasColumnType(DbNativeFieldTypeMapping.GetNativeMapping(null, DbFieldType.TimeSpan));
 
         /// <summary>
-        /// Define a Timestamp column
+        /// Define a DateTime column
         /// </summary>
         /// <typeparam name="TProperty">Model Property</typeparam>
         /// <param name="property">PropertyBuilder instance</param>
         /// <returns>PropertyBuilder instance</returns>
-        public static PropertyBuilder<TProperty> IsTimestampColumn<TProperty>(this PropertyBuilder<TProperty> property) => property.HasColumnType(DbNativeFieldTypeMapping.GetNativeMapping(null, DbFieldType.Timestamp));
+        public static PropertyBuilder<TProperty> IsDateTimeColumn<TProperty>(this PropertyBuilder<TProperty> property) => property.HasColumnType(DbNativeFieldTypeMapping.GetNativeMapping(null, DbFieldType.DateTime));
 
         /// <summary>
-        /// Define a High Resolution Timestamp column
+        /// Define a DateTime with UTC Offset Column
         /// </summary>
         /// <typeparam name="TProperty">Model Property</typeparam>
         /// <param name="property">PropertyBuilder instance</param>
         /// <returns>PropertyBuilder instance</returns>
-        public static PropertyBuilder<TProperty> IsHighResolutionTimestampColumn<TProperty>(this PropertyBuilder<TProperty> property) => property.HasColumnType(DbNativeFieldTypeMapping.GetNativeMapping(null, DbFieldType.HighResolutionTimestamp));
+        public static PropertyBuilder<TProperty> IsDateTimeWithUtcOffsetColumn<TProperty>(this PropertyBuilder<TProperty> property) => property.HasColumnType(DbNativeFieldTypeMapping.GetNativeMapping(null, DbFieldType.DateTimeWithUtcOffset));
 
         /// <summary>
         /// Define a long integer column

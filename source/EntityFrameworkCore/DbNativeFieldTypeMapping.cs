@@ -24,13 +24,13 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 
             return fieldType switch
             {
-                DbFieldType.BinaryUuid => "binary(16)",
+                DbFieldType.Uuid => "char(36)",
                 DbFieldType.Boolean => "bit(1)",
                 DbFieldType.Date => "date",
-                DbFieldType.DateTime => "datetime",
+                DbFieldType.Time => "time(6)",
                 DbFieldType.TimeSpan => "bigint",
-                DbFieldType.Timestamp => "timestamp",
-                DbFieldType.HighResolutionTimestamp => "timestamp(6)",
+                DbFieldType.DateTime => "datetime(6)",
+                DbFieldType.DateTimeWithUtcOffset => "timestamp(6)",
                 DbFieldType.Numeric => $"decimal({precision ?? 20}, {scale ?? 2})",
                 DbFieldType.BigInt => "bigint",
                 DbFieldType.Text => "longtext",

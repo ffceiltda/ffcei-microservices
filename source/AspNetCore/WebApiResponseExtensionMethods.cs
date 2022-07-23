@@ -80,7 +80,6 @@ namespace FFCEI.Microservices.AspNetCore
         /// <param name="response">Response</param>
         /// <returns>NotFound if response is null or Status is null, OK if response status is 0, InternalError if status if 500, BadRequest if status &gt; 0, NotAcceptable if status &lt; 0</returns>
         public static IActionResult ToHttpResponse<TResult>(this WebApiResultWith<TResult> response)
-            where TResult : class
         {
             if (response is null)
             {

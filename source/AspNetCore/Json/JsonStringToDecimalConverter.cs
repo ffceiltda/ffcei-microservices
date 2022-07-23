@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace FFCEI.Microservices.AspNetCore.Json
 {
-    sealed class StringToDecimalConverter : JsonConverterFactory
+    sealed class JsonStringToDecimalConverter : JsonConverterFactory
     {
         public override bool CanConvert(Type typeToConvert) => typeToConvert == typeof(decimal);
 

@@ -1,29 +1,35 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Text;
 
-namespace FFCEI.Microservices.AspNetCore.StaticFiles
+namespace FFCEI.Microservices.AspNetCore.StaticFolderMappings
 {
     /// <summary>
     /// Middleware for folder mapping for static file serving
     /// </summary>
-    public sealed class FolderMappingMiddleware
+    public sealed class StaticFolderMappingMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger<FolderMappingMiddleware> _logger;
-        private readonly SortedDictionary<string, FolderMapping> _staticFolderMappings;
+        private readonly ILogger<StaticFolderMappingMiddleware> _logger;
+        private readonly SortedDictionary<string, MappedFolder> _mappedFolders;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="next">Next middleware in chain</param>
         /// <param name="logger">Logger</param>
-        /// <param name="staticFolderMappings">Folder mappings</param>
-        public FolderMappingMiddleware(RequestDelegate next, ILogger<FolderMappingMiddleware> logger, SortedDictionary<string, FolderMapping> staticFolderMappings)
+        /// <param name="options">Folder mappings</param>
+        public StaticFolderMappingMiddleware(RequestDelegate next, ILogger<StaticFolderMappingMiddleware> logger, IOptions<StaticFolderMappingMiddlewareOptions> options)
         {
+            if (options is null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
             _next = next;
             _logger = logger;
-            _staticFolderMappings = staticFolderMappings;
+            _mappedFolders = options.Value.MappedFolders;
         }
 
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
@@ -45,7 +51,7 @@ namespace FFCEI.Microservices.AspNetCore.StaticFiles
                 var requestPath = httpContext.Request.Path.ToString();
                 var requestAuthorized = false;
 
-                foreach (var mapping in _staticFolderMappings.Values)
+                foreach (var mapping in _mappedFolders.Values)
                 {
                     if (requestAuthorized)
                     {

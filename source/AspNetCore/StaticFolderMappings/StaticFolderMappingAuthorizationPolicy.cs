@@ -1,4 +1,4 @@
-namespace FFCEI.Microservices.AspNetCore
+namespace FFCEI.Microservices.AspNetCore.StaticFolderMappings
 {
     /// <summary>
     /// Static folder mapping authorization policy

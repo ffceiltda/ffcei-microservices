@@ -35,7 +35,7 @@ namespace FFCEI.Microservices.Configuration
         /// <summary>
         /// Handle binary(16) as Uuid 
         /// </summary>
-        public bool OldGuids { get; set; } = true;
+        public bool OldGuids { get; set; }
 
         /// <summary>
         /// Use compressed protocol

@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace FFCEI.Microservices.AspNetCore.Json
 {
-    sealed class StringToIntegerConverter : JsonConverterFactory
+    sealed class JsonStringToIntegerConverter : JsonConverterFactory
     {
         public override bool CanConvert(Type typeToConvert) => typeToConvert == typeof(int);
 

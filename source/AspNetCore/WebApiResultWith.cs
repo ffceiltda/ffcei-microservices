@@ -4,7 +4,6 @@ namespace FFCEI.Microservices.AspNetCore
     /// Web Api result response with result data
     /// </summary>
     public sealed class WebApiResultWith<TResult> : WebApiResultBase
-        where TResult : class
     {
         /// <summary>
         /// Result data
@@ -18,7 +17,7 @@ namespace FFCEI.Microservices.AspNetCore
         /// <param name="result">Result date</param>
         /// <param name="detail">Detail message</param>
         /// <returns>WebApiResultWith&lt;TResult&gt; instance</returns>
-        public static WebApiResultWith<TResult> Succeeded(TResult? result = null, string? detail = null)
+        public static WebApiResultWith<TResult> Succeeded(TResult? result = default, string? detail = null)
         {
             return new WebApiResultWith<TResult>()
             {
@@ -34,7 +33,7 @@ namespace FFCEI.Microservices.AspNetCore
         /// <param name="result">Result date</param>
         /// <param name="detail">Detail message</param>
         /// <returns>WebApiResultWith&lt;TResult&gt; instance</returns>
-        public static WebApiResultWith<TResult> InternalError(TResult? result = null, string? detail = null)
+        public static WebApiResultWith<TResult> InternalError(TResult? result = default, string? detail = null)
         {
             return new WebApiResultWith<TResult>()
             {
@@ -50,7 +49,7 @@ namespace FFCEI.Microservices.AspNetCore
         /// <param name="result">Result date</param>
         /// <param name="detail">Detail message</param>
         /// <returns>WebApiResult instance</returns>
-        public static WebApiResultWith<TResult> NotFound(TResult? result = null, string? detail = null)
+        public static WebApiResultWith<TResult> NotFound(TResult? result = default, string? detail = null)
         {
             return new WebApiResultWith<TResult>()
             {
@@ -67,7 +66,7 @@ namespace FFCEI.Microservices.AspNetCore
         /// <param name="result">Result date</param>
         /// <param name="detail">Detail message</param>
         /// <returns>WebApiResultWith&lt;TResult&gt; instance</returns>
-        public static WebApiResultWith<TResult> Error(TResult? result = null, string? detail = null, int? status = null)
+        public static WebApiResultWith<TResult> Error(TResult? result = default, string? detail = null, int? status = null)
         {
             return new WebApiResultWith<TResult>()
             {

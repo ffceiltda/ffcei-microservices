@@ -8,7 +8,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
         /// <summary>
         /// Binary UUID
         /// </summary>
-        BinaryUuid,
+        Uuid,
         /// <summary>
         /// Boolean
         /// </summary>
@@ -18,21 +18,21 @@ namespace FFCEI.Microservices.EntityFrameworkCore
         /// </summary>
         Date,
         /// <summary>
-        /// Date and time
+        /// Time-only
         /// </summary>
-        DateTime,
+        Time,
         /// <summary>
         /// Time-only
         /// </summary>
         TimeSpan,
         /// <summary>
-        /// Precision date and time
+        /// Date and time
         /// </summary>
-        Timestamp,
+        DateTime,
         /// <summary>
-        /// High resolution precision date and time
+        /// Date and time (with UTC offset)
         /// </summary>
-        HighResolutionTimestamp,
+        DateTimeWithUtcOffset,
         /// <summary>
         /// 64-bit integer
         /// </summary>

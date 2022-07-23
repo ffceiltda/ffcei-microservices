@@ -195,8 +195,8 @@ namespace FFCEI.Microservices.Security
             {
                 var symmetricSecurityKey = configurationManager[$"{configurationKeyStringPrefix}Symmetric.Key"];
                 var symmetricSecuritySignatureAlgorithm = configurationManager[$"{configurationKeyStringPrefix}Symmetric.SignatureAlgorithm"];
-                var symmetricEncryptionKeyIdentifier = configurationManager[$"{configurationKeyStringPrefix}Symmetric.KeyIdentifier"];
-                var symmetricEncryptionAlgorithm = configurationManager[$"{configurationKeyStringPrefix}Symmetric.Algorithm"];
+                var symmetricEncryptionKeyWrapAlgorithm = configurationManager[$"{configurationKeyStringPrefix}Symmetric.EncryptionKeyWrapAlgorithm"];
+                var symmetricEncryptionAlgorithm = configurationManager[$"{configurationKeyStringPrefix}Symmetric.EncryptionAlgorithm"];
 
                 if (!string.IsNullOrEmpty(symmetricSecurityKey))
                 {
@@ -204,12 +204,12 @@ namespace FFCEI.Microservices.Security
                     {
                         if (string.IsNullOrEmpty(symmetricSecuritySignatureAlgorithm))
                         {
-                            symmetricSecuritySignatureAlgorithm = SecurityAlgorithms.HmacSha512Signature;
+                            symmetricSecuritySignatureAlgorithm = SecurityAlgorithms.HmacSha512;
                         }
 
-                        if (string.IsNullOrEmpty(symmetricEncryptionKeyIdentifier))
+                        if (string.IsNullOrEmpty(symmetricEncryptionKeyWrapAlgorithm))
                         {
-                            symmetricEncryptionKeyIdentifier = SecurityAlgorithms.Aes256KW;
+                            symmetricEncryptionKeyWrapAlgorithm = SecurityAlgorithms.Aes256KW;
                         }
 
                         if (string.IsNullOrEmpty(symmetricEncryptionAlgorithm))
@@ -221,7 +221,7 @@ namespace FFCEI.Microservices.Security
                         _securityKeyIsAsymmetric = false;
                         _securityKeyIsX509 = false;
                         _signingCredentials = new SigningCredentials(_securityKey, symmetricSecuritySignatureAlgorithm);
-                        _encryptingCredentials = new EncryptingCredentials(_securityKey, symmetricEncryptionKeyIdentifier, symmetricEncryptionAlgorithm);
+                        _encryptingCredentials = new EncryptingCredentials(_securityKey, symmetricEncryptionKeyWrapAlgorithm, symmetricEncryptionAlgorithm);
                     }
                     catch (CryptographicException e)
                     {

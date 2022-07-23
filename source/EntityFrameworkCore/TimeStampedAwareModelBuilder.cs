@@ -25,11 +25,11 @@ namespace FFCEI.Microservices.EntityFrameworkCore
 #pragma warning disable IDE0058 // Expression value is never used
             entityBuilder.Property(e => e.CreatedAt)
                 .IsRequired()
-                .IsHighResolutionTimestampColumn();
+                .IsDateTimeWithUtcOffsetColumn();
 
             entityBuilder.Property(e => e.UpdatedAt)
                 .IsRequired()
-                .IsHighResolutionTimestampColumn();
+                .IsDateTimeWithUtcOffsetColumn();
 #pragma warning restore IDE0058 // Expression value is never used
         }
     }

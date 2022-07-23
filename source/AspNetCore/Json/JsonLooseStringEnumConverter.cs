@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace FFCEI.Microservices.AspNetCore.Json
 {
-    sealed class LooseStringEnumConverter : JsonConverterFactory
+    sealed class JsonLooseStringEnumConverter : JsonConverterFactory
     {
         public override bool CanConvert(Type typeToConvert)
         {

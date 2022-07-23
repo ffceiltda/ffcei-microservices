@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace FFCEI.Microservices.AspNetCore.Middlewares
+namespace FFCEI.Microservices.AspNetCore.StaticFolderMappings
 {
     /// <summary>
-    /// JwtPostAuthorizationMiddleware extension methods
+    /// StaticFolderMappingMiddleware extension methods
     /// </summary>
-    public static class JwtPostAuthorizationMiddlewareExtensionMethods
+    public static class StaticFolderMappingMiddlewareExtensionMethods
     {
         /// <summary>
         /// Add JwtPostAuthorizationMiddleware to ServiceCollection
@@ -15,7 +15,7 @@ namespace FFCEI.Microservices.AspNetCore.Middlewares
         /// <param name="options">Options</param>
         /// <returns>ServiceCollection instance</returns>
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-        public static IServiceCollection AddJwtPostAuthorization(this IServiceCollection service, Action<JwtPostAuthorizationMiddlewareOptions> options = default)
+        public static IServiceCollection AddStaticFolderMappings(this IServiceCollection service, Action<StaticFolderMappingMiddlewareOptions> options = default)
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         {
 #pragma warning disable IDE0054 // Use compound assignment
@@ -34,9 +34,9 @@ namespace FFCEI.Microservices.AspNetCore.Middlewares
         /// </summary>
         /// <param name="builder">ApplicationBuilder instance</param>
         /// <returns>ApplicationBuilder instance</returns>
-        public static IApplicationBuilder UseJwtPostAuthorization(this IApplicationBuilder builder)
+        public static IApplicationBuilder UseStaticFolderMappings(this IApplicationBuilder builder)
         {
-            return builder.UseMiddleware<JwtPostAuthorizationMiddleware>();
+            return builder.UseMiddleware<StaticFolderMappingMiddleware>();
         }
     }
 }
