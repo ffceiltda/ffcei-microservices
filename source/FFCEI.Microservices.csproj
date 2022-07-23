@@ -18,10 +18,12 @@
     <PackageTags>aspnetcore entityframeworkcore webapi microservice</PackageTags>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
     <AnalysisLevel>6.0-all</AnalysisLevel>
     <SignAssembly>False</SignAssembly>
-    <Version>0.1.3</Version>
+    <Version>0.1.4</Version>
   </PropertyGroup>
 
   <ItemGroup>

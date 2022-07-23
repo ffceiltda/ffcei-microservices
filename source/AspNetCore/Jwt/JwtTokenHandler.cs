@@ -11,6 +11,8 @@ namespace FFCEI.Microservices.AspNetCore.Jwt
     /// </summary>
     public static class JwtTokenHandler
     {
+        internal static DateTime MaximumTokenExpiration = new DateTime(2038, 1, 19, 3, 14, 07, DateTimeKind.Utc);
+
         /// <summary>
         /// Create a security Javascript Web Token
         /// </summary>
@@ -22,7 +24,7 @@ namespace FFCEI.Microservices.AspNetCore.Jwt
         /// <param name="issuer">Issuer</param>
         /// <param name="audience">Audience</param>
         /// <returns>SecurityToken instance</returns>
-        public static JwtSecurityToken CreateJwtSecurityToken(TimeSpan expiration, IEnumerable<KeyValuePair<string, string>>? subjectClaims = null, SigningCredentials? signingCredentials = null, IEnumerable<string>? roles = null, EncryptingCredentials? encryptingCredentials = null, string? issuer = null, string? audience = null)
+        public static JwtSecurityToken CreateJwtSecurityToken(ref TimeSpan expiration, IEnumerable<KeyValuePair<string, string>>? subjectClaims = null, SigningCredentials? signingCredentials = null, IEnumerable<string>? roles = null, EncryptingCredentials? encryptingCredentials = null, string? issuer = null, string? audience = null)
         {
             if (subjectClaims is null)
             {
@@ -36,6 +38,13 @@ namespace FFCEI.Microservices.AspNetCore.Jwt
 
             var issuedAt = DateTime.UtcNow;
             var expiresAt = issuedAt.AddTicks(expiration.Ticks);
+
+            if (expiresAt > MaximumTokenExpiration)
+            {
+                expiresAt = MaximumTokenExpiration;
+                expiration = expiresAt - issuedAt;
+            }
+
             var jwtSujectClaims = new ClaimsIdentity();
 
             foreach (var claim in subjectClaims)

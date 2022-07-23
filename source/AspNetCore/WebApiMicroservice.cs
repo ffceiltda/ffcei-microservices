@@ -12,11 +12,9 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Events;
-using Swashbuckle.AspNetCore.Filters;
 using System.Reflection;
 using System.Text.Json.Serialization;
 
@@ -572,7 +570,7 @@ namespace FFCEI.Microservices.AspNetCore
                         options.SchemaFilter<Swagger.EnumTypesSchemaFilter>(xmlFile);
                         options.SchemaFilter<Swagger.MessageAttributeSchemaFilter>(xmlFile);
                         options.DocumentFilter<Swagger.PropertyAttributeDocumentFilter>();
-                        options.OperationFilter<SecurityRequirementsOperationFilter>(false);
+                        // options.OperationFilter<SecurityRequirementsOperationFilter>(false);
                     }
                     catch (Exception e)
                     {

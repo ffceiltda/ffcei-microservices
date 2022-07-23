@@ -102,13 +102,15 @@ namespace FFCEI.Microservices.AspNetCore
             BuildJwtAuthenticator();
 
             base.OnCreateBuilder();
+
+            BuildJwtPostAuthorizator();
         }
 
         protected override void OnCreateApplication()
         {
             base.OnCreateApplication();
 
-            CreateJwtPostAuthenticator();
+            CreateJwtPostAuthorizator();
         }
 
 #pragma warning disable IDE0058 // Expression value is never used
@@ -151,7 +153,10 @@ namespace FFCEI.Microservices.AspNetCore
                 };
 #pragma warning restore CA5404 // Do not disable token validation checks
             });
+        }
 
+        private void BuildJwtPostAuthorizator()
+        {
             if (WebApiUseAuthorization)
             {
                 Builder.Services.AddJwtPostAuthorization(options =>
@@ -162,7 +167,7 @@ namespace FFCEI.Microservices.AspNetCore
         }
 #pragma warning restore IDE0058 // Expression value is never used
 
-        private void CreateJwtPostAuthenticator()
+        private void CreateJwtPostAuthorizator()
         {
             if (WebApiUseAuthorization)
             {

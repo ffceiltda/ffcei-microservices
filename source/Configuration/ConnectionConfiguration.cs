@@ -22,6 +22,10 @@ namespace FFCEI.Microservices.Configuration
 #pragma warning restore IDE0058 // Expression value is never used
         }
 
+        /// <summary>
+        /// Creates connection string
+        /// </summary>
+        /// <returns>Connection string</returns>
         protected abstract StringBuilder BuildConnectionString();
     }
 }
