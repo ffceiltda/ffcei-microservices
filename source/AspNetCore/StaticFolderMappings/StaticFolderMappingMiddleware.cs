@@ -20,7 +20,7 @@ namespace FFCEI.Microservices.AspNetCore.StaticFolderMappings
         /// <param name="next">Next middleware in chain</param>
         /// <param name="logger">Logger</param>
         /// <param name="options">Folder mappings</param>
-        public StaticFolderMappingMiddleware(RequestDelegate next, ILogger<StaticFolderMappingMiddleware> logger, IOptions<StaticFolderMappingMiddlewareOptions> options)
+        public StaticFolderMappingMiddleware(RequestDelegate next, ILogger<StaticFolderMappingMiddleware> logger, StaticFolderMappingMiddlewareOptions options)
         {
             if (options is null)
             {
@@ -29,7 +29,7 @@ namespace FFCEI.Microservices.AspNetCore.StaticFolderMappings
 
             _next = next;
             _logger = logger;
-            _mappedFolders = options.Value.MappedFolders;
+            _mappedFolders = options.MappedFolders;
         }
 
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task

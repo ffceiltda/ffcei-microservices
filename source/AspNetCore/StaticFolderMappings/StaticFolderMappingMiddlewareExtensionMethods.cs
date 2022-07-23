@@ -22,8 +22,12 @@ namespace FFCEI.Microservices.AspNetCore.StaticFolderMappings
             options = options ?? (opts => { });
 #pragma warning restore IDE0054 // Use compound assignment
 
+            StaticFolderMappingMiddlewareOptions middlewareOptions = new();
+
+            options.Invoke(middlewareOptions);
+
 #pragma warning disable IDE0058 // Expression value is never used
-            service.Configure(options);
+            service.AddSingleton(middlewareOptions);
 #pragma warning restore IDE0058 // Expression value is never used
 
             return service;

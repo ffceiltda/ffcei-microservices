@@ -574,9 +574,9 @@ namespace FFCEI.Microservices.AspNetCore
                         options.DocumentFilter<Swagger.PropertyAttributeDocumentFilter>();
                         options.OperationFilter<SecurityRequirementsOperationFilter>(false);
                     }
-                    catch (Exception ex)
+                    catch (Exception e)
                     {
-                        Console.WriteLine("Exception while enriching Swagger documentation: " + ex.Message);
+                        Log.Logger.Error(e, "Exception while enriching Swagger documentation");
                     }
 #pragma warning restore CA1031 // Do not catch general exception types
                 });
@@ -627,18 +627,9 @@ namespace FFCEI.Microservices.AspNetCore
 
         private void CreateWebApiStaticFolderMappings()
         {
-            var configuration = Application.Services.GetService<IConfigureOptions<StaticFolderMappingMiddlewareOptions>>();
+            var options = Application.Services.GetService<StaticFolderMappingMiddlewareOptions>();
 
-            if (configuration == null)
-            {
-                return;
-            }
-
-            var options = new StaticFolderMappingMiddlewareOptions();
-
-            configuration.Configure(options);
-
-            if (options.Empty)
+            if (options is null)
             {
                 return;
             }
