@@ -24,7 +24,7 @@ namespace FFCEI.Microservices.AspNetCore.Jwt
         /// <param name="issuer">Issuer</param>
         /// <param name="audience">Audience</param>
         /// <returns>SecurityToken instance</returns>
-        public static JwtSecurityToken CreateJwtSecurityToken(ref TimeSpan expiration, IEnumerable<KeyValuePair<string, string>>? subjectClaims = null, SigningCredentials? signingCredentials = null, IEnumerable<string>? roles = null, EncryptingCredentials? encryptingCredentials = null, string? issuer = null, string? audience = null)
+        public static JwtSecurityToken CreateJwtSecurityToken(ref TimeSpan? expiration, IEnumerable<KeyValuePair<string, string>>? subjectClaims = null, SigningCredentials? signingCredentials = null, IEnumerable<string>? roles = null, EncryptingCredentials? encryptingCredentials = null, string? issuer = null, string? audience = null)
         {
             if (subjectClaims is null)
             {
@@ -36,10 +36,10 @@ namespace FFCEI.Microservices.AspNetCore.Jwt
                 throw new ArgumentNullException(nameof(signingCredentials));
             }
 
-            var issuedAt = DateTime.UtcNow;
-            var expiresAt = issuedAt.AddTicks(expiration.Ticks);
+            DateTime issuedAt = DateTime.UtcNow;
+            DateTime? expiresAt = expiration is not null ? issuedAt + expiration : null;
 
-            if (expiresAt > MaximumTokenExpiration)
+            if ((expiresAt is not null) && (expiresAt > MaximumTokenExpiration))
             {
                 expiresAt = MaximumTokenExpiration;
                 expiration = expiresAt - issuedAt;
@@ -79,7 +79,10 @@ namespace FFCEI.Microservices.AspNetCore.Jwt
                 }
                 else if (claim.Key == JwtRegisteredClaimNames.Exp)
                 {
-                    claimValue = expiresAt.ToString(CultureInfo.InvariantCulture);
+                    if (expiresAt.HasValue)
+                    {
+                        claimValue = expiresAt.Value.ToString(CultureInfo.InvariantCulture);
+                    }
                 }
 
                 var jwtClaim = new Claim(claim.Key, claimValue);

@@ -7,5 +7,6 @@ namespace FFCEI.Microservices.AspNetCore
     public sealed class WebApiClaimAttribute : Attribute
     {
         public bool Required { get; set; } = true;
+        public string Type { get; set; } = null!;
     }
 }

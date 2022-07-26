@@ -1,5 +1,8 @@
 using System.Security.Claims;
 using System.Globalization;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using FFCEI.Microservices.AspNetCore.Jwt;
 
 namespace FFCEI.Microservices.AspNetCore
 {
@@ -26,6 +29,24 @@ namespace FFCEI.Microservices.AspNetCore
             DoParseClaims(this, claims);
         }
 
+        /// <summary>
+        /// Issued At
+        /// </summary>
+        [WebApiClaim(Type = "iat")]
+        public DateTimeOffset? IssuedAt { get; set; }
+
+        /// <summary>
+        /// Expires At
+        /// </summary>
+        [WebApiClaim(Type = "exp")]
+        public DateTimeOffset? ExpiresAt { get; set; }
+
+        /// <summary>
+        /// Not Before
+        /// </summary>
+        [WebApiClaim(Type = "nbf")]
+        public DateTimeOffset? NotBefore { get; set; }
+
         private void DoParseClaims(object instance, ClaimsIdentity claims)
         {
             if (claims is null)
@@ -42,29 +63,53 @@ namespace FFCEI.Microservices.AspNetCore
 
                 if (claim is not null)
                 {
-                    if (instanceClaim.PropertyType == typeof(Guid))
+                    if ((instanceClaim.PropertyType == typeof(Guid)) || (instanceClaim.PropertyType == typeof(Guid?)))
                     {
                         var guidValue = Guid.Parse(claim.Value);
 
                         instanceClaim.SetValue(instance, guidValue);
                     }
-                    else if (instanceClaim.PropertyType == typeof(int))
+                    else if ((instanceClaim.PropertyType == typeof(int)) || (instanceClaim.PropertyType == typeof(int?)))
                     {
                         var intValue = int.Parse(claim.Value, CultureInfo.InvariantCulture);
 
                         instanceClaim.SetValue(instance, intValue);
                     }
-                    else if (instanceClaim.PropertyType == typeof(long))
+                    else if ((instanceClaim.PropertyType == typeof(uint)) || (instanceClaim.PropertyType == typeof(uint?)))
+                    {
+                        var intValue = uint.Parse(claim.Value, CultureInfo.InvariantCulture);
+
+                        instanceClaim.SetValue(instance, intValue);
+                    }
+                    else if ((instanceClaim.PropertyType == typeof(long)) || (instanceClaim.PropertyType == typeof(long?)))
                     {
                         var longValue = long.Parse(claim.Value, CultureInfo.InvariantCulture);
 
                         instanceClaim.SetValue(instance, longValue);
                     }
-                    else if (instanceClaim.PropertyType == typeof(bool))
+                    else if ((instanceClaim.PropertyType == typeof(ulong)) || (instanceClaim.PropertyType == typeof(ulong?)))
+                    {
+                        var longValue = ulong.Parse(claim.Value, CultureInfo.InvariantCulture);
+
+                        instanceClaim.SetValue(instance, longValue);
+                    }
+                    else if ((instanceClaim.PropertyType == typeof(bool)) || (instanceClaim.PropertyType == typeof(bool?)))
                     {
                         var boolValue = bool.Parse(claim.Value);
 
                         instanceClaim.SetValue(instance, boolValue);
+                    }
+                    else if ((instanceClaim.PropertyType == typeof(DateTime)) || (instanceClaim.PropertyType == typeof(DateTime?)))
+                    {
+                        var dateTimeValue = DateTime.Parse(claim.Value, CultureInfo.InvariantCulture);
+
+                        instanceClaim.SetValue(instance, dateTimeValue);
+                    }
+                    else if ((instanceClaim.PropertyType == typeof(DateTimeOffset)) || (instanceClaim.PropertyType == typeof(DateTimeOffset?)))
+                    {
+                        var dateTimeOffsetValue = DateTimeOffset.Parse(claim.Value, CultureInfo.InvariantCulture);
+
+                        instanceClaim.SetValue(instance, dateTimeOffsetValue);
                     }
                     else if (instanceClaim.PropertyType == typeof(string))
                     {
@@ -78,14 +123,14 @@ namespace FFCEI.Microservices.AspNetCore
 
                         if (attribute is null)
                         {
-                            throw new InvalidOperationException($"Missing required claim attribute for {claimType}");
+                            throw new InvalidOperationException($"Missing claim attribute for {claimType}");
                         }
 
                         var webApiClaimAttribute = (attribute as WebApiClaimAttribute);
 
                         if (webApiClaimAttribute is null)
                         {
-                            throw new InvalidOperationException($"Invalid required claim attribute for {claimType}");
+                            throw new InvalidOperationException($"Invalid claim attribute for {claimType}");
                         }
 
                         if (webApiClaimAttribute.Required)
@@ -162,5 +207,51 @@ namespace FFCEI.Microservices.AspNetCore
         /// Roles
         /// </summary>
         public IReadOnlySet<string> Roles => _roles;
+
+        /// <summary>
+        /// Creates a Jwt Security Token
+        /// </summary>
+        /// <param name="signingCredentials">Signing key</param>
+        /// <param name="encryptingCredentials">Encrypting credentials</param>
+        /// <param name="issuer">Issuer</param>
+        /// <param name="audience">Audience</param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public JwtSecurityToken CreateJwtSecurityToken(SigningCredentials? signingCredentials = null, EncryptingCredentials? encryptingCredentials = null, string? issuer = null, string? audience = null)
+        {
+            IssuedAt = DateTimeOffset.Now;
+
+            if (NotBefore is not null)
+            {
+                if (NotBefore < IssuedAt)
+                {
+                    NotBefore = IssuedAt;
+                }
+            }
+
+            TimeSpan? expiration = null;
+
+            if (ExpiresAt is not null)
+            {
+                if (ExpiresAt <= IssuedAt)
+                {
+                    throw new InvalidOperationException("Cannot issue an already expired token");
+                }
+
+                NotBefore = IssuedAt;
+
+                expiration = ExpiresAt - IssuedAt;
+            }
+
+            var token = JwtTokenHandler.CreateJwtSecurityToken(ref expiration,
+                subjectClaims: SubjectClaims,
+                signingCredentials: signingCredentials,
+                encryptingCredentials: encryptingCredentials,
+                roles: Roles,
+                issuer: issuer,
+                audience: audience);
+
+            return token;
+        }
     }
 }
