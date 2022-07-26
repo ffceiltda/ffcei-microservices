@@ -13,12 +13,12 @@ namespace FFCEI.Microservices.Configuration
         /// <param name="configurationManager">Configuration Manager instance</param>
         /// <param name="hostSettingName">Host setting name in Configuration Manager</param>
         /// <param name="portSettingName">Port setting name in Configuration Manager</param>
-        /// <param name="usernameSettingName">Username setting name in Configuration Manager</param>
+        /// <param name="usernameSettingName">UserName setting name in Configuration Manager</param>
         /// <param name="passwordSettingName">Password setting name in Configuration Manager</param>
         /// <param name="databaseSettingName">Database setting name in Configuration Manager</param>
         /// <param name="host">Use this Host or IP address if specified</param>
         /// <param name="port">Use this TCP port address if specified</param>
-        /// <param name="username">Use this Username if specified</param>
+        /// <param name="userName">Use this UserName if specified</param>
         /// <param name="password">Use this Password if specified</param>
         /// <param name="database">Use this Database if specified</param>
         /// <returns>MySqlConnectionConfiguration instance</returns>
@@ -26,12 +26,12 @@ namespace FFCEI.Microservices.Configuration
         public static MySqlConnectionConfiguration GetMySqlConfiguration(this ConfigurationManager configurationManager,
             string hostSettingName = "MySql.Host",
             string portSettingName = "MySql.Port",
-            string usernameSettingName = "MySql.Username",
+            string usernameSettingName = "MySql.UserName",
             string passwordSettingName = "MySql.Password",
             string databaseSettingName = "MySql.Database",
             string? host = null,
             ushort? port = null,
-            string? username = null,
+            string? userName = null,
             string? password = null,
             string? database = null)
         {
@@ -46,7 +46,7 @@ namespace FFCEI.Microservices.Configuration
             {
                 Host = configurationManager[hostSettingName],
                 Port = (mySqlPort is null) ? null : ushort.Parse(mySqlPort, NumberStyles.Integer, CultureInfo.InvariantCulture),
-                Username = configurationManager[usernameSettingName],
+                UserName = configurationManager[usernameSettingName],
                 Password = configurationManager[passwordSettingName],
                 Database = configurationManager[databaseSettingName]
             };
@@ -61,9 +61,9 @@ namespace FFCEI.Microservices.Configuration
                 result.Port = port;
             }
 
-            if (string.IsNullOrEmpty(result.Username) || (username is not null))
+            if (string.IsNullOrEmpty(result.UserName) || (userName is not null))
             {
-                result.Username = username;
+                result.UserName = userName;
             }
 
             if (string.IsNullOrEmpty(result.Password) || (password is not null))

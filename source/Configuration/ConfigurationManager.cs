@@ -28,16 +28,12 @@ namespace FFCEI.Microservices.Configuration
 
             if (!string.IsNullOrEmpty(mainAssemblyCodeBase))
             {
-                string environmentBasePath;
-
-                var mainAssemblyCodeBaseUri = new UriBuilder(mainAssemblyCodeBase);
-                var mainAssemblyCodeBasePath = mainAssemblyCodeBaseUri.Path;
-                var mainAssemblyFilenamePath = Path.GetDirectoryName(mainAssemblyCodeBasePath);
+                var mainAssemblyFilenamePath = Path.GetDirectoryName(mainAssemblyCodeBase);
 
                 while (!string.IsNullOrEmpty(mainAssemblyFilenamePath) &&
                     (string.IsNullOrEmpty(_allConfigurationsFilePath) || string.IsNullOrEmpty(_applicationConfigurationsFilePath)))
                 {
-                    environmentBasePath = Path.Combine(mainAssemblyFilenamePath, "Environment");
+                    var environmentBasePath = Path.Combine(mainAssemblyFilenamePath, "Environment");
 
                     if (Directory.Exists(environmentBasePath))
                     {

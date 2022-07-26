@@ -22,7 +22,7 @@ namespace FFCEI.Microservices.Configuration
         /// <summary>
         /// User name
         /// </summary>
-        public string? Username { get; set; }
+        public string? UserName { get; set; }
 
         /// <summary>
         /// Password
@@ -92,9 +92,9 @@ namespace FFCEI.Microservices.Configuration
                 stringBuilder.Append($":{Port}");
             }
 
-            if (!string.IsNullOrEmpty(Username))
+            if (!string.IsNullOrEmpty(UserName))
             {
-                stringBuilder.Append($",user={Username};");
+                stringBuilder.Append($",user={UserName};");
             }
 
             if (!string.IsNullOrEmpty(Password))
@@ -150,7 +150,7 @@ namespace FFCEI.Microservices.Configuration
             }
 
             options.DBConfig.Endpoints.Add(new ServerEndPoint(Host, (int)Port));
-            options.DBConfig.Username = Username;
+            options.DBConfig. Username = UserName;
             options.DBConfig.Password = Password;
 
             if (Database is not null)

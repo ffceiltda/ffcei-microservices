@@ -20,7 +20,7 @@ namespace FFCEI.Microservices.Configuration
         /// <summary>
         /// User name
         /// </summary>
-        public string? Username { get; set; }
+        public string? UserName { get; set; }
 
         /// <summary>
         /// Password
@@ -82,6 +82,16 @@ namespace FFCEI.Microservices.Configuration
         /// </summary>
         public ushort DefaultCommandTimeout { get; set; } = 120;
 
+        /// <summary>
+        /// Treat TINYINT(1) as System.Boolean
+        /// </summary>
+        public bool TreatTinyAsBoolean { get; set; } = true;
+
+        /// <summary>
+        /// DateTime UTC/Local handling type
+        /// </summary>
+        public DateTimeKind DateTimeKind { get; set; } = DateTimeKind.Utc;
+
         protected override StringBuilder BuildConnectionString()
         {
             var stringBuilder = new StringBuilder();
@@ -98,9 +108,9 @@ namespace FFCEI.Microservices.Configuration
                 stringBuilder.Append($"Port={Port};");
             }
 
-            if (!string.IsNullOrEmpty(Username))
+            if (!string.IsNullOrEmpty(UserName))
             {
-                stringBuilder.Append($"User={Username};");
+                stringBuilder.Append($"User={UserName};");
             }
 
             if (!string.IsNullOrEmpty(Password))
@@ -128,6 +138,8 @@ namespace FFCEI.Microservices.Configuration
 
             stringBuilder.Append($"ConnectionTimeout={ConnectionTimeout};");
             stringBuilder.Append($"DefaultCommandTimeout={DefaultCommandTimeout};");
+            stringBuilder.Append($"TreatTinyAsBoolean={TreatTinyAsBoolean};");
+            stringBuilder.Append($"DateTimeKind={DateTimeKind};");
 #pragma warning restore CA1305 // Specify IFormatProvider
 #pragma warning restore IDE0058 // Expression value is never used
 

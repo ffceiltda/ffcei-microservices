@@ -13,12 +13,12 @@ namespace FFCEI.Microservices.Configuration
         /// <param name="configurationManager">Configuration Manager instance</param>
         /// <param name="hostSettingName">Host setting name in Configuration Manager</param>
         /// <param name="portSettingName">Port setting name in Configuration Manager</param>
-        /// <param name="usernameSettingName">Username setting name in Configuration Manager</param>
+        /// <param name="usernameSettingName">UserName setting name in Configuration Manager</param>
         /// <param name="passwordSettingName">Password setting name in Configuration Manager</param>
         /// <param name="databaseSettingName">Database setting name in Configuration Manager</param>
         /// <param name="host">Use this Host or IP address if specified</param>
         /// <param name="port">Use this TCP port address if specified</param>
-        /// <param name="username">Use this Username if specified</param>
+        /// <param name="userName">Use this UserName if specified</param>
         /// <param name="password">Use this Password if specified</param>
         /// <param name="database">Use this Database if specified</param>
         /// <returns>redisConnectionConfiguration instance</returns>
@@ -26,12 +26,12 @@ namespace FFCEI.Microservices.Configuration
         public static RedisConnectionConfiguration GetRedisConfiguration(this ConfigurationManager configurationManager,
             string hostSettingName = "Redis.Host",
             string portSettingName = "Redis.Port",
-            string usernameSettingName = "Redis.Username",
+            string usernameSettingName = "Redis.UserName",
             string passwordSettingName = "Redis.Password",
             string databaseSettingName = "Redism.Database",
             string? host = null,
             ushort? port = null,
-            string? username = null,
+            string? userName = null,
             string? password = null,
             int? database = null)
         {
@@ -47,7 +47,7 @@ namespace FFCEI.Microservices.Configuration
             {
                 Host = configurationManager[hostSettingName],
                 Port = (redisPort is null) ? null : ushort.Parse(redisPort, NumberStyles.Integer, CultureInfo.InvariantCulture),
-                Username = configurationManager[usernameSettingName],
+                UserName = configurationManager[usernameSettingName],
                 Password = configurationManager[passwordSettingName],
                 Database = (redisDatabase is null) ? null : ushort.Parse(redisDatabase, NumberStyles.Integer, CultureInfo.InvariantCulture),
             };
@@ -62,9 +62,9 @@ namespace FFCEI.Microservices.Configuration
                 result.Port = port;
             }
 
-            if (string.IsNullOrEmpty(result.Username) || (username is not null))
+            if (string.IsNullOrEmpty(result.UserName) || (userName is not null))
             {
-                result.Username = username;
+                result.UserName = userName;
             }
 
             if (string.IsNullOrEmpty(result.Password) || (password is not null))

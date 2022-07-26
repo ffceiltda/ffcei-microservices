@@ -3,7 +3,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore
     /// <summary>
     /// Native database field types
     /// </summary>
-    public enum DbFieldType
+    public enum DatabaseColumnType
     {
         /// <summary>
         /// Binary UUID

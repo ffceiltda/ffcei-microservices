@@ -9,7 +9,6 @@ namespace FFCEI.Microservices.AspNetCore
     /// Web Api controller base class
     /// </summary>
     [ApiController]
-    [Authorize]
     [Produces(MediaTypeNames.Application.Json)]
     public class WebApiController : ControllerExtended
     {

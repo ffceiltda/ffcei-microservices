@@ -251,7 +251,7 @@ namespace FFCEI.Microservices.AspNetCore
                 var standardConfiguration = ConfigurationManager.GetRedisConfiguration(
                     hostSettingName: "Redis.Cache.Host",
                     portSettingName: "Redis.Cache.Port",
-                    usernameSettingName: "Redis.Cache.Username",
+                    usernameSettingName: "Redis.Cache.UserName",
                     passwordSettingName: "Redis.Cache.Password",
                     databaseSettingName: "Redis.Cache.Database");
 

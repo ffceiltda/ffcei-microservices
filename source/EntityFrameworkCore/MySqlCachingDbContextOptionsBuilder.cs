@@ -14,12 +14,12 @@ namespace FFCEI.Microservices.EntityFrameworkCore
         /// Default constructor
         /// </summary>
         /// <param name="database">Initial database</param>
-        /// <param name="username">Username</param>
+        /// <param name="userName">UserName</param>
         /// <param name="password">Password</param>
         /// <param name="host">Host or IP address</param>
         /// <param name="port">TCP port</param>
-        public MySqlCachingDbContextOptionsBuilder(string database, string username, string password, string host, ushort port)
-            : base(MySqlConnectionStringBuilder.Build(database, username, password, host, port))
+        public MySqlCachingDbContextOptionsBuilder(string database, string userName, string password, string host, ushort port)
+            : base(MySqlConnectionStringBuilder.Build(database, userName, password, host, port))
         {
         }
 
@@ -40,11 +40,12 @@ namespace FFCEI.Microservices.EntityFrameworkCore
             options.UseMySql(ConnectionString, ServerVersion.AutoDetect(ConnectionString),
                 parameters =>
                 {
-                    parameters.DefaultDataTypeMappings(m => m.WithClrBoolean(MySqlBooleanType.Bit1));
+                    parameters.DefaultDataTypeMappings(m => m.WithClrBoolean(MySqlBooleanType.TinyInt1));
                     parameters.DefaultDataTypeMappings(m => m.WithClrDateTime(MySqlDateTimeType.DateTime));
-                    parameters.DefaultDataTypeMappings(m => m.WithClrDateTimeOffset(MySqlDateTimeType.Timestamp6));
+                    parameters.DefaultDataTypeMappings(m => m.WithClrDateTimeOffset(MySqlDateTimeType.DateTime6));
                     parameters.DefaultDataTypeMappings(m => m.WithClrTimeSpan(MySqlTimeSpanType.Time6));
                     parameters.DefaultDataTypeMappings(m => m.WithClrTimeOnly(6));
+                    parameters.EnableIndexOptimizedBooleanColumns();
                     parameters.EnableStringComparisonTranslations();
                     parameters.EnableRetryOnFailure().CommandTimeout(60);
                     parameters.UseMicrosoftJson();
