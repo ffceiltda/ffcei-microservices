@@ -40,8 +40,8 @@ namespace FFCEI.Microservices.EntityFrameworkCore
             options.UseMySql(ConnectionString, ServerVersion.AutoDetect(ConnectionString),
                 parameters =>
                 {
-                    parameters.DefaultDataTypeMappings(m => m.WithClrBoolean(MySqlBooleanType.TinyInt1));
-                    parameters.DefaultDataTypeMappings(m => m.WithClrDateTime(MySqlDateTimeType.DateTime));
+                    parameters.DefaultDataTypeMappings(m => m.WithClrBoolean(MySqlBooleanType.Bit1));
+                    parameters.DefaultDataTypeMappings(m => m.WithClrDateTime(MySqlDateTimeType.DateTime6));
                     parameters.DefaultDataTypeMappings(m => m.WithClrDateTimeOffset(MySqlDateTimeType.DateTime6));
                     parameters.DefaultDataTypeMappings(m => m.WithClrTimeSpan(MySqlTimeSpanType.Time6));
                     parameters.DefaultDataTypeMappings(m => m.WithClrTimeOnly(6));

@@ -33,7 +33,7 @@ namespace FFCEI.Microservices.Configuration
         public string? Database { get; set; }
 
         /// <summary>
-        /// Handle binary(16) as Uuid 
+        /// Handle binary(16) as Uuid
         /// </summary>
         public bool OldGuids { get; set; }
 
