@@ -85,7 +85,7 @@ namespace FFCEI.Microservices.Configuration
         /// <summary>
         /// Treat TINYINT(1) as System.Boolean
         /// </summary>
-        public bool TreatTinyAsBoolean { get; set; }
+        public bool? TreatTinyAsBoolean { get; set; }
 
         /// <summary>
         /// DateTime UTC/Local handling type
@@ -138,7 +138,12 @@ namespace FFCEI.Microservices.Configuration
 
             stringBuilder.Append($"ConnectionTimeout={ConnectionTimeout};");
             stringBuilder.Append($"DefaultCommandTimeout={DefaultCommandTimeout};");
-            stringBuilder.Append($"TreatTinyAsBoolean={TreatTinyAsBoolean};");
+            
+            if (TreatTinyAsBoolean is not null)
+            {
+            	stringBuilder.Append($"TreatTinyAsBoolean={TreatTinyAsBoolean};");
+            }
+            
             stringBuilder.Append($"DateTimeKind={DateTimeKind};");
 #pragma warning restore CA1305 // Specify IFormatProvider
 #pragma warning restore IDE0058 // Expression value is never used
