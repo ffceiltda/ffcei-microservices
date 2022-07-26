@@ -85,7 +85,7 @@ namespace FFCEI.Microservices.Configuration
         /// <summary>
         /// Treat TINYINT(1) as System.Boolean
         /// </summary>
-        public bool TreatTinyAsBoolean { get; set; } = true;
+        public bool TreatTinyAsBoolean { get; set; }
 
         /// <summary>
         /// DateTime UTC/Local handling type

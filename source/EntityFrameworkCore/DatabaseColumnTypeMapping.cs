@@ -25,10 +25,10 @@ namespace FFCEI.Microservices.EntityFrameworkCore
             return columnType switch
             {
                 DatabaseColumnType.Uuid => "char(36)",
-                DatabaseColumnType.Boolean => "tinyint(1)",
+                DatabaseColumnType.Boolean => "bit(1)",
                 DatabaseColumnType.Date => "date",
                 DatabaseColumnType.Time => "time(6)",
-                DatabaseColumnType.TimeSpan => "bigint",
+                DatabaseColumnType.TimeSpan => "time(6)",
                 DatabaseColumnType.DateTime => "datetime(6)",
                 DatabaseColumnType.DateTimeWithUtcOffset => "datetime(6)",
                 DatabaseColumnType.Numeric => $"decimal({precision ?? 20}, {scale ?? 2})",
