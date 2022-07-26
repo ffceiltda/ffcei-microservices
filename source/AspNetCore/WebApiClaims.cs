@@ -1,8 +1,8 @@
-using System.Security.Claims;
-using System.Globalization;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using FFCEI.Microservices.AspNetCore.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace FFCEI.Microservices.AspNetCore
 {

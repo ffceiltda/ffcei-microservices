@@ -150,7 +150,7 @@ namespace FFCEI.Microservices.Configuration
             }
 
             options.DBConfig.Endpoints.Add(new ServerEndPoint(Host, (int)Port));
-            options.DBConfig. Username = UserName;
+            options.DBConfig.Username = UserName;
             options.DBConfig.Password = Password;
 
             if (Database is not null)

@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System.Net.Mime;
 using System.Security.Claims;
 
 namespace FFCEI.Microservices.AspNetCore
@@ -11,7 +9,7 @@ namespace FFCEI.Microservices.AspNetCore
     /// </summary>
     [Authorize]
     public class WebApiJwtAuthenticatedController<TWebApiClaims> : WebApiController
-        where TWebApiClaims: WebApiClaims, new()
+        where TWebApiClaims : WebApiClaims, new()
     {
         /// <summary>
         /// Default constructor

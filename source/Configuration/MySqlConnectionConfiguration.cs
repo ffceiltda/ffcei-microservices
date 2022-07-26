@@ -138,12 +138,12 @@ namespace FFCEI.Microservices.Configuration
 
             stringBuilder.Append($"ConnectionTimeout={ConnectionTimeout};");
             stringBuilder.Append($"DefaultCommandTimeout={DefaultCommandTimeout};");
-            
+
             if (TreatTinyAsBoolean is not null)
             {
-            	stringBuilder.Append($"TreatTinyAsBoolean={TreatTinyAsBoolean};");
+                stringBuilder.Append($"TreatTinyAsBoolean={TreatTinyAsBoolean};");
             }
-            
+
             stringBuilder.Append($"DateTimeKind={DateTimeKind};");
 #pragma warning restore CA1305 // Specify IFormatProvider
 #pragma warning restore IDE0058 // Expression value is never used
