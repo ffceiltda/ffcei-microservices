@@ -8,6 +8,8 @@ namespace FFCEI.Microservices.AspNetCore
     /// </summary>
     public class WebApiClaims
     {
+        private SortedSet<string> _roles = new();
+
         /// <summary>
         /// Default constructor
         /// </summary>
@@ -24,7 +26,7 @@ namespace FFCEI.Microservices.AspNetCore
             DoParseClaims(this, claims);
         }
 
-        private static void DoParseClaims(object instance, ClaimsIdentity claims)
+        private void DoParseClaims(object instance, ClaimsIdentity claims)
         {
             if (claims is null)
             {
@@ -93,6 +95,15 @@ namespace FFCEI.Microservices.AspNetCore
                     }
                 }
             }
+
+            var allClaims = claims.FindAll(c => c.Type == ClaimTypes.Role).ToList();
+
+            foreach (var claim in allClaims)
+            {
+#pragma warning disable IDE0058 // Expression value is never used
+                _roles.Add(claim.Value);
+#pragma warning restore IDE0058 // Expression value is never used
+            }
         }
 
         /// <summary>
@@ -103,5 +114,53 @@ namespace FFCEI.Microservices.AspNetCore
         {
             DoParseClaims(this, claims);
         }
+
+        private List<KeyValuePair<string, string>> GetSubjectClaims()
+        {
+            return DoGetSubjectClaims(this);
+        }
+
+        private static List<KeyValuePair<string, string>> DoGetSubjectClaims(object instance)
+        {
+            var result = new List<KeyValuePair<string, string>>();
+
+            var instanceClaims = instance.GetType().GetProperties().Where(claim => claim.GetCustomAttributes(typeof(WebApiClaimAttribute), true).Length > 0).ToList();
+
+            foreach (var instanceClaim in instanceClaims)
+            {
+                var claimType = instanceClaim.Name;
+                var claimValue = instanceClaim.GetValue(instance)?.ToString();
+
+                if (string.IsNullOrEmpty(claimValue))
+                {
+                    continue;
+                }
+
+                result.Add(new KeyValuePair<string, string>(claimType, claimValue));
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Claims
+        /// </summary>
+        public IReadOnlyList<KeyValuePair<string, string>> SubjectClaims => GetSubjectClaims();
+
+        /// <summary>
+        /// Add a Role to Claims
+        /// </summary>
+        /// <param name="role">Role Id</param>
+        public void AddRole(string role)
+        {
+#pragma warning disable IDE0058 // Expression value is never used
+            _roles.Add(role);
+#pragma warning restore IDE0058 // Expression value is never used
+        }
+
+        /// <summary>
+        /// Roles
+        /// </summary>
+        public IReadOnlySet<string> Roles => _roles;
     }
 }
