@@ -32,19 +32,19 @@ namespace FFCEI.Microservices.AspNetCore
         /// <summary>
         /// Issued At
         /// </summary>
-        [WebApiClaim(Type = "iat")]
+        [WebApiClaim(Type = "iat", DoNotListOnSubjectClaims = true)]
         public DateTimeOffset? IssuedAt { get; set; }
 
         /// <summary>
         /// Expires At
         /// </summary>
-        [WebApiClaim(Type = "exp")]
+        [WebApiClaim(Type = "exp", DoNotListOnSubjectClaims = true)]
         public DateTimeOffset? ExpiresAt { get; set; }
 
         /// <summary>
         /// Not Before
         /// </summary>
-        [WebApiClaim(Type = "nbf")]
+        [WebApiClaim(Type = "nbf", DoNotListOnSubjectClaims = true)]
         public DateTimeOffset? NotBefore { get; set; }
 
         private void DoParseClaims(object instance, ClaimsIdentity claims)
@@ -59,6 +59,22 @@ namespace FFCEI.Microservices.AspNetCore
             foreach (var instanceClaim in instanceClaims)
             {
                 var claimType = instanceClaim.Name;
+                var attribute = instanceClaim.GetCustomAttributes(typeof(WebApiClaimAttribute), true).FirstOrDefault();
+
+                if (attribute is null)
+                {
+                    throw new InvalidOperationException($"Missing claim attribute for {claimType}");
+                }
+
+                var webApiClaimAttribute = (attribute as WebApiClaimAttribute);
+
+                if (webApiClaimAttribute is null)
+                {
+                    throw new InvalidOperationException($"Invalid claim attribute for {claimType}");
+                }
+
+                claimType = webApiClaimAttribute.Type ?? instanceClaim.Name;
+
                 var claim = claims.FindFirst(c => c.Type == claimType);
 
                 if (claim is not null)
@@ -101,13 +117,31 @@ namespace FFCEI.Microservices.AspNetCore
                     }
                     else if ((instanceClaim.PropertyType == typeof(DateTime)) || (instanceClaim.PropertyType == typeof(DateTime?)))
                     {
-                        var dateTimeValue = DateTime.Parse(claim.Value, CultureInfo.InvariantCulture);
+                        DateTime dateTimeValue;
+
+                        try
+                        {
+                            dateTimeValue = DateTimeOffset.FromUnixTimeSeconds(long.Parse(claim.Value, CultureInfo.InvariantCulture)).DateTime;
+                        }
+                        catch (ArgumentOutOfRangeException)
+                        {
+                            dateTimeValue = DateTimeOffset.Parse(claim.Value, CultureInfo.InvariantCulture).DateTime;
+                        }
 
                         instanceClaim.SetValue(instance, dateTimeValue);
                     }
                     else if ((instanceClaim.PropertyType == typeof(DateTimeOffset)) || (instanceClaim.PropertyType == typeof(DateTimeOffset?)))
                     {
-                        var dateTimeOffsetValue = DateTimeOffset.Parse(claim.Value, CultureInfo.InvariantCulture);
+                        DateTimeOffset dateTimeOffsetValue;
+
+                        try
+                        {
+                            dateTimeOffsetValue = DateTimeOffset.FromUnixTimeSeconds(long.Parse(claim.Value, CultureInfo.InvariantCulture));
+                        }
+                        catch (ArgumentOutOfRangeException)
+                        {
+                            dateTimeOffsetValue = DateTimeOffset.Parse(claim.Value, CultureInfo.InvariantCulture);
+                        }
 
                         instanceClaim.SetValue(instance, dateTimeOffsetValue);
                     }
@@ -119,20 +153,6 @@ namespace FFCEI.Microservices.AspNetCore
                     }
                     else
                     {
-                        var attribute = instanceClaim.GetCustomAttributes(typeof(WebApiClaimAttribute), true).FirstOrDefault();
-
-                        if (attribute is null)
-                        {
-                            throw new InvalidOperationException($"Missing claim attribute for {claimType}");
-                        }
-
-                        var webApiClaimAttribute = (attribute as WebApiClaimAttribute);
-
-                        if (webApiClaimAttribute is null)
-                        {
-                            throw new InvalidOperationException($"Invalid claim attribute for {claimType}");
-                        }
-
                         if (webApiClaimAttribute.Required)
                         {
                             throw new InvalidOperationException($"Missing required claim value for {claimType}");
@@ -174,7 +194,51 @@ namespace FFCEI.Microservices.AspNetCore
             foreach (var instanceClaim in instanceClaims)
             {
                 var claimType = instanceClaim.Name;
-                var claimValue = instanceClaim.GetValue(instance)?.ToString();
+                var attribute = instanceClaim.GetCustomAttributes(typeof(WebApiClaimAttribute), true).FirstOrDefault();
+
+                if (attribute is null)
+                {
+                    throw new InvalidOperationException($"Missing claim attribute for {claimType}");
+                }
+
+                var webApiClaimAttribute = (attribute as WebApiClaimAttribute);
+
+                if (webApiClaimAttribute is null)
+                {
+                    throw new InvalidOperationException($"Invalid claim attribute for {claimType}");
+                }
+
+                if (webApiClaimAttribute.DoNotListOnSubjectClaims)
+                {
+                    continue;
+                }
+
+                claimType = webApiClaimAttribute.Type ?? instanceClaim.Name;
+
+                var claimObjectValue = instanceClaim.GetValue(instance);
+
+                if (claimObjectValue is null)
+                {
+                    if (webApiClaimAttribute.Required)
+                    {
+                        throw new InvalidOperationException($"Missing required claim value for {claimType}");
+                    }
+
+                    continue;
+                }
+
+                var claimValue = claimObjectValue.ToString();
+
+                if ((instanceClaim.PropertyType == typeof(DateTime)) || (instanceClaim.PropertyType == typeof(DateTime?)))
+                {
+                    var dateTimeValue = (DateTime)claimObjectValue;
+                    claimValue = new DateTimeOffset(dateTimeValue).ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture);
+                }
+                else if ((instanceClaim.PropertyType == typeof(DateTimeOffset)) || (instanceClaim.PropertyType == typeof(DateTimeOffset?)))
+                {
+                    var dateTimeOffsetValue = (DateTimeOffset)claimObjectValue;
+                    claimValue = dateTimeOffsetValue.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture);
+                }
 
                 if (string.IsNullOrEmpty(claimValue))
                 {

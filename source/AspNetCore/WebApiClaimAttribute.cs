@@ -8,5 +8,6 @@ namespace FFCEI.Microservices.AspNetCore
     {
         public bool Required { get; set; } = true;
         public string Type { get; set; } = null!;
+        public bool DoNotListOnSubjectClaims { get; set; }
     }
 }
