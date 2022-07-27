@@ -1,128 +1,127 @@
-namespace FFCEI.Microservices.Models
+namespace FFCEI.Microservices.Models;
+
+/// <summary>
+/// Model interface with Uuid property and Timestamping (created / updated) support
+/// </summary>
+public class UuidAwareTimestampedModel : TimestampedModel, IUuidAwareModel
 {
-    /// <summary>
-    /// Model interface with Uuid property and Timestamping (created / updated) support
-    /// </summary>
-    public class UuidAwareTimestampedModel : TimestampedModel, IUuidAwareModel
+    public Guid Uuid { get; set; }
+
+    public override void CopyModelPropertiesFrom(IModel model)
     {
-        public Guid Uuid { get; set; }
+        base.CopyModelPropertiesFrom(model);
 
-        public override void CopyModelPropertiesFrom(IModel model)
+        if (model is IUuidAwareModel modelCasted)
         {
-            base.CopyModelPropertiesFrom(model);
-
-            if (model is IUuidAwareModel modelCasted)
+            if (modelCasted.Uuid != Guid.Empty)
             {
-                if (modelCasted.Uuid != Guid.Empty)
-                {
-                    Uuid = modelCasted.Uuid;
-                }
+                Uuid = modelCasted.Uuid;
             }
         }
+    }
 
-        public int CompareTo(IUuidAwareModel? other)
+    public int CompareTo(IUuidAwareModel? other)
+    {
+        if (other is null)
         {
-            if (other is null)
-            {
-                throw new ArgumentNullException(nameof(other));
-            }
-
-            return Uuid.CompareTo(other.Uuid);
+            throw new ArgumentNullException(nameof(other));
         }
 
-        public virtual int CompareTo(object? obj)
-        {
-            if (obj is IUuidAwareModel modelCasted)
-            {
-                return CompareTo(modelCasted);
-            }
+        return Uuid.CompareTo(other.Uuid);
+    }
 
-            throw new ArgumentException("incompatible object for comparison", nameof(obj));
+    public virtual int CompareTo(object? obj)
+    {
+        if (obj is IUuidAwareModel modelCasted)
+        {
+            return CompareTo(modelCasted);
         }
 
-        public bool Equals(IUuidAwareModel? other) => (other is not null) && (Uuid == other.Uuid);
+        throw new ArgumentException("incompatible object for comparison", nameof(obj));
+    }
 
-        public override bool Equals(object? obj)
+    public bool Equals(IUuidAwareModel? other) => (other is not null) && (Uuid == other.Uuid);
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is IUuidAwareModel modelCasted)
         {
-            if (obj is IUuidAwareModel modelCasted)
-            {
-                return Equals(modelCasted);
-            }
-
-            return false;
+            return Equals(modelCasted);
         }
 
-        public override int GetHashCode() => Uuid.GetHashCode();
+        return false;
+    }
 
-        /// <summary>
-        /// Operator ==
-        /// </summary>
-        /// <param name="left">left instance</param>
-        /// <param name="right">right instance</param>
-        /// <returns>true if equals, false otherwise</returns>
-        public static bool operator ==(UuidAwareTimestampedModel left, UuidAwareTimestampedModel right)
+    public override int GetHashCode() => Uuid.GetHashCode();
+
+    /// <summary>
+    /// Operator ==
+    /// </summary>
+    /// <param name="left">left instance</param>
+    /// <param name="right">right instance</param>
+    /// <returns>true if equals, false otherwise</returns>
+    public static bool operator ==(UuidAwareTimestampedModel left, UuidAwareTimestampedModel right)
+    {
+        if (ReferenceEquals(left, null))
         {
-            if (ReferenceEquals(left, null))
-            {
-                return ReferenceEquals(right, null);
-            }
-
-            return left.Equals(right);
+            return ReferenceEquals(right, null);
         }
 
-        /// <summary>
-        /// Operator !=
-        /// </summary>
-        /// <param name="left">left instance</param>
-        /// <param name="right">right instance</param>
-        /// <returns>true if different, false otherwise</returns>
-        public static bool operator !=(UuidAwareTimestampedModel left, UuidAwareTimestampedModel right)
-        {
-            return !(left == right);
-        }
+        return left.Equals(right);
+    }
 
-        /// <summary>
-        /// Operator &lt;
-        /// </summary>
-        /// <param name="left">left instance</param>
-        /// <param name="right">right instance</param>
-        /// <returns>true if left is less than right, false otherwise</returns>
-        public static bool operator <(UuidAwareTimestampedModel left, UuidAwareTimestampedModel right)
-        {
-            return ReferenceEquals(left, null) ? !ReferenceEquals(right, null) : left.CompareTo(right) < 0;
-        }
+    /// <summary>
+    /// Operator !=
+    /// </summary>
+    /// <param name="left">left instance</param>
+    /// <param name="right">right instance</param>
+    /// <returns>true if different, false otherwise</returns>
+    public static bool operator !=(UuidAwareTimestampedModel left, UuidAwareTimestampedModel right)
+    {
+        return !(left == right);
+    }
 
-        /// <summary>
-        /// Operator &lt;=
-        /// </summary>
-        /// <param name="left">left instance</param>
-        /// <param name="right">right instance</param>
-        /// <returns>true if left is less or equals than right, false otherwise</returns>
-        public static bool operator <=(UuidAwareTimestampedModel left, UuidAwareTimestampedModel right)
-        {
-            return ReferenceEquals(left, null) || left.CompareTo(right) <= 0;
-        }
+    /// <summary>
+    /// Operator &lt;
+    /// </summary>
+    /// <param name="left">left instance</param>
+    /// <param name="right">right instance</param>
+    /// <returns>true if left is less than right, false otherwise</returns>
+    public static bool operator <(UuidAwareTimestampedModel left, UuidAwareTimestampedModel right)
+    {
+        return ReferenceEquals(left, null) ? !ReferenceEquals(right, null) : left.CompareTo(right) < 0;
+    }
 
-        /// <summary>
-        /// Operator &gt;
-        /// </summary>
-        /// <param name="left">left instance</param>
-        /// <param name="right">right instance</param>
-        /// <returns>true if left is greater than right, false otherwise</returns>
-        public static bool operator >(UuidAwareTimestampedModel left, UuidAwareTimestampedModel right)
-        {
-            return !ReferenceEquals(left, null) && left.CompareTo(right) > 0;
-        }
+    /// <summary>
+    /// Operator &lt;=
+    /// </summary>
+    /// <param name="left">left instance</param>
+    /// <param name="right">right instance</param>
+    /// <returns>true if left is less or equals than right, false otherwise</returns>
+    public static bool operator <=(UuidAwareTimestampedModel left, UuidAwareTimestampedModel right)
+    {
+        return ReferenceEquals(left, null) || left.CompareTo(right) <= 0;
+    }
 
-        /// <summary>
-        /// Operator &gt;=
-        /// </summary>
-        /// <param name="left">left instance</param>
-        /// <param name="right">right instance</param>
-        /// <returns>true if left is greater or equals than right, false otherwise</returns>
-        public static bool operator >=(UuidAwareTimestampedModel left, UuidAwareTimestampedModel right)
-        {
-            return ReferenceEquals(left, null) ? ReferenceEquals(right, null) : left.CompareTo(right) >= 0;
-        }
+    /// <summary>
+    /// Operator &gt;
+    /// </summary>
+    /// <param name="left">left instance</param>
+    /// <param name="right">right instance</param>
+    /// <returns>true if left is greater than right, false otherwise</returns>
+    public static bool operator >(UuidAwareTimestampedModel left, UuidAwareTimestampedModel right)
+    {
+        return !ReferenceEquals(left, null) && left.CompareTo(right) > 0;
+    }
+
+    /// <summary>
+    /// Operator &gt;=
+    /// </summary>
+    /// <param name="left">left instance</param>
+    /// <param name="right">right instance</param>
+    /// <returns>true if left is greater or equals than right, false otherwise</returns>
+    public static bool operator >=(UuidAwareTimestampedModel left, UuidAwareTimestampedModel right)
+    {
+        return ReferenceEquals(left, null) ? ReferenceEquals(right, null) : left.CompareTo(right) >= 0;
     }
 }

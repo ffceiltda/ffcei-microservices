@@ -1,13 +1,12 @@
-namespace FFCEI.Microservices.Models
+namespace FFCEI.Microservices.Models;
+
+/// <summary>
+/// Model interface with Id property
+/// </summary>
+public interface IIdAwareModel : IModel, IEquatable<IIdAwareModel>, IComparable<IIdAwareModel>, IComparable
 {
     /// <summary>
-    /// Model interface with Id property
+    /// Id property
     /// </summary>
-    public interface IIdAwareModel : IModel, IEquatable<IIdAwareModel>, IComparable<IIdAwareModel>, IComparable
-    {
-        /// <summary>
-        /// Id property
-        /// </summary>
-        long Id { get; }
-    }
+    long Id { get; }
 }

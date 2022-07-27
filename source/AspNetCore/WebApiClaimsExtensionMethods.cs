@@ -1,37 +1,36 @@
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
-namespace FFCEI.Microservices.AspNetCore
+namespace FFCEI.Microservices.AspNetCore;
+
+/// <summary>
+/// Web Api claims base class
+/// </summary>
+public static class WebApiClaimsExtensionMethods
 {
     /// <summary>
-    /// Web Api claims base class
+    /// Get Web Api Authenticated Claims
     /// </summary>
-    public static class WebApiClaimsExtensionMethods
+    /// <typeparam name="TWebApiClaims">WebApiClaims descendant type</typeparam>
+    /// <param name="httpContext">ASP.NET Http Context</param>
+    /// <returns>TWebApiClaims instance</returns>
+    public static TWebApiClaims? GetWebApiAuthenticatedClaims<TWebApiClaims>(this HttpContext httpContext)
+        where TWebApiClaims : WebApiClaims, new()
     {
-        /// <summary>
-        /// Get Web Api Authenticated Claims
-        /// </summary>
-        /// <typeparam name="TWebApiClaims">WebApiClaims descendant type</typeparam>
-        /// <param name="httpContext">ASP.NET Http Context</param>
-        /// <returns>TWebApiClaims instance</returns>
-        public static TWebApiClaims? GetWebApiAuthenticatedClaims<TWebApiClaims>(this HttpContext httpContext)
-            where TWebApiClaims : WebApiClaims, new()
+        if ((httpContext?.User.Identity ?? null) is not ClaimsIdentity claims)
         {
-            if ((httpContext?.User.Identity ?? null) is not ClaimsIdentity claims)
-            {
-                return null;
-            }
-
-            if (!claims.IsAuthenticated)
-            {
-                return null;
-            }
-
-            var result = new TWebApiClaims();
-
-            result.ParseClaims(claims);
-
-            return result;
+            return null;
         }
+
+        if (!claims.IsAuthenticated)
+        {
+            return null;
+        }
+
+        var result = new TWebApiClaims();
+
+        result.ParseClaims(claims);
+
+        return result;
     }
 }

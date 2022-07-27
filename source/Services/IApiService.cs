@@ -1,15 +1,14 @@
 using Microsoft.Extensions.Logging;
 
-namespace FFCEI.Microservices.Services
+namespace FFCEI.Microservices.Services;
+
+/// <summary>
+/// Apí service interface
+/// </summary>
+public interface IApiService
 {
     /// <summary>
-    /// Apí service interface
+    /// Apí service logger
     /// </summary>
-    public interface IApiService
-    {
-        /// <summary>
-        /// Apí service logger
-        /// </summary>
-        ILogger Logger { get; }
-    }
+    ILogger Logger { get; }
 }

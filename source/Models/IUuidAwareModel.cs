@@ -1,13 +1,12 @@
-namespace FFCEI.Microservices.Models
+namespace FFCEI.Microservices.Models;
+
+/// <summary>
+/// Model interface with Uuid property
+/// </summary>
+public interface IUuidAwareModel : IModel, IEquatable<IUuidAwareModel>, IComparable<IUuidAwareModel>, IComparable
 {
     /// <summary>
-    /// Model interface with Uuid property
+    /// Uuid property
     /// </summary>
-    public interface IUuidAwareModel : IModel, IEquatable<IUuidAwareModel>, IComparable<IUuidAwareModel>, IComparable
-    {
-        /// <summary>
-        /// Uuid property
-        /// </summary>
-        Guid Uuid { get; }
-    }
+    Guid Uuid { get; }
 }

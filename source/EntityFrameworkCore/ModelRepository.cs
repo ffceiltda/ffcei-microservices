@@ -3,280 +3,279 @@ using FFCEI.Microservices.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace FFCEI.Microservices.EntityFrameworkCore
+namespace FFCEI.Microservices.EntityFrameworkCore;
+
+/// <summary>
+/// Generic Model Repository
+/// </summary>
+/// <typeparam name="TModel"></typeparam>
+public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRepository<TModel> where TModel : Model
 {
     /// <summary>
-    /// Generic Model Repository
+    /// Model Repository constructor
     /// </summary>
-    /// <typeparam name="TModel"></typeparam>
-    public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRepository<TModel> where TModel : Model
-    {
-        /// <summary>
-        /// Model Repository constructor
-        /// </summary>
-        /// <param name="context">Model Repository DbContext instance</param>
-        public ModelRepository(ModelRepositoryDbContext context) : base(context) { }
+    /// <param name="context">Model Repository DbContext instance</param>
+    public ModelRepository(ModelRepositoryDbContext context) : base(context) { }
 
 #pragma warning disable IDE0058 // Expression value is never used
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
-        public async Task AddNewAsync(TModel content, bool autoCommit = true)
+    public async Task AddNewAsync(TModel content, bool autoCommit = true)
+    {
+        if (content is null)
         {
-            if (content is null)
-            {
-                throw new ArgumentNullException(nameof(content));
-            }
-
-            await Set.AddAsync(content);
-
-            if (autoCommit)
-            {
-                await Context.SaveChangesAsync();
-            }
+            throw new ArgumentNullException(nameof(content));
         }
 
-        public async Task AddNewAsync(IModel content, bool autoCommit = true)
-        {
-            if (content is null)
-            {
-                throw new ArgumentNullException(nameof(content));
-            }
+        await Set.AddAsync(content);
 
-            if (content is TModel casted)
-            {
-                await AddNewAsync(casted, autoCommit);
-            }
-            else
+        if (autoCommit)
+        {
+            await Context.SaveChangesAsync();
+        }
+    }
+
+    public async Task AddNewAsync(IModel content, bool autoCommit = true)
+    {
+        if (content is null)
+        {
+            throw new ArgumentNullException(nameof(content));
+        }
+
+        if (content is TModel casted)
+        {
+            await AddNewAsync(casted, autoCommit);
+        }
+        else
+        {
+            throw new IncompatibleModelObjectTypeForDbSetException(typeof(TModel), content.GetType());
+        }
+    }
+
+    public async Task AddManyAsync(IEnumerable<TModel> contents, bool autoCommit = true)
+    {
+        if (contents is null)
+        {
+            throw new ArgumentNullException(nameof(contents));
+        }
+
+        await Set.AddRangeAsync(contents);
+
+        if (autoCommit)
+        {
+            await Context.SaveChangesAsync();
+        }
+    }
+
+    public async Task AddManyAsync(IEnumerable<IModel> contents, bool autoCommit = true)
+    {
+        if (contents is null)
+        {
+            throw new ArgumentNullException(nameof(contents));
+        }
+
+        foreach (var content in contents)
+        {
+            if (content is not TModel casted)
             {
                 throw new IncompatibleModelObjectTypeForDbSetException(typeof(TModel), content.GetType());
             }
         }
 
-        public async Task AddManyAsync(IEnumerable<TModel> contents, bool autoCommit = true)
+        foreach (var content in contents)
         {
-            if (contents is null)
-            {
-                throw new ArgumentNullException(nameof(contents));
-            }
-
-            await Set.AddRangeAsync(contents);
-
-            if (autoCommit)
-            {
-                await Context.SaveChangesAsync();
-            }
+            await AddNewAsync((TModel)content, false);
         }
 
-        public async Task AddManyAsync(IEnumerable<IModel> contents, bool autoCommit = true)
+        if (autoCommit)
         {
-            if (contents is null)
-            {
-                throw new ArgumentNullException(nameof(contents));
-            }
+            await Context.SaveChangesAsync();
+        }
+    }
 
-            foreach (var content in contents)
-            {
-                if (content is not TModel casted)
-                {
-                    throw new IncompatibleModelObjectTypeForDbSetException(typeof(TModel), content.GetType());
-                }
-            }
-
-            foreach (var content in contents)
-            {
-                await AddNewAsync((TModel)content, false);
-            }
-
-            if (autoCommit)
-            {
-                await Context.SaveChangesAsync();
-            }
+    public async Task UpdateExistingAsync(TModel content, bool autoCommit = true)
+    {
+        if (content is null)
+        {
+            throw new ArgumentNullException(nameof(content));
         }
 
-        public async Task UpdateExistingAsync(TModel content, bool autoCommit = true)
+        Set.Update(content);
+
+        if (autoCommit)
         {
-            if (content is null)
-            {
-                throw new ArgumentNullException(nameof(content));
-            }
+            await Context.SaveChangesAsync();
+        }
+    }
 
-            Set.Update(content);
-
-            if (autoCommit)
-            {
-                await Context.SaveChangesAsync();
-            }
+    public async Task UpdateExistingAsync(IModel content, bool autoCommit = true)
+    {
+        if (content is null)
+        {
+            throw new ArgumentNullException(nameof(content));
         }
 
-        public async Task UpdateExistingAsync(IModel content, bool autoCommit = true)
+        if (content is TModel casted)
         {
-            if (content is null)
-            {
-                throw new ArgumentNullException(nameof(content));
-            }
+            await UpdateExistingAsync(casted, autoCommit);
+        }
+        else
+        {
+            throw new IncompatibleModelObjectTypeForDbSetException(typeof(TModel), content.GetType());
+        }
+    }
 
-            if (content is TModel casted)
-            {
-                await UpdateExistingAsync(casted, autoCommit);
-            }
-            else
-            {
-                throw new IncompatibleModelObjectTypeForDbSetException(typeof(TModel), content.GetType());
-            }
+    public async Task RemoveExistingAsync(TModel content, bool autoCommit = true)
+    {
+        if (content is null)
+        {
+            throw new ArgumentNullException(nameof(content));
         }
 
-        public async Task RemoveExistingAsync(TModel content, bool autoCommit = true)
+        Set.Remove(content);
+
+        if (autoCommit)
         {
-            if (content is null)
-            {
-                throw new ArgumentNullException(nameof(content));
-            }
+            await Context.SaveChangesAsync();
+        }
+    }
 
-            Set.Remove(content);
-
-            if (autoCommit)
-            {
-                await Context.SaveChangesAsync();
-            }
+    public async Task RemoveExistingAsync(IModel content, bool autoCommit = true)
+    {
+        if (content is null)
+        {
+            throw new ArgumentNullException(nameof(content));
         }
 
-        public async Task RemoveExistingAsync(IModel content, bool autoCommit = true)
+        if (content is TModel casted)
         {
-            if (content is null)
-            {
-                throw new ArgumentNullException(nameof(content));
-            }
+            await RemoveExistingAsync(casted, autoCommit);
+        }
+        else
+        {
+            throw new IncompatibleModelObjectTypeForDbSetException(typeof(TModel), content.GetType());
+        }
+    }
 
-            if (content is TModel casted)
-            {
-                await RemoveExistingAsync(casted, autoCommit);
-            }
-            else
-            {
-                throw new IncompatibleModelObjectTypeForDbSetException(typeof(TModel), content.GetType());
-            }
+    public async Task RemoveManyAsync(IEnumerable<TModel> contents, bool autoCommit = true)
+    {
+        if (contents is null)
+        {
+            throw new ArgumentNullException(nameof(contents));
         }
 
-        public async Task RemoveManyAsync(IEnumerable<TModel> contents, bool autoCommit = true)
+        Set.RemoveRange(contents);
+
+        if (autoCommit)
         {
-            if (contents is null)
-            {
-                throw new ArgumentNullException(nameof(contents));
-            }
+            await Context.SaveChangesAsync();
+        }
+    }
 
-            Set.RemoveRange(contents);
-
-            if (autoCommit)
-            {
-                await Context.SaveChangesAsync();
-            }
+    public async Task RemoveManyAsync(IEnumerable<IModel> contents, bool autoCommit = true)
+    {
+        if (contents is null)
+        {
+            throw new ArgumentNullException(nameof(contents));
         }
 
-        public async Task RemoveManyAsync(IEnumerable<IModel> contents, bool autoCommit = true)
+        if (contents is IEnumerable<TModel> casted)
         {
-            if (contents is null)
-            {
-                throw new ArgumentNullException(nameof(contents));
-            }
+            await RemoveManyAsync(casted, autoCommit);
+        }
+        else
+        {
+            throw new IncompatibleModelObjectTypeForDbSetException(typeof(IEnumerable<TModel>), contents.GetType());
+        }
+    }
 
-            if (contents is IEnumerable<TModel> casted)
-            {
-                await RemoveManyAsync(casted, autoCommit);
-            }
-            else
-            {
-                throw new IncompatibleModelObjectTypeForDbSetException(typeof(IEnumerable<TModel>), contents.GetType());
-            }
+    public async Task RemoveByKeyAsync(bool autoCommit = true, params object[] keys)
+    {
+        if (keys is null)
+        {
+            throw new ArgumentNullException(nameof(keys));
         }
 
-        public async Task RemoveByKeyAsync(bool autoCommit = true, params object[] keys)
+        var content = await FirstOrDefaultByKeyAsync(keys);
+
+        if (content is not null)
         {
-            if (keys is null)
-            {
-                throw new ArgumentNullException(nameof(keys));
-            }
+            await RemoveExistingAsync(content, autoCommit);
+        }
+    }
 
-            var content = await FirstOrDefaultByKeyAsync(keys);
+    public async Task RemoveManyByPredicateAsync(Expression<Func<TModel, bool>> predicate, bool autoCommit = true)
+    {
+        var contents = await Set.Where(predicate).ToListAsync();
 
-            if (content is not null)
-            {
-                await RemoveExistingAsync(content, autoCommit);
-            }
+        if (contents is null)
+        {
+            throw new ArgumentNullException(nameof(predicate), "predicate returned null");
         }
 
-        public async Task RemoveManyByPredicateAsync(Expression<Func<TModel, bool>> predicate, bool autoCommit = true)
+        foreach (var content in contents)
         {
-            var contents = await Set.Where(predicate).ToListAsync();
-
-            if (contents is null)
-            {
-                throw new ArgumentNullException(nameof(predicate), "predicate returned null");
-            }
-
-            foreach (var content in contents)
-            {
-                await RemoveExistingAsync(content, false);
-            }
-
-            if (autoCommit)
-            {
-                await Context.SaveChangesAsync();
-            }
+            await RemoveExistingAsync(content, false);
         }
 
-        public async Task ReloadExistingAsync(TModel content)
+        if (autoCommit)
         {
-            if (content is null)
-            {
-                throw new ArgumentNullException(nameof(content));
-            }
+            await Context.SaveChangesAsync();
+        }
+    }
 
-            await Context.Entry(content).ReloadAsync();
+    public async Task ReloadExistingAsync(TModel content)
+    {
+        if (content is null)
+        {
+            throw new ArgumentNullException(nameof(content));
         }
 
-        public async Task ReloadExistingAsync(IModel content)
-        {
-            if (content is null)
-            {
-                throw new ArgumentNullException(nameof(content));
-            }
+        await Context.Entry(content).ReloadAsync();
+    }
 
-            if (content is TModel casted)
-            {
-                await ReloadExistingAsync(casted);
-            }
-            else
-            {
-                throw new IncompatibleModelObjectTypeForDbSetException(typeof(TModel), content.GetType());
-            }
+    public async Task ReloadExistingAsync(IModel content)
+    {
+        if (content is null)
+        {
+            throw new ArgumentNullException(nameof(content));
         }
+
+        if (content is TModel casted)
+        {
+            await ReloadExistingAsync(casted);
+        }
+        else
+        {
+            throw new IncompatibleModelObjectTypeForDbSetException(typeof(TModel), content.GetType());
+        }
+    }
 #pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
 #pragma warning restore IDE0058 // Expression value is never used
 
-        public void Detach(TModel content)
+    public void Detach(TModel content)
+    {
+        if (content is null)
         {
-            if (content is null)
-            {
-                throw new ArgumentNullException(nameof(content));
-            }
-
-            Context.Entry(content).State = EntityState.Detached;
+            throw new ArgumentNullException(nameof(content));
         }
 
-        public void Detach(IModel content)
-        {
-            if (content is null)
-            {
-                throw new ArgumentNullException(nameof(content));
-            }
+        Context.Entry(content).State = EntityState.Detached;
+    }
 
-            if (content is TModel casted)
-            {
-                Detach(casted);
-            }
-            else
-            {
-                throw new IncompatibleModelObjectTypeForDbSetException(typeof(TModel), content.GetType());
-            }
+    public void Detach(IModel content)
+    {
+        if (content is null)
+        {
+            throw new ArgumentNullException(nameof(content));
+        }
+
+        if (content is TModel casted)
+        {
+            Detach(casted);
+        }
+        else
+        {
+            throw new IncompatibleModelObjectTypeForDbSetException(typeof(TModel), content.GetType());
         }
     }
 }

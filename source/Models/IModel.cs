@@ -1,14 +1,13 @@
-namespace FFCEI.Microservices.Models
+namespace FFCEI.Microservices.Models;
+
+/// <summary>
+/// Model interface class
+/// </summary>
+public interface IModel
 {
     /// <summary>
-    /// Model interface class
+    /// Copy model properties for another model instance
     /// </summary>
-    public interface IModel
-    {
-        /// <summary>
-        /// Copy model properties for another model instance
-        /// </summary>
-        /// <param name="model">IModel instance</param>
-        void CopyModelPropertiesFrom(IModel model);
-    }
+    /// <param name="model">IModel instance</param>
+    void CopyModelPropertiesFrom(IModel model);
 }

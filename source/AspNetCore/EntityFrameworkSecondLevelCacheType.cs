@@ -1,9 +1,20 @@
-namespace FFCEI.Microservices.AspNetCore
+namespace FFCEI.Microservices.AspNetCore;
+
+/// <summary>
+/// Entity Framework Second Level Cache Type
+/// </summary>
+public enum EntityFrameworkSecondLevelCacheType
 {
-    public enum EntityFrameworkSecondLevelCacheType
-    {
-        NoCache,
-        MemoryCache,
-        RedisCache
-    }
+    /// <summary>
+    /// No caching
+    /// </summary>
+    NoCache,
+    /// <summary>
+    /// Use local in-memory cache
+    /// </summary>
+    MemoryCache,
+    /// <summary>
+    /// Use Redis based cache
+    /// </summary>
+    RedisCache
 }

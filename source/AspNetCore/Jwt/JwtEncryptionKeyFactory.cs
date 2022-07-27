@@ -2,21 +2,20 @@ using FFCEI.Microservices.Configuration;
 using FFCEI.Microservices.Security;
 using Microsoft.Extensions.Logging;
 
-namespace FFCEI.Microservices.AspNetCore.Jwt
+namespace FFCEI.Microservices.AspNetCore.Jwt;
+
+/// <summary>
+/// Javascript Web Token encryption key factory
+/// </summary>
+public sealed class JwtEncryptionKeyFactory : SecurityKeyFactory
 {
     /// <summary>
-    /// Javascript Web Token encryption key factory
+    /// Constructor
     /// </summary>
-    public sealed class JwtEncryptionKeyFactory : SecurityKeyFactory
+    /// <param name="configurationManager">ConfigurationManager</param>
+    /// <param name="logger">Logger</param>
+    public JwtEncryptionKeyFactory(ConfigurationManager configurationManager, ILogger? logger = null)
+        : base(configurationManager, "Jwt.Encryption.", logger)
     {
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="configurationManager">ConfigurationManager</param>
-        /// <param name="logger">Logger</param>
-        public JwtEncryptionKeyFactory(ConfigurationManager configurationManager, ILogger? logger = null)
-            : base(configurationManager, "Jwt.Encryption.", logger)
-        {
-        }
     }
 }

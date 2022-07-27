@@ -1,42 +1,41 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace FFCEI.Microservices.AspNetCore
+namespace FFCEI.Microservices.AspNetCore;
+
+/// <summary>
+/// Extended controller base class
+/// </summary>
+public class Controller : ControllerBase
 {
     /// <summary>
-    /// Extended controller base class
+    /// Default logger
     /// </summary>
-    public class Controller : ControllerBase
+    public ILogger Logger { get; private set; }
+
+    /// <summary>
+    /// Remote client address
+    /// </summary>
+    public string? RemoteClientAddress => GetRemoteClientAddress();
+
+    private string? GetRemoteClientAddress()
     {
-        /// <summary>
-        /// Default logger
-        /// </summary>
-        public ILogger Logger { get; private set; }
+        var requestorAddress = Request?.Headers["X-Forwarded-For"].ToString().Split(new char[] { ',' }).FirstOrDefault();
 
-        /// <summary>
-        /// Remote client address
-        /// </summary>
-        public string? RemoteClientAddress => GetRemoteClientAddress();
-
-        private string? GetRemoteClientAddress()
+        if (string.IsNullOrEmpty(requestorAddress))
         {
-            var requestorAddress = Request?.Headers["X-Forwarded-For"].ToString().Split(new char[] { ',' }).FirstOrDefault();
-
-            if (string.IsNullOrEmpty(requestorAddress))
-            {
-                requestorAddress = HttpContext?.Connection?.RemoteIpAddress?.ToString();
-            }
-
-            return requestorAddress;
+            requestorAddress = HttpContext?.Connection?.RemoteIpAddress?.ToString();
         }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        /// <param name="logger">Default logger</param>
-        public Controller(ILogger logger)
-        {
-            Logger = logger;
-        }
+        return requestorAddress;
+    }
+
+    /// <summary>
+    /// Default constructor
+    /// </summary>
+    /// <param name="logger">Default logger</param>
+    public Controller(ILogger logger)
+    {
+        Logger = logger;
     }
 }

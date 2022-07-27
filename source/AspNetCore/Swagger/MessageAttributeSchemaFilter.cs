@@ -1,44 +1,47 @@
+using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Xml.Linq;
 
-namespace FFCEI.Microservices.AspNetCore.Swagger
-{
-#pragma warning disable CA1812
-    internal sealed class MessageAttributeSchemaFilter : ISchemaFilter
-#pragma warning restore CA1812
-    {
-        private readonly XDocument? _xmlComments;
+namespace FFCEI.Microservices.AspNetCore.Swagger;
 
-        public MessageAttributeSchemaFilter(string xmlPath)
+#pragma warning disable CA1812
+internal sealed class MessageAttributeSchemaFilter : ISchemaFilter
+#pragma warning restore CA1812
+{
+    private readonly XDocument? _xmlComments;
+
+    public MessageAttributeSchemaFilter(string xmlPath)
+    {
+        if (File.Exists(xmlPath))
         {
-            if (File.Exists(xmlPath))
-            {
-                _xmlComments = XDocument.Load(xmlPath);
-            }
+            _xmlComments = XDocument.Load(xmlPath);
+        }
+    }
+
+    public void Apply(OpenApiSchema schema, SchemaFilterContext context)
+    {
+        if (_xmlComments is null)
+        {
+            return;
         }
 
-        public void Apply(OpenApiSchema schema, SchemaFilterContext context)
+        if (schema is null)
         {
-            if (_xmlComments is null)
-            {
-                return;
-            }
+            throw new ArgumentNullException(nameof(schema));
+        }
 
-            if (schema is null)
-            {
-                throw new ArgumentNullException(nameof(schema));
-            }
+        if (context is null)
+        {
+            throw new ArgumentNullException(nameof(context));
+        }
 
-            if (context is null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
+        var attribute = Attribute.GetCustomAttribute(context.Type, typeof(SwaggerRequestAttribute), true);
 
-            if (Attribute.GetCustomAttribute(context.Type, typeof(SwaggerMessageAttribute), false) is not null)
-            {
-                schema.Title = context.Type.Name;
-            }
+        if (attribute is not null)
+        {
+            schema.Default = new OpenApiString(context.Type.AssemblyQualifiedName);
+            schema.Title = context.Type.Name;
         }
     }
 }

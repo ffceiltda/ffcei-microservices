@@ -1,9 +1,8 @@
-namespace FFCEI.Microservices.AspNetCore
+namespace FFCEI.Microservices.AspNetCore;
+
+/// <summary>
+/// Filter engine for search requests
+/// </summary>
+public class WebApiSearchRequestFilter
 {
-    /// <summary>
-    /// Filter engine for search requests
-    /// </summary>
-    public class WebApiSearchRequestFilter
-    {
-    }
 }

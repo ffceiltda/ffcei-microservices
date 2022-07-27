@@ -1,128 +1,127 @@
-namespace FFCEI.Microservices.Models
+namespace FFCEI.Microservices.Models;
+
+/// <summary>
+/// Model interface with Id property and IsEnabled property
+/// </summary>
+public class IdAwareEnabledAwareModel : EnabledAwareModel, IIdAwareModel
 {
-    /// <summary>
-    /// Model interface with Id property and IsEnabled property
-    /// </summary>
-    public class IdAwareEnabledAwareModel : EnabledAwareModel, IIdAwareModel
+    public long Id { get; set; }
+
+    public override void CopyModelPropertiesFrom(IModel model)
     {
-        public long Id { get; set; }
+        base.CopyModelPropertiesFrom(model);
 
-        public override void CopyModelPropertiesFrom(IModel model)
+        if (model is IIdAwareModel modelCastedId)
         {
-            base.CopyModelPropertiesFrom(model);
-
-            if (model is IIdAwareModel modelCastedId)
+            if (modelCastedId.Id != 0)
             {
-                if (modelCastedId.Id != 0)
-                {
-                    Id = modelCastedId.Id;
-                }
+                Id = modelCastedId.Id;
             }
         }
+    }
 
-        public int CompareTo(IIdAwareModel? other)
+    public int CompareTo(IIdAwareModel? other)
+    {
+        if (other is null)
         {
-            if (other is null)
-            {
-                throw new ArgumentNullException(nameof(other));
-            }
-
-            return Id.CompareTo(other.Id);
+            throw new ArgumentNullException(nameof(other));
         }
 
-        public virtual int CompareTo(object? obj)
-        {
-            if (obj is IIdAwareModel modelCasted)
-            {
-                return CompareTo(modelCasted);
-            }
+        return Id.CompareTo(other.Id);
+    }
 
-            throw new ArgumentException("incompatible object for comparison", nameof(obj));
+    public virtual int CompareTo(object? obj)
+    {
+        if (obj is IIdAwareModel modelCasted)
+        {
+            return CompareTo(modelCasted);
         }
 
-        public bool Equals(IIdAwareModel? other) => (other is not null) && (Id == other.Id);
+        throw new ArgumentException("incompatible object for comparison", nameof(obj));
+    }
 
-        public override bool Equals(object? obj)
+    public bool Equals(IIdAwareModel? other) => (other is not null) && (Id == other.Id);
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is IUuidAwareModel modelCasted)
         {
-            if (obj is IUuidAwareModel modelCasted)
-            {
-                return Equals(modelCasted);
-            }
-
-            return false;
+            return Equals(modelCasted);
         }
 
-        public override int GetHashCode() => Id.GetHashCode();
+        return false;
+    }
 
-        /// <summary>
-        /// Operator ==
-        /// </summary>
-        /// <param name="left">left instance</param>
-        /// <param name="right">right instance</param>
-        /// <returns>true if equals, false otherwise</returns>
-        public static bool operator ==(IdAwareEnabledAwareModel left, IdAwareEnabledAwareModel right)
+    public override int GetHashCode() => Id.GetHashCode();
+
+    /// <summary>
+    /// Operator ==
+    /// </summary>
+    /// <param name="left">left instance</param>
+    /// <param name="right">right instance</param>
+    /// <returns>true if equals, false otherwise</returns>
+    public static bool operator ==(IdAwareEnabledAwareModel left, IdAwareEnabledAwareModel right)
+    {
+        if (ReferenceEquals(left, null))
         {
-            if (ReferenceEquals(left, null))
-            {
-                return ReferenceEquals(right, null);
-            }
-
-            return left.Equals(right);
+            return ReferenceEquals(right, null);
         }
 
-        /// <summary>
-        /// Operator !=
-        /// </summary>
-        /// <param name="left">left instance</param>
-        /// <param name="right">right instance</param>
-        /// <returns>true if different, false otherwise</returns>
-        public static bool operator !=(IdAwareEnabledAwareModel left, IdAwareEnabledAwareModel right)
-        {
-            return !(left == right);
-        }
+        return left.Equals(right);
+    }
 
-        /// <summary>
-        /// Operator &lt;
-        /// </summary>
-        /// <param name="left">left instance</param>
-        /// <param name="right">right instance</param>
-        /// <returns>true if left is less than right, false otherwise</returns>
-        public static bool operator <(IdAwareEnabledAwareModel left, IdAwareEnabledAwareModel right)
-        {
-            return ReferenceEquals(left, null) ? !ReferenceEquals(right, null) : left.CompareTo(right) < 0;
-        }
+    /// <summary>
+    /// Operator !=
+    /// </summary>
+    /// <param name="left">left instance</param>
+    /// <param name="right">right instance</param>
+    /// <returns>true if different, false otherwise</returns>
+    public static bool operator !=(IdAwareEnabledAwareModel left, IdAwareEnabledAwareModel right)
+    {
+        return !(left == right);
+    }
 
-        /// <summary>
-        /// Operator &lt;=
-        /// </summary>
-        /// <param name="left">left instance</param>
-        /// <param name="right">right instance</param>
-        /// <returns>true if left is less or equals than right, false otherwise</returns>
-        public static bool operator <=(IdAwareEnabledAwareModel left, IdAwareEnabledAwareModel right)
-        {
-            return ReferenceEquals(left, null) || left.CompareTo(right) <= 0;
-        }
+    /// <summary>
+    /// Operator &lt;
+    /// </summary>
+    /// <param name="left">left instance</param>
+    /// <param name="right">right instance</param>
+    /// <returns>true if left is less than right, false otherwise</returns>
+    public static bool operator <(IdAwareEnabledAwareModel left, IdAwareEnabledAwareModel right)
+    {
+        return ReferenceEquals(left, null) ? !ReferenceEquals(right, null) : left.CompareTo(right) < 0;
+    }
 
-        /// <summary>
-        /// Operator &gt;
-        /// </summary>
-        /// <param name="left">left instance</param>
-        /// <param name="right">right instance</param>
-        /// <returns>true if left is greater than right, false otherwise</returns>
-        public static bool operator >(IdAwareEnabledAwareModel left, IdAwareEnabledAwareModel right)
-        {
-            return !ReferenceEquals(left, null) && left.CompareTo(right) > 0;
-        }
+    /// <summary>
+    /// Operator &lt;=
+    /// </summary>
+    /// <param name="left">left instance</param>
+    /// <param name="right">right instance</param>
+    /// <returns>true if left is less or equals than right, false otherwise</returns>
+    public static bool operator <=(IdAwareEnabledAwareModel left, IdAwareEnabledAwareModel right)
+    {
+        return ReferenceEquals(left, null) || left.CompareTo(right) <= 0;
+    }
 
-        /// <summary>
-        /// Operator &gt;=
-        /// </summary>
-        /// <param name="left">left instance</param>
-        /// <param name="right">right instance</param>
-        /// <returns>true if left is greater or equals than right, false otherwise</returns>
-        public static bool operator >=(IdAwareEnabledAwareModel left, IdAwareEnabledAwareModel right)
-        {
-            return ReferenceEquals(left, null) ? ReferenceEquals(right, null) : left.CompareTo(right) >= 0;
-        }
+    /// <summary>
+    /// Operator &gt;
+    /// </summary>
+    /// <param name="left">left instance</param>
+    /// <param name="right">right instance</param>
+    /// <returns>true if left is greater than right, false otherwise</returns>
+    public static bool operator >(IdAwareEnabledAwareModel left, IdAwareEnabledAwareModel right)
+    {
+        return !ReferenceEquals(left, null) && left.CompareTo(right) > 0;
+    }
+
+    /// <summary>
+    /// Operator &gt;=
+    /// </summary>
+    /// <param name="left">left instance</param>
+    /// <param name="right">right instance</param>
+    /// <returns>true if left is greater or equals than right, false otherwise</returns>
+    public static bool operator >=(IdAwareEnabledAwareModel left, IdAwareEnabledAwareModel right)
+    {
+        return ReferenceEquals(left, null) ? ReferenceEquals(right, null) : left.CompareTo(right) >= 0;
     }
 }

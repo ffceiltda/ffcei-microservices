@@ -1,20 +1,19 @@
-namespace FFCEI.Microservices.Models
+namespace FFCEI.Microservices.Models;
+
+/// <summary>
+/// Model class with IsEnabled property
+/// </summary>
+public class EnabledAwareModel : Model, IEnabledAwareModel
 {
-    /// <summary>
-    /// Model class with IsEnabled property
-    /// </summary>
-    public class EnabledAwareModel : Model, IEnabledAwareModel
+    public bool IsEnabled { get; set; } = true;
+
+    public override void CopyModelPropertiesFrom(IModel model)
     {
-        public bool IsEnabled { get; set; } = true;
+        base.CopyModelPropertiesFrom(model);
 
-        public override void CopyModelPropertiesFrom(IModel model)
+        if (model is IEnabledAwareModel modelCasted)
         {
-            base.CopyModelPropertiesFrom(model);
-
-            if (model is IEnabledAwareModel modelCasted)
-            {
-                IsEnabled = modelCasted.IsEnabled;
-            }
+            IsEnabled = modelCasted.IsEnabled;
         }
     }
 }

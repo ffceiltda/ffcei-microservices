@@ -1,42 +1,41 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace FFCEI.Microservices.AspNetCore.Middlewares
+namespace FFCEI.Microservices.AspNetCore.Middlewares;
+
+/// <summary>
+/// JwtPostAuthorizationMiddleware extension methods
+/// </summary>
+public static class JwtPostAuthorizationMiddlewareExtensionMethods
 {
     /// <summary>
-    /// JwtPostAuthorizationMiddleware extension methods
+    /// Add JwtPostAuthorizationMiddleware to ServiceCollection
     /// </summary>
-    public static class JwtPostAuthorizationMiddlewareExtensionMethods
-    {
-        /// <summary>
-        /// Add JwtPostAuthorizationMiddleware to ServiceCollection
-        /// </summary>
-        /// <param name="service">ServiceCollection instance</param>
-        /// <param name="options">Options</param>
-        /// <returns>ServiceCollection instance</returns>
+    /// <param name="service">ServiceCollection instance</param>
+    /// <param name="options">Options</param>
+    /// <returns>ServiceCollection instance</returns>
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-        public static IServiceCollection AddJwtPostAuthorization(this IServiceCollection service, Action<JwtPostAuthorizationMiddlewareOptions> options = default)
+    public static IServiceCollection AddJwtPostAuthorization(this IServiceCollection service, Action<JwtPostAuthorizationMiddlewareOptions> options = default)
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
-        {
+    {
 #pragma warning disable IDE0054 // Use compound assignment
-            options = options ?? (opts => { });
+        options = options ?? (opts => { });
 #pragma warning restore IDE0054 // Use compound assignment
 
 #pragma warning disable IDE0058 // Expression value is never used
-            service.Configure(options);
+        service.Configure(options);
 #pragma warning restore IDE0058 // Expression value is never used
 
-            return service;
-        }
+        return service;
+    }
 
-        /// <summary>
-        /// Use JwtPostAuthorizationMiddleware middleware in ApplicationBuilder
-        /// </summary>
-        /// <param name="builder">ApplicationBuilder instance</param>
-        /// <returns>ApplicationBuilder instance</returns>
-        public static IApplicationBuilder UseJwtPostAuthorization(this IApplicationBuilder builder)
-        {
-            return builder.UseMiddleware<JwtPostAuthorizationMiddleware>();
-        }
+    /// <summary>
+    /// Use JwtPostAuthorizationMiddleware middleware in ApplicationBuilder
+    /// </summary>
+    /// <param name="builder">ApplicationBuilder instance</param>
+    /// <returns>ApplicationBuilder instance</returns>
+    public static IApplicationBuilder UseJwtPostAuthorization(this IApplicationBuilder builder)
+    {
+        return builder.UseMiddleware<JwtPostAuthorizationMiddleware>();
     }
 }
