@@ -12,7 +12,7 @@ namespace FFCEI.Microservices.AspNetCore
         internal const string DetailSuceeded = "Succeeded";
         internal const string DetailInternalError = "A unexpected error has ocurred";
         internal const string DetailStatusForbidden = "Access to resource was denied";
-        internal const string DetailStatusUnauthorized = "Access unauthorized";
+        internal const string DetailStatusUnauthorized = "Access to resource was not authorized";
 
         /// <summary>
         /// Status code

@@ -32,7 +32,7 @@ namespace FFCEI.Microservices.Configuration
         /// <summary>
         /// Database number
         /// </summary>
-        public int? Database { get; set; }
+        public int Database { get; set; }
 
         /// <summary>
         /// Serializer name
@@ -45,9 +45,14 @@ namespace FFCEI.Microservices.Configuration
         public string? ConnectionName { get; set; }
 
         /// <summary>
+        /// Use SSL
+        /// </summary>
+        public bool Ssl { get; set; }
+
+        /// <summary>
         /// Allow admin
         /// </summary>
-        public bool AllowAdmin { get; set; }
+        public bool AllowAdmin { get; set; } = true;
 
         /// <summary>
         /// Number of connection retries
@@ -57,7 +62,7 @@ namespace FFCEI.Microservices.Configuration
         /// <summary>
         /// Connection timeout
         /// </summary>
-        public int ConnectTimeout { get; set; } = 10;
+        public int ConnectTimeout { get; set; } = 10000;
 
         /// <summary>
         /// Keep-alive timeout
@@ -67,12 +72,12 @@ namespace FFCEI.Microservices.Configuration
         /// <summary>
         /// Synchronous call timeout
         /// </summary>
-        public int SyncTimeout { get; set; } = 120;
+        public int SyncTimeout { get; set; } = 120000;
 
         /// <summary>
         /// Asynchronous call timeout
         /// </summary>
-        public int AsyncTimeout { get; set; } = 120;
+        public int AsyncTimeout { get; set; } = 120000;
 
         protected override StringBuilder BuildConnectionString()
         {
@@ -80,7 +85,7 @@ namespace FFCEI.Microservices.Configuration
 
 #pragma warning disable IDE0058 // Expression value is never used
 #pragma warning disable CA1305 // Specify IFormatProvider
-            if (!string.IsNullOrEmpty(Host))
+            if (string.IsNullOrEmpty(Host))
             {
                 throw new ArgumentNullException(nameof(Host));
             }
@@ -94,24 +99,26 @@ namespace FFCEI.Microservices.Configuration
 
             if (!string.IsNullOrEmpty(UserName))
             {
-                stringBuilder.Append($",user={UserName};");
+                stringBuilder.Append($",user={UserName}");
             }
 
             if (!string.IsNullOrEmpty(Password))
             {
-                stringBuilder.Append($",password={Password};");
+                stringBuilder.Append($",password={Password}");
             }
 
-            if (Database is not null)
+            if (Database > 0)
             {
-                stringBuilder.Append($",defaultDatabase={Database};");
+                stringBuilder.Append($",defaultDatabase={Database}");
             }
 
             if (!string.IsNullOrEmpty(ConnectionName))
             {
-                stringBuilder.Append($",name={ConnectionName};");
+                stringBuilder.Append($",name={ConnectionName}");
             }
 
+            stringBuilder.Append(",resolveDns=true");
+            stringBuilder.Append($",ssl={Ssl}");
             stringBuilder.Append($",allowAdmin={AllowAdmin}");
             stringBuilder.Append($",connectRetry={ConnectRetry}");
             stringBuilder.Append($",connectTimeout={ConnectTimeout}");
@@ -152,12 +159,7 @@ namespace FFCEI.Microservices.Configuration
             options.DBConfig.Endpoints.Add(new ServerEndPoint(Host, (int)Port));
             options.DBConfig.Username = UserName;
             options.DBConfig.Password = Password;
-
-            if (Database is not null)
-            {
-                options.DBConfig.Database = Database.Value;
-            }
-
+            options.DBConfig.Database = Database;
             options.DBConfig.AllowAdmin = AllowAdmin;
             options.DBConfig.ConnectionTimeout = ConnectTimeout;
             options.DBConfig.SyncTimeout = SyncTimeout;

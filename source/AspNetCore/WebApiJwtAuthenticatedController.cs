@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
-using System.Security.Claims;
 
 namespace FFCEI.Microservices.AspNetCore
 {
@@ -23,29 +22,8 @@ namespace FFCEI.Microservices.AspNetCore
         /// <summary>
         /// Remote client address
         /// </summary>
-        public TWebApiClaims? AuthenticatedUserClaims => _authenticatedUserClaims ??= GetAuthenticatedUserClaims();
+        public TWebApiClaims? Claims => _webApiAuthenticatedClaims ??= HttpContext.GetWebApiAuthenticatedClaims<TWebApiClaims>();
 
-        private TWebApiClaims? _authenticatedUserClaims;
-
-        private TWebApiClaims? GetAuthenticatedUserClaims()
-        {
-            var claims = (HttpContext.User.Identity ?? null) as ClaimsIdentity;
-
-            if (claims is null)
-            {
-                return null;
-            }
-
-            if (!claims.IsAuthenticated)
-            {
-                return null;
-            }
-
-            var result = new TWebApiClaims();
-
-            result.ParseClaims(claims);
-
-            return result;
-        }
+        private TWebApiClaims? _webApiAuthenticatedClaims;
     }
 }

@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System.Net.Mime;
 
 namespace FFCEI.Microservices.AspNetCore
 {
@@ -8,7 +7,6 @@ namespace FFCEI.Microservices.AspNetCore
     /// Web Api controller base class
     /// </summary>
     [ApiController]
-    [Produces(MediaTypeNames.Application.Json)]
     public class WebApiController : ControllerExtended
     {
         /// <summary>

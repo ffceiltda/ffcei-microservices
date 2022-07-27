@@ -101,7 +101,7 @@ namespace FFCEI.Microservices.AspNetCore
             {
                 WebApiResultBase.StatusSucceeded => new OkObjectResult(response)
                 {
-                    Value = response.Result
+                    Value = typeof(TResult).IsValueType || typeof(TResult).IsEnum ? response : response.Result
                 },
                 WebApiResultBase.StatusInternalError => new ObjectResult(response)
                 {

@@ -28,8 +28,8 @@ namespace FFCEI.Microservices.EntityFrameworkCore
                 .IsRequired()
                 .IsUuidColumn();
 
-            entityBuilder.HasIndex(e => e.Uuid, $"{entityBuilder.Metadata.GetTableName()}_UK_1")
-                .IsUnique();
+            entityBuilder.HasAlternateKey(e => e.Uuid)
+                .HasName($"{entityBuilder.Metadata.GetTableName()}_UK_1");
 #pragma warning restore IDE0058 // Expression value is never used
         }
     }

@@ -30,6 +30,18 @@ namespace FFCEI.Microservices.AspNetCore
         }
 
         /// <summary>
+        /// Issuer
+        /// </summary>
+        [WebApiClaim(Type = "iss", DoNotListOnSubjectClaims = true)]
+        public string Issuer { get; set; } = null!;
+
+        /// <summary>
+        /// Audience
+        /// </summary>
+        [WebApiClaim(Type = "aud", DoNotListOnSubjectClaims = true)]
+        public string Audience { get; set; } = null!;
+
+        /// <summary>
         /// Issued At
         /// </summary>
         [WebApiClaim(Type = "iat", DoNotListOnSubjectClaims = true)]
@@ -46,6 +58,12 @@ namespace FFCEI.Microservices.AspNetCore
         /// </summary>
         [WebApiClaim(Type = "nbf", DoNotListOnSubjectClaims = true)]
         public DateTimeOffset? NotBefore { get; set; }
+
+        /// <summary>
+        /// Compute the seconds before token expiration
+        /// </summary>
+        public long SecondsBeforeExpiration => (long)(ExpiresAt is null ? long.MaxValue :
+            (ExpiresAt.Value.UtcDateTime - (IssuedAt ?? DateTimeOffset.UtcNow).UtcDateTime).TotalSeconds);
 
         private void DoParseClaims(object instance, ClaimsIdentity claims)
         {
@@ -283,7 +301,7 @@ namespace FFCEI.Microservices.AspNetCore
         /// <exception cref="InvalidOperationException"></exception>
         public JwtSecurityToken CreateJwtSecurityToken(SigningCredentials? signingCredentials = null, EncryptingCredentials? encryptingCredentials = null, string? issuer = null, string? audience = null)
         {
-            IssuedAt = DateTimeOffset.Now;
+            IssuedAt = DateTimeOffset.UtcNow;
 
             if (NotBefore is not null)
             {
@@ -297,6 +315,8 @@ namespace FFCEI.Microservices.AspNetCore
 
             if (ExpiresAt is not null)
             {
+                ExpiresAt = TimeZoneInfo.ConvertTime(ExpiresAt.Value, TimeZoneInfo.Utc);
+
                 if (ExpiresAt <= IssuedAt)
                 {
                     throw new InvalidOperationException("Cannot issue an already expired token");

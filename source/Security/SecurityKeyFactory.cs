@@ -178,7 +178,7 @@ namespace FFCEI.Microservices.Security
                     }
                 }
 
-                var certificate = certificateList.Where(c => c.NotAfter >= DateTime.Now.ToLocalTime()).OrderByDescending(c => c.NotBefore).FirstOrDefault();
+                var certificate = certificateList.Where(c => c.NotAfter >= DateTimeOffset.UtcNow.LocalDateTime).OrderByDescending(c => c.NotBefore).FirstOrDefault();
 
                 if (certificate is not null)
                 {

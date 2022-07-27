@@ -28,7 +28,7 @@ namespace FFCEI.Microservices.Configuration
             string portSettingName = "Redis.Port",
             string usernameSettingName = "Redis.UserName",
             string passwordSettingName = "Redis.Password",
-            string databaseSettingName = "Redism.Database",
+            string databaseSettingName = "Redis.Database",
             string? host = null,
             ushort? port = null,
             string? userName = null,
@@ -49,7 +49,7 @@ namespace FFCEI.Microservices.Configuration
                 Port = (redisPort is null) ? null : ushort.Parse(redisPort, NumberStyles.Integer, CultureInfo.InvariantCulture),
                 UserName = configurationManager[usernameSettingName],
                 Password = configurationManager[passwordSettingName],
-                Database = (redisDatabase is null) ? null : ushort.Parse(redisDatabase, NumberStyles.Integer, CultureInfo.InvariantCulture),
+                Database = (redisDatabase is null) ? 0 : ushort.Parse(redisDatabase, NumberStyles.Integer, CultureInfo.InvariantCulture),
             };
 
             if (string.IsNullOrEmpty(result.Host) || (host is not null))
@@ -74,7 +74,7 @@ namespace FFCEI.Microservices.Configuration
 
             if (database is not null)
             {
-                result.Database = database;
+                result.Database = database.Value;
             }
 
             return result;
