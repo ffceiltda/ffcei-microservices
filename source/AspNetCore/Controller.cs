@@ -6,7 +6,7 @@ namespace FFCEI.Microservices.AspNetCore
     /// <summary>
     /// Extended controller base class
     /// </summary>
-    public class ControllerExtended : ControllerBase
+    public class Controller : ControllerBase
     {
         /// <summary>
         /// Default logger
@@ -34,7 +34,7 @@ namespace FFCEI.Microservices.AspNetCore
         /// Default constructor
         /// </summary>
         /// <param name="logger">Default logger</param>
-        public ControllerExtended(ILogger logger)
+        public Controller(ILogger logger)
         {
             Logger = logger;
         }

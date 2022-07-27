@@ -2,7 +2,6 @@ using FFCEI.Microservices.Configuration;
 using StackExchange.Redis;
 using System.Diagnostics;
 using System.Globalization;
-using System.Text;
 
 namespace FFCEI.Microservices.AspNetCore
 {
@@ -86,7 +85,7 @@ namespace FFCEI.Microservices.AspNetCore
                 throw new InvalidOperationException($"Redis call failed, expected 'OK' but received '{value}'");
             }
         }
-        
+
         public async Task<string> GetSessionAsync(Guid claimer, Guid session, string resource)
         {
             if (claimer == Guid.Empty)
@@ -137,7 +136,7 @@ namespace FFCEI.Microservices.AspNetCore
 
             return value;
         }
-        
+
         public async Task ExpireSessionAsync(Guid claimer, Guid session, string resource)
         {
             if (claimer == Guid.Empty)

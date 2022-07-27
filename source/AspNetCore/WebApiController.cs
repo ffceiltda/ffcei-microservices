@@ -7,7 +7,7 @@ namespace FFCEI.Microservices.AspNetCore
     /// Web Api controller base class
     /// </summary>
     [ApiController]
-    public class WebApiController : ControllerExtended
+    public class WebApiController : Controller
     {
         /// <summary>
         /// Default constructor
