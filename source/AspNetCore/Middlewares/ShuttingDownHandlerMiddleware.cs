@@ -27,23 +27,23 @@ public sealed class ShuttingDownHandlerMiddleware
     /// <exception cref="ArgumentNullException">throws if httpContext is null</exception>
     public async Task InvokeAsync(HttpContext httpContext)
     {
+        if (httpContext is null)
+        {
+            throw new ArgumentNullException(nameof(httpContext));
+        }
+
+#pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
         if (WebApiMicroservice.Instance?.ShuttingDown ?? true)
         {
-            if (httpContext is null)
-            {
-                throw new ArgumentNullException(nameof(httpContext));
-            }
-
             httpContext.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
             httpContext.Response.ContentType = "text/plain";
 
-#pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
             await httpContext.Response.Body.WriteAsync(Encoding.UTF8.GetBytes("Service is not available"));
+
+            return;
         }
-        else
-        {
-            await _next(httpContext);
-        }
+
+        await _next(httpContext);
 #pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
     }
 }

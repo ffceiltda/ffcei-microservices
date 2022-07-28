@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 
 namespace FFCEI.Microservices.AspNetCore;
@@ -6,7 +5,6 @@ namespace FFCEI.Microservices.AspNetCore;
 /// <summary>
 /// Web Api controller base class
 /// </summary>
-[Authorize]
 public class WebApiJwtAuthenticatedController<TWebApiClaims> : WebApiController
     where TWebApiClaims : WebApiClaims, new()
 {

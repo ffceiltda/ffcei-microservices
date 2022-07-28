@@ -47,12 +47,31 @@ public sealed class JwtPostAuthorizationMiddleware
         var authorized = false;
 
         var controllerActionDescriptor = httpContext.GetEndpoint()?.Metadata.GetMetadata<ControllerActionDescriptor>();
+
+        if (controllerActionDescriptor?.MethodInfo is null)
+        {
+            httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+            httpContext.Response.ContentType = "text/plain";
+
+#pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
+            await httpContext.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(WebApiResultBase.DetailNotFound));
+#pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
+
+            return;
+        }
+
         var hasAllowAnonymousAttributeOnAction = controllerActionDescriptor?.MethodInfo?
             .GetCustomAttributes(inherit: true)?.Any(a => a.GetType() == typeof(AllowAnonymousAttribute)) ?? false;
         var hasAllowAnonymousAttributeOnController = controllerActionDescriptor?.ControllerTypeInfo?
             .GetCustomAttributes(inherit: true)?.Any(a => a.GetType() == typeof(AllowAnonymousAttribute)) ?? false;
 
-        if (hasAllowAnonymousAttributeOnController || hasAllowAnonymousAttributeOnAction)
+        var hasAuthorizeAttributeOnAction = controllerActionDescriptor?.MethodInfo?
+            .GetCustomAttributes(inherit: true)?.Any(a => a.GetType() == typeof(AuthorizeAttribute)) ?? false;
+        var hasAuthorizeAttributeOnController = controllerActionDescriptor?.ControllerTypeInfo?
+            .GetCustomAttributes(inherit: true)?.Any(a => a.GetType() == typeof(AuthorizeAttribute)) ?? false;
+
+        if ((!hasAllowAnonymousAttributeOnAction && !hasAllowAnonymousAttributeOnController && !hasAuthorizeAttributeOnAction && !hasAuthorizeAttributeOnController) ||
+            (hasAllowAnonymousAttributeOnAction || hasAllowAnonymousAttributeOnController))
         {
             authorized = true;
         }

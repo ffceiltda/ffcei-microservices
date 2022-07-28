@@ -36,6 +36,13 @@ public interface IReadOnlyModelRepository<TModel> : IReadOnlyModelRepository whe
     ValueTask<TModel?> FirstOrDefaultByPredicateAsync(Expression<Func<TModel, bool>> predicate);
 
     /// <summary>
+    /// Return last model that match predicate or null
+    /// </summary>
+    /// <param name="predicate">Model match predicate</param>
+    /// <returns>First model that match predicate or null</returns>
+    ValueTask<TModel?> LastOrDefaultByPredicateAsync(Expression<Func<TModel, bool>> predicate);
+
+    /// <summary>
     /// Return all models that match predicate or null
     /// </summary>
     /// <param name="predicate">Model match predicate</param>

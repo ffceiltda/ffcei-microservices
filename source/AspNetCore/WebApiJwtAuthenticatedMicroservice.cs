@@ -1,5 +1,6 @@
 using FFCEI.Microservices.AspNetCore.Jwt;
 using FFCEI.Microservices.AspNetCore.Middlewares;
+using FFCEI.Microservices.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -118,9 +119,11 @@ public class WebApiJwtAuthenticatedMicroservice<TWebApiClaims> : WebApiMicroserv
     {
         var signingKeyFactory = new JwtSigningKeyFactory(this.ConfigurationManager);
         var encryptionKeyFactory = new JwtEncryptionKeyFactory(this.ConfigurationManager);
+        var argon2KeyFactory = new Argon2KeyFactory(this.ConfigurationManager);
 
         Builder.Services.AddSingleton(signingKeyFactory);
         Builder.Services.AddSingleton(encryptionKeyFactory);
+        Builder.Services.AddSingleton(argon2KeyFactory);
 
         Builder.Services.AddAuthentication(options =>
         {

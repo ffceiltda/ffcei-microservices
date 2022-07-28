@@ -34,6 +34,8 @@ public class ReadOnlyModelRepository<TModel> : IReadOnlyModelRepository<TModel> 
 
     public async ValueTask<TModel?> FirstOrDefaultByPredicateAsync(Expression<Func<TModel, bool>> predicate) => await Where(predicate).FirstOrDefaultAsync();
 
+    public async ValueTask<TModel?> LastOrDefaultByPredicateAsync(Expression<Func<TModel, bool>> predicate) => await Where(predicate).LastOrDefaultAsync();
+
     public async Task<IEnumerable<TModel>> ManyByPredicateAsync(Expression<Func<TModel, bool>> predicate) => await Where(predicate).ToListAsync();
 #pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
 }
