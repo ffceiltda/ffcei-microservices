@@ -65,12 +65,33 @@ internal sealed class PropertyAttributeDocumentFilter : IDocumentFilter
 
                     var schema = context.SchemaRepository.Schemas[schemaReferenceId];
 
-                    if (schema.Default is null)
+                    if (string.IsNullOrEmpty(schema.Title))
                     {
                         continue;
                     }
 
-                    var schemaType = (schema.Default as OpenApiString)?.Value;
+                    var lastOpenParenthesis = schema.Title.LastIndexOf("(", StringComparison.InvariantCulture);
+                    var lastCloseParenthesis = schema.Title.LastIndexOf(")", StringComparison.InvariantCulture);
+
+                    if (lastOpenParenthesis == -1 || lastCloseParenthesis == -1)
+                    {
+                        continue;
+                    }
+
+                    var title = schema.Title.Substring(0, lastOpenParenthesis - 1).TrimEnd();
+
+                    int length = lastCloseParenthesis - lastOpenParenthesis - 1;
+
+                    if (length < 1)
+                    {
+                        schema.Title = title;
+
+                        continue;
+                    }
+
+                    var schemaType = schema.Title.Substring(lastOpenParenthesis + 1, lastCloseParenthesis - lastOpenParenthesis - 1);
+
+                    schema.Title = title;
 
                     if (schemaType is null)
                     {

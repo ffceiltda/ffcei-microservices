@@ -40,8 +40,7 @@ internal sealed class MessageAttributeSchemaFilter : ISchemaFilter
 
         if (attribute is not null)
         {
-            schema.Default = new OpenApiString(context.Type.AssemblyQualifiedName);
-            schema.Title = context.Type.Name;
+            schema.Title = $"{context.Type.Name} ({context.Type.AssemblyQualifiedName})";
         }
     }
 }
