@@ -1,8 +1,6 @@
 using FFCEI.Microservices.Configuration;
-using System.Text;
-using System.Security.Cryptography;
+using FFCEI.Microservices.Generators;
 using System.Globalization;
-using Isopoh.Cryptography.Argon2;
 
 namespace FFCEI.Microservices.Security
 {
@@ -26,6 +24,11 @@ namespace FFCEI.Microservices.Security
             {
                 _defaultSaltLength = int.Parse(saltLength, CultureInfo.InvariantCulture);
             }
+
+            if (_defaultSaltLength < 64)
+            {
+                throw new InvalidOperationException("Argon2.Salt.Length must be at least 64");
+            }
         }
 
         /// <summary>
@@ -42,16 +45,7 @@ namespace FFCEI.Microservices.Security
                 length = _defaultSaltLength;
             }
 
-            var bytes = new byte[length];
-
-            RandomNumberGenerator.Fill(bytes);
-
-            for (int i = 0; i < saltLength; i++)
-            {
-                bytes[i] = (byte)((bytes[i] % 93) + 33);
-            }
-
-            return Encoding.UTF8.GetString(bytes);
+            return RandomTokenGenerator.GenerateRandomToken(length, true, true, LetterCapitalization.AnyCase, true);
         }
 
         /// <summary>
