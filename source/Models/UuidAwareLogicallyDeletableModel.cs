@@ -1,38 +1,38 @@
 namespace FFCEI.Microservices.Models;
 
 /// <summary>
-/// Model interface with Id property and Uuid property and IsEnabled property and Timestamping (created / updated) support
+/// Model interface with Uuid property and IsLogicallyDeleted property
 /// </summary>
-public class IdAwareUuidAwareEnabledAwareTimestampedModel : UuidAwareEnabledAwareTimestampedModel, IIdAwareModel
+public class UuidAwareLogicallyDeletableModel : LogicallyDeletableModel, IUuidAwareModel
 {
-    public long Id { get; set; }
+    public Guid Uuid { get; set; }
 
     public override void CopyModelPropertiesFrom(IModel model)
     {
         base.CopyModelPropertiesFrom(model);
 
-        if (model is IIdAwareModel modelCastedId)
+        if (model is IUuidAwareModel modelCasted)
         {
-            if (modelCastedId.Id != 0)
+            if (modelCasted.Uuid != Guid.Empty)
             {
-                Id = modelCastedId.Id;
+                Uuid = modelCasted.Uuid;
             }
         }
     }
 
-    public int CompareTo(IIdAwareModel? other)
+    public int CompareTo(IUuidAwareModel? other)
     {
         if (other is null)
         {
             throw new ArgumentNullException(nameof(other));
         }
 
-        return Id.CompareTo(other.Id);
+        return Uuid.CompareTo(other.Uuid);
     }
 
-    public override int CompareTo(object? obj)
+    public virtual int CompareTo(object? obj)
     {
-        if (obj is IIdAwareModel modelCasted)
+        if (obj is IUuidAwareModel modelCasted)
         {
             return CompareTo(modelCasted);
         }
@@ -40,7 +40,7 @@ public class IdAwareUuidAwareEnabledAwareTimestampedModel : UuidAwareEnabledAwar
         throw new ArgumentException("incompatible object for comparison", nameof(obj));
     }
 
-    public bool Equals(IIdAwareModel? other) => (other is not null) && (Id == other.Id);
+    public bool Equals(IUuidAwareModel? other) => (other is not null) && (Uuid == other.Uuid);
 
     public override bool Equals(object? obj)
     {
@@ -52,7 +52,7 @@ public class IdAwareUuidAwareEnabledAwareTimestampedModel : UuidAwareEnabledAwar
         return false;
     }
 
-    public override int GetHashCode() => Id.GetHashCode();
+    public override int GetHashCode() => Uuid.GetHashCode();
 
     /// <summary>
     /// Operator ==
@@ -60,7 +60,7 @@ public class IdAwareUuidAwareEnabledAwareTimestampedModel : UuidAwareEnabledAwar
     /// <param name="left">left instance</param>
     /// <param name="right">right instance</param>
     /// <returns>true if equals, false otherwise</returns>
-    public static bool operator ==(IdAwareUuidAwareEnabledAwareTimestampedModel left, IdAwareUuidAwareEnabledAwareTimestampedModel right)
+    public static bool operator ==(UuidAwareLogicallyDeletableModel left, UuidAwareLogicallyDeletableModel right)
     {
         if (ReferenceEquals(left, null))
         {
@@ -76,7 +76,7 @@ public class IdAwareUuidAwareEnabledAwareTimestampedModel : UuidAwareEnabledAwar
     /// <param name="left">left instance</param>
     /// <param name="right">right instance</param>
     /// <returns>true if different, false otherwise</returns>
-    public static bool operator !=(IdAwareUuidAwareEnabledAwareTimestampedModel left, IdAwareUuidAwareEnabledAwareTimestampedModel right)
+    public static bool operator !=(UuidAwareLogicallyDeletableModel left, UuidAwareLogicallyDeletableModel right)
     {
         return !(left == right);
     }
@@ -87,7 +87,7 @@ public class IdAwareUuidAwareEnabledAwareTimestampedModel : UuidAwareEnabledAwar
     /// <param name="left">left instance</param>
     /// <param name="right">right instance</param>
     /// <returns>true if left is less than right, false otherwise</returns>
-    public static bool operator <(IdAwareUuidAwareEnabledAwareTimestampedModel left, IdAwareUuidAwareEnabledAwareTimestampedModel right)
+    public static bool operator <(UuidAwareLogicallyDeletableModel left, UuidAwareLogicallyDeletableModel right)
     {
         return ReferenceEquals(left, null) ? !ReferenceEquals(right, null) : left.CompareTo(right) < 0;
     }
@@ -98,7 +98,7 @@ public class IdAwareUuidAwareEnabledAwareTimestampedModel : UuidAwareEnabledAwar
     /// <param name="left">left instance</param>
     /// <param name="right">right instance</param>
     /// <returns>true if left is less or equals than right, false otherwise</returns>
-    public static bool operator <=(IdAwareUuidAwareEnabledAwareTimestampedModel left, IdAwareUuidAwareEnabledAwareTimestampedModel right)
+    public static bool operator <=(UuidAwareLogicallyDeletableModel left, UuidAwareLogicallyDeletableModel right)
     {
         return ReferenceEquals(left, null) || left.CompareTo(right) <= 0;
     }
@@ -109,7 +109,7 @@ public class IdAwareUuidAwareEnabledAwareTimestampedModel : UuidAwareEnabledAwar
     /// <param name="left">left instance</param>
     /// <param name="right">right instance</param>
     /// <returns>true if left is greater than right, false otherwise</returns>
-    public static bool operator >(IdAwareUuidAwareEnabledAwareTimestampedModel left, IdAwareUuidAwareEnabledAwareTimestampedModel right)
+    public static bool operator >(UuidAwareLogicallyDeletableModel left, UuidAwareLogicallyDeletableModel right)
     {
         return !ReferenceEquals(left, null) && left.CompareTo(right) > 0;
     }
@@ -120,7 +120,7 @@ public class IdAwareUuidAwareEnabledAwareTimestampedModel : UuidAwareEnabledAwar
     /// <param name="left">left instance</param>
     /// <param name="right">right instance</param>
     /// <returns>true if left is greater or equals than right, false otherwise</returns>
-    public static bool operator >=(IdAwareUuidAwareEnabledAwareTimestampedModel left, IdAwareUuidAwareEnabledAwareTimestampedModel right)
+    public static bool operator >=(UuidAwareLogicallyDeletableModel left, UuidAwareLogicallyDeletableModel right)
     {
         return ReferenceEquals(left, null) ? ReferenceEquals(right, null) : left.CompareTo(right) >= 0;
     }

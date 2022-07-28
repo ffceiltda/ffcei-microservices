@@ -1,9 +1,9 @@
 namespace FFCEI.Microservices.Models;
 
 /// <summary>
-/// Model interface with Id property and Uuid property and IsEnabled property
+/// Model interface with Id property and IsLogicallyDeleted property and Timestamping (created / updated) support
 /// </summary>
-public class IdAwareUuidAwareEnabledAwareModel : UuidAwareEnabledAwareModel, IIdAwareModel
+public class IdAwareLogicallyDeletableTimeStampedModel : LogicallyDeletableTimeStampedModel, IIdAwareModel
 {
     public long Id { get; set; }
 
@@ -30,7 +30,7 @@ public class IdAwareUuidAwareEnabledAwareModel : UuidAwareEnabledAwareModel, IId
         return Id.CompareTo(other.Id);
     }
 
-    public override int CompareTo(object? obj)
+    public virtual int CompareTo(object? obj)
     {
         if (obj is IIdAwareModel modelCasted)
         {
@@ -60,7 +60,7 @@ public class IdAwareUuidAwareEnabledAwareModel : UuidAwareEnabledAwareModel, IId
     /// <param name="left">left instance</param>
     /// <param name="right">right instance</param>
     /// <returns>true if equals, false otherwise</returns>
-    public static bool operator ==(IdAwareUuidAwareEnabledAwareModel left, IdAwareUuidAwareEnabledAwareModel right)
+    public static bool operator ==(IdAwareLogicallyDeletableTimeStampedModel left, IdAwareLogicallyDeletableTimeStampedModel right)
     {
         if (ReferenceEquals(left, null))
         {
@@ -76,7 +76,7 @@ public class IdAwareUuidAwareEnabledAwareModel : UuidAwareEnabledAwareModel, IId
     /// <param name="left">left instance</param>
     /// <param name="right">right instance</param>
     /// <returns>true if different, false otherwise</returns>
-    public static bool operator !=(IdAwareUuidAwareEnabledAwareModel left, IdAwareUuidAwareEnabledAwareModel right)
+    public static bool operator !=(IdAwareLogicallyDeletableTimeStampedModel left, IdAwareLogicallyDeletableTimeStampedModel right)
     {
         return !(left == right);
     }
@@ -87,7 +87,7 @@ public class IdAwareUuidAwareEnabledAwareModel : UuidAwareEnabledAwareModel, IId
     /// <param name="left">left instance</param>
     /// <param name="right">right instance</param>
     /// <returns>true if left is less than right, false otherwise</returns>
-    public static bool operator <(IdAwareUuidAwareEnabledAwareModel left, IdAwareUuidAwareEnabledAwareModel right)
+    public static bool operator <(IdAwareLogicallyDeletableTimeStampedModel left, IdAwareLogicallyDeletableTimeStampedModel right)
     {
         return ReferenceEquals(left, null) ? !ReferenceEquals(right, null) : left.CompareTo(right) < 0;
     }
@@ -98,7 +98,7 @@ public class IdAwareUuidAwareEnabledAwareModel : UuidAwareEnabledAwareModel, IId
     /// <param name="left">left instance</param>
     /// <param name="right">right instance</param>
     /// <returns>true if left is less or equals than right, false otherwise</returns>
-    public static bool operator <=(IdAwareUuidAwareEnabledAwareModel left, IdAwareUuidAwareEnabledAwareModel right)
+    public static bool operator <=(IdAwareLogicallyDeletableTimeStampedModel left, IdAwareLogicallyDeletableTimeStampedModel right)
     {
         return ReferenceEquals(left, null) || left.CompareTo(right) <= 0;
     }
@@ -109,7 +109,7 @@ public class IdAwareUuidAwareEnabledAwareModel : UuidAwareEnabledAwareModel, IId
     /// <param name="left">left instance</param>
     /// <param name="right">right instance</param>
     /// <returns>true if left is greater than right, false otherwise</returns>
-    public static bool operator >(IdAwareUuidAwareEnabledAwareModel left, IdAwareUuidAwareEnabledAwareModel right)
+    public static bool operator >(IdAwareLogicallyDeletableTimeStampedModel left, IdAwareLogicallyDeletableTimeStampedModel right)
     {
         return !ReferenceEquals(left, null) && left.CompareTo(right) > 0;
     }
@@ -120,7 +120,7 @@ public class IdAwareUuidAwareEnabledAwareModel : UuidAwareEnabledAwareModel, IId
     /// <param name="left">left instance</param>
     /// <param name="right">right instance</param>
     /// <returns>true if left is greater or equals than right, false otherwise</returns>
-    public static bool operator >=(IdAwareUuidAwareEnabledAwareModel left, IdAwareUuidAwareEnabledAwareModel right)
+    public static bool operator >=(IdAwareLogicallyDeletableTimeStampedModel left, IdAwareLogicallyDeletableTimeStampedModel right)
     {
         return ReferenceEquals(left, null) ? ReferenceEquals(right, null) : left.CompareTo(right) >= 0;
     }

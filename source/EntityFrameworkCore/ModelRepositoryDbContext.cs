@@ -11,10 +11,12 @@ public abstract class ModelRepositoryDbContext : DbContext
 {
     private static readonly PropertyInfo? CreatedAtProperty = typeof(TimestampedModel).GetProperty("CreatedAt");
     private static readonly PropertyInfo? UpdatedAtProperty = typeof(TimestampedModel).GetProperty("UpdatedAt");
-    private static readonly PropertyInfo? UuidEnabledTimestampedProperty = typeof(UuidAwareEnabledAwareTimestampedModel).GetProperty("Uuid");
+    private static readonly PropertyInfo? UuidEnabledTimestampedProperty = typeof(UuidAwareLogicallyDeletableTimeStampedModel).GetProperty("Uuid");
     private static readonly PropertyInfo? UuidTimestampedProperty = typeof(UuidAwareTimestampedModel).GetProperty("Uuid");
-    private static readonly PropertyInfo? UuidEnabledProperty = typeof(UuidAwareEnabledAwareModel).GetProperty("Uuid");
+    private static readonly PropertyInfo? UuidEnabledProperty = typeof(UuidAwareLogicallyDeletableModel).GetProperty("Uuid");
     private static readonly PropertyInfo? UuidProperty = typeof(UuidAwareModel).GetProperty("Uuid");
+    private static readonly PropertyInfo? IsLogicallyDeletedProperty = typeof(LogicallyDeletableModel).GetProperty("IsLogicallyDeleted");
+    private static readonly PropertyInfo? IsLogicallyDeletedTimestampedProperty = typeof(LogicallyDeletableTimeStampedModel).GetProperty("IsLogicallyDeleted");
 
     private bool _modelBuildersMapped;
 
@@ -98,19 +100,36 @@ public abstract class ModelRepositoryDbContext : DbContext
 
             if (entity.State == EntityState.Added)
             {
-                var uuidProperty = entity.Entity.GetType().IsSubclassOf(typeof(UuidAwareEnabledAwareTimestampedModel)) ? UuidEnabledTimestampedProperty :
+                var uuidProperty = entity.Entity.GetType().IsSubclassOf(typeof(UuidAwareLogicallyDeletableTimeStampedModel)) ? UuidEnabledTimestampedProperty :
                     entity.Entity.GetType().IsSubclassOf(typeof(UuidAwareTimestampedModel)) ? UuidTimestampedProperty :
-                    entity.Entity.GetType().IsSubclassOf(typeof(UuidAwareEnabledAwareModel)) ? UuidEnabledProperty :
+                    entity.Entity.GetType().IsSubclassOf(typeof(UuidAwareLogicallyDeletableModel)) ? UuidEnabledProperty :
                     entity.Entity.GetType().IsSubclassOf(typeof(UuidAwareModel)) ? UuidProperty :
                     null;
 
-                var value = uuidProperty?.GetValue(entity.Entity);
-
-                if (((value is Guid guid) && (guid == Guid.Empty)) || (value is null))
+                if (uuidProperty is not null)
                 {
-                    value = Guid.NewGuid();
+                    var value = uuidProperty.GetValue(entity.Entity);
 
-                    uuidProperty?.SetValue(entity.Entity, value);
+                    if (((value is Guid guid) && (guid == Guid.Empty)) || (value is null))
+                    {
+                        value = Guid.NewGuid();
+
+                        uuidProperty.SetValue(entity.Entity, value);
+                    }
+                }
+            }
+
+            if (entity.State == EntityState.Deleted)
+            {
+                var isLogicallyDeletedProperty = entity.Entity.GetType().IsSubclassOf(typeof(LogicallyDeletableModel)) ? IsLogicallyDeletedProperty :
+                    entity.Entity.GetType().IsSubclassOf(typeof(LogicallyDeletableTimeStampedModel)) ? IsLogicallyDeletedTimestampedProperty :
+                    null;
+
+                if (isLogicallyDeletedProperty is not null)
+                {
+                    isLogicallyDeletedProperty.SetValue(entity.Entity, false);
+
+                    entity.State = EntityState.Modified;
                 }
             }
         }

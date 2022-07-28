@@ -131,7 +131,16 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
             throw new ArgumentNullException(nameof(content));
         }
 
-        Set.Remove(content);
+        if (content is ILogicallyDeletableModel model)
+        {
+            model.IsLogicallyDeleted = true;
+
+            Set.Update(content);
+        }
+        else
+        {
+            Set.Remove(content);
+        }
 
         if (autoCommit)
         {
@@ -163,7 +172,10 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
             throw new ArgumentNullException(nameof(contents));
         }
 
-        Set.RemoveRange(contents);
+        foreach (var content in contents)
+        {
+            await RemoveExistingAsync(content, false);
+        }
 
         if (autoCommit)
         {
