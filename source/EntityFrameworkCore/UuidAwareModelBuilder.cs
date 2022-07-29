@@ -26,7 +26,8 @@ public static class UuidAwareModelBuilder
 #pragma warning disable IDE0058 // Expression value is never used
         entityBuilder.Property(e => e.Uuid)
             .IsRequired()
-            .IsUuidColumn();
+            .IsUuidColumn()
+            .ValueGeneratedOnAdd();
 
         entityBuilder.HasAlternateKey(e => e.Uuid)
             .HasName($"{entityBuilder.Metadata.GetTableName()}_UK_1");

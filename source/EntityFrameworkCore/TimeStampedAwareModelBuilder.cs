@@ -25,11 +25,13 @@ public static class TimestampedAwareModelBuilder
 #pragma warning disable IDE0058 // Expression value is never used
         entityBuilder.Property(e => e.CreatedAt)
             .IsRequired()
-            .IsDateTimeWithUtcOffsetColumn();
+            .IsDateTimeWithUtcOffsetColumn()
+            .ValueGeneratedOnAdd();
 
         entityBuilder.Property(e => e.UpdatedAt)
             .IsRequired()
-            .IsDateTimeWithUtcOffsetColumn();
+            .IsDateTimeWithUtcOffsetColumn()
+            .ValueGeneratedOnAddOrUpdate();
 #pragma warning restore IDE0058 // Expression value is never used
     }
 }
