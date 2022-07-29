@@ -67,4 +67,34 @@ public interface IReadOnlyModelRepository<TModel> : IReadOnlyModelRepository whe
     /// <param name="predicate">Model match predicate</param>
     /// <returns>All models that match predicate or null</returns>
     Task<IEnumerable<TModel>> ManyByPredicateAdvancedAsync(bool ignoreQueryFilters, Expression<Func<TModel, bool>> predicate);
+
+    /// <summary>
+    /// Return all models that match predicate or null, as a List
+    /// </summary>
+    /// <param name="predicate">Model match predicate</param>
+    /// <returns>All models that match predicate or null</returns>
+    Task<List<TModel>> ManyByPredicateAsListAsync(Expression<Func<TModel, bool>> predicate);
+
+    /// <summary>
+    /// Return all models that match predicate or null, allowing to ignore EF Query Filters, as a List
+    /// </summary>
+    /// <param name="ignoreQueryFilters">Ignore EF Core Query Filters</param>
+    /// <param name="predicate">Model match predicate</param>
+    /// <returns>All models that match predicate or null</returns>
+    Task<List<TModel>> ManyByPredicateAsListAdvancedAsync(bool ignoreQueryFilters, Expression<Func<TModel, bool>> predicate);
+
+    /// <summary>
+    /// Return all models that match predicate or null, as a HashSet
+    /// </summary>
+    /// <param name="predicate">Model match predicate</param>
+    /// <returns>All models that match predicate or null</returns>
+    Task<HashSet<TModel>> ManyByPredicateAsHashSetAsync(Expression<Func<TModel, bool>> predicate);
+
+    /// <summary>
+    /// Return all models that match predicate or null, allowing to ignore EF Query Filters, as a HashSet
+    /// </summary>
+    /// <param name="ignoreQueryFilters">Ignore EF Core Query Filters</param>
+    /// <param name="predicate">Model match predicate</param>
+    /// <returns>All models that match predicate or null</returns>
+    Task<HashSet<TModel>> ManyByPredicateAsHashSetAdvancedAsync(bool ignoreQueryFilters, Expression<Func<TModel, bool>> predicate);
 }

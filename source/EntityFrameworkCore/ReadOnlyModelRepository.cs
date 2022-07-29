@@ -49,14 +49,28 @@ public class ReadOnlyModelRepository<TModel> : IReadOnlyModelRepository<TModel> 
         return result;
     }
 
-    public async ValueTask<TModel?> FirstOrDefaultByPredicateAsync(Expression<Func<TModel, bool>> predicate) => await Where(predicate).FirstOrDefaultAsync();
+    public async ValueTask<TModel?> FirstOrDefaultByPredicateAsync(Expression<Func<TModel, bool>> predicate) =>
+        await Where(predicate).FirstOrDefaultAsync();
 
     public async ValueTask<TModel?> FirstOrDefaultByPredicateAdvancedAsync(bool ignoreQueryFilters, Expression<Func<TModel, bool>> predicate) =>
         await WhereAdvanced(ignoreQueryFilters, predicate).FirstOrDefaultAsync();
 
-    public async Task<IEnumerable<TModel>> ManyByPredicateAsync(Expression<Func<TModel, bool>> predicate) => await Where(predicate).ToListAsync();
+    public async Task<IEnumerable<TModel>> ManyByPredicateAsync(Expression<Func<TModel, bool>> predicate) =>
+        await ManyByPredicateAsListAsync(predicate);
 
     public async Task<IEnumerable<TModel>> ManyByPredicateAdvancedAsync(bool ignoreQueryFilters, Expression<Func<TModel, bool>> predicate) =>
-         await WhereAdvanced(ignoreQueryFilters, predicate).ToListAsync();
+        await ManyByPredicateAsListAdvancedAsync(ignoreQueryFilters, predicate);
+
+    public async Task<List<TModel>> ManyByPredicateAsListAsync(Expression<Func<TModel, bool>> predicate) =>
+        await Where(predicate).ToListAsync();
+
+    public async Task<List<TModel>> ManyByPredicateAsListAdvancedAsync(bool ignoreQueryFilters, Expression<Func<TModel, bool>> predicate) =>
+        await WhereAdvanced(ignoreQueryFilters, predicate).ToListAsync();
+
+    public async Task<HashSet<TModel>> ManyByPredicateAsHashSetAsync(Expression<Func<TModel, bool>> predicate) =>
+        (await ManyByPredicateAsListAsync(predicate)).ToHashSet();
+
+    public async Task<HashSet<TModel>> ManyByPredicateAsHashSetAdvancedAsync(bool ignoreQueryFilters, Expression<Func<TModel, bool>> predicate) =>
+        (await ManyByPredicateAsListAdvancedAsync(ignoreQueryFilters, predicate)).ToHashSet();
 #pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
 }
