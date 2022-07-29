@@ -32,6 +32,30 @@ public interface IModelRepository : IReadOnlyModelRepository
     Task UpdateExistingAsync(IModel content, bool autoCommit = true);
 
     /// <summary>
+    /// Update existing Models in repository
+    /// </summary>
+    /// <param name="contents">Collection of Model instances</param>
+    /// <param name="autoCommit">Save changes after operation succeeds</param>
+    /// <returns>void</returns>
+    Task UpdateManyAsync(IEnumerable<IModel> contents, bool autoCommit = true);
+
+    /// <summary>
+    /// Logically delete a existing Model from repository if TModel implements ILogicallyDeletableModel
+    /// </summary>
+    /// <param name="content">Model instance</param>
+    /// <param name="autoCommit">Save changes after operation succeeds</param>
+    /// <returns>void</returns>
+    Task LogicallyDeleteExistingAsync(IModel content, bool autoCommit = true);
+
+    /// <summary>
+    /// Logically delete existing ModelS from repository if TModel implements ILogicallyDeletableModel
+    /// </summary>
+    /// <param name="contents">Collection of Model instances</param>
+    /// <param name="autoCommit">Save changes after operation succeeds</param>
+    /// <returns>void</returns>
+    Task LogicallyDeleteManyAsync(IEnumerable<IModel> contents, bool autoCommit = true);
+
+    /// <summary>
     /// Remove existing Model from repository
     /// </summary>
     /// <param name="content">Model instance</param>

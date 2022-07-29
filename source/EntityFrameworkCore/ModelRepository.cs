@@ -19,14 +19,14 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
 #pragma warning disable IDE0058 // Expression value is never used
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
-    public async Task AddNewAsync(TModel content, bool autoCommit = true)
+    public async Task AddNewAsync(TModel model, bool autoCommit = true)
     {
-        if (content is null)
+        if (model is null)
         {
-            throw new ArgumentNullException(nameof(content));
+            throw new ArgumentNullException(nameof(model));
         }
 
-        await Set.AddAsync(content);
+        await Set.AddAsync(model);
 
         if (autoCommit)
         {
@@ -41,9 +41,9 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
             throw new ArgumentNullException(nameof(content));
         }
 
-        if (content is TModel casted)
+        if (content is TModel model)
         {
-            await AddNewAsync(casted, autoCommit);
+            await AddNewAsync(model, autoCommit);
         }
         else
         {
@@ -51,14 +51,14 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
         }
     }
 
-    public async Task AddManyAsync(IEnumerable<TModel> contents, bool autoCommit = true)
+    public async Task AddManyAsync(IEnumerable<TModel> models, bool autoCommit = true)
     {
-        if (contents is null)
+        if (models is null)
         {
-            throw new ArgumentNullException(nameof(contents));
+            throw new ArgumentNullException(nameof(models));
         }
 
-        await Set.AddRangeAsync(contents);
+        await Set.AddRangeAsync(models);
 
         if (autoCommit)
         {
@@ -73,33 +73,31 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
             throw new ArgumentNullException(nameof(contents));
         }
 
+        var models = new List<TModel>();
+
         foreach (var content in contents)
         {
-            if (content is not TModel casted)
+            if (content is TModel model)
+            {
+                models.Add(model);
+            }
+            else
             {
                 throw new IncompatibleModelObjectTypeForDbSetException(typeof(TModel), content.GetType());
             }
         }
 
-        foreach (var content in contents)
-        {
-            await AddNewAsync((TModel)content, false);
-        }
-
-        if (autoCommit)
-        {
-            await Context.SaveChangesAsync();
-        }
+        await AddManyAsync(models, autoCommit);
     }
 
-    public async Task UpdateExistingAsync(TModel content, bool autoCommit = true)
+    public async Task UpdateExistingAsync(TModel model, bool autoCommit = true)
     {
-        if (content is null)
+        if (model is null)
         {
-            throw new ArgumentNullException(nameof(content));
+            throw new ArgumentNullException(nameof(model));
         }
 
-        Set.Update(content);
+        Set.Update(model);
 
         if (autoCommit)
         {
@@ -114,9 +112,9 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
             throw new ArgumentNullException(nameof(content));
         }
 
-        if (content is TModel casted)
+        if (content is TModel model)
         {
-            await UpdateExistingAsync(casted, autoCommit);
+            await UpdateExistingAsync(model, autoCommit);
         }
         else
         {
@@ -124,22 +122,152 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
         }
     }
 
-    public async Task RemoveExistingAsync(TModel content, bool autoCommit = true)
+    public async Task UpdateManyAsync(IEnumerable<TModel> models, bool autoCommit = true)
+    {
+        if (models is null)
+        {
+            throw new ArgumentNullException(nameof(models));
+        }
+
+        Set.UpdateRange(models);
+
+        if (autoCommit)
+        {
+            await Context.SaveChangesAsync();
+        }
+    }
+
+    public async Task UpdateManyAsync(IEnumerable<IModel> contents, bool autoCommit = true)
+    {
+        if (contents is null)
+        {
+            throw new ArgumentNullException(nameof(contents));
+        }
+
+        var models = new List<TModel>();
+
+        foreach (var content in contents)
+        {
+            if (content is TModel model)
+            {
+                models.Add(model);
+            }
+            else
+            {
+                throw new IncompatibleModelObjectTypeForDbSetException(typeof(TModel), content.GetType());
+            }
+        }
+
+        await UpdateManyAsync(models, autoCommit);
+    }
+
+    public async Task LogicallyDeleteExistingAsync(TModel model, bool autoCommit = true)
+    {
+        if (model is null)
+        {
+            throw new ArgumentNullException(nameof(model));
+        }
+
+        if (model is ILogicallyDeletableModel logicallyDeletableModel)
+        {
+            logicallyDeletableModel.IsLogicallyDeleted = true;
+
+            Set.Update(model);
+        }
+
+        if (autoCommit)
+        {
+            await Context.SaveChangesAsync();
+        }
+    }
+
+    public async Task LogicallyDeleteExistingAsync(IModel content, bool autoCommit = true)
     {
         if (content is null)
         {
             throw new ArgumentNullException(nameof(content));
         }
 
-        if (content is ILogicallyDeletableModel model)
+        if (content is TModel model)
         {
-            model.IsLogicallyDeleted = true;
-
-            Set.Update(content);
+            await LogicallyDeleteExistingAsync(model, autoCommit);
         }
         else
         {
-            Set.Remove(content);
+            throw new IncompatibleModelObjectTypeForDbSetException(typeof(TModel), content.GetType());
+        }
+    }
+
+    public async Task LogicallyDeleteManyAsync(IEnumerable<TModel> models, bool autoCommit = true)
+    {
+        if (models is null)
+        {
+            throw new ArgumentNullException(nameof(models));
+        }
+
+        var modelType = models.FirstOrDefault();
+
+        if (modelType is ILogicallyDeletableModel)
+        {
+            foreach (var model in models)
+            {
+                if (model is ILogicallyDeletableModel logicallyDeletableModel)
+                {
+                    logicallyDeletableModel.IsLogicallyDeleted = true;
+                }
+            }
+
+            Set.UpdateRange(models);
+        }
+        else
+        {
+            Set.RemoveRange(models);
+        }
+
+        if (autoCommit)
+        {
+            await Context.SaveChangesAsync();
+        }
+    }
+
+    public async Task LogicallyDeleteManyAsync(IEnumerable<IModel> contents, bool autoCommit = true)
+    {
+        if (contents is null)
+        {
+            throw new ArgumentNullException(nameof(contents));
+        }
+
+        var models = new List<TModel>();
+
+        foreach (var content in contents)
+        {
+            if (content is TModel model)
+            {
+                models.Add(model);
+            }
+            else
+            {
+                throw new IncompatibleModelObjectTypeForDbSetException(typeof(TModel), content.GetType());
+            }
+        }
+
+        await LogicallyDeleteManyAsync(models, autoCommit);
+    }
+
+    public async Task RemoveExistingAsync(TModel model, bool autoCommit = true)
+    {
+        if (model is null)
+        {
+            throw new ArgumentNullException(nameof(model));
+        }
+
+        if (model is ILogicallyDeletableModel)
+        {
+            await LogicallyDeleteExistingAsync(model, false);
+        }
+        else
+        {
+            Set.Remove(model);
         }
 
         if (autoCommit)
@@ -155,9 +283,9 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
             throw new ArgumentNullException(nameof(content));
         }
 
-        if (content is TModel casted)
+        if (content is TModel model)
         {
-            await RemoveExistingAsync(casted, autoCommit);
+            await RemoveExistingAsync(model, autoCommit);
         }
         else
         {
@@ -165,16 +293,22 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
         }
     }
 
-    public async Task RemoveManyAsync(IEnumerable<TModel> contents, bool autoCommit = true)
+    public async Task RemoveManyAsync(IEnumerable<TModel> models, bool autoCommit = true)
     {
-        if (contents is null)
+        if (models is null)
         {
-            throw new ArgumentNullException(nameof(contents));
+            throw new ArgumentNullException(nameof(models));
         }
 
-        foreach (var content in contents)
+        var modelType = models.FirstOrDefault();
+
+        if (modelType is ILogicallyDeletableModel)
         {
-            await RemoveExistingAsync(content, false);
+            await LogicallyDeleteManyAsync(models, false);
+        }
+        else
+        {
+            Set.RemoveRange(models);
         }
 
         if (autoCommit)
@@ -190,14 +324,21 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
             throw new ArgumentNullException(nameof(contents));
         }
 
-        if (contents is IEnumerable<TModel> casted)
+        var models = new List<TModel>();
+
+        foreach (var content in contents)
         {
-            await RemoveManyAsync(casted, autoCommit);
+            if (content is TModel model)
+            {
+                models.Add(model);
+            }
+            else
+            {
+                throw new IncompatibleModelObjectTypeForDbSetException(typeof(TModel), content.GetType());
+            }
         }
-        else
-        {
-            throw new IncompatibleModelObjectTypeForDbSetException(typeof(IEnumerable<TModel>), contents.GetType());
-        }
+
+        await RemoveManyAsync(models, autoCommit);
     }
 
     public async Task RemoveByKeyAsync(bool autoCommit = true, params object[] keys)
@@ -217,22 +358,14 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task RemoveManyByPredicateAsync(Expression<Func<TModel, bool>> predicate, bool autoCommit = true)
     {
-        var contents = await Set.Where(predicate).ToListAsync();
+        var models = await Set.Where(predicate).ToListAsync();
 
-        if (contents is null)
+        if (models is null)
         {
             throw new ArgumentNullException(nameof(predicate), "predicate returned null");
         }
 
-        foreach (var content in contents)
-        {
-            await RemoveExistingAsync(content, false);
-        }
-
-        if (autoCommit)
-        {
-            await Context.SaveChangesAsync();
-        }
+        await RemoveManyAsync(models, autoCommit);
     }
 
     public async Task ReloadExistingAsync(TModel content)
@@ -252,9 +385,9 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
             throw new ArgumentNullException(nameof(content));
         }
 
-        if (content is TModel casted)
+        if (content is TModel model)
         {
-            await ReloadExistingAsync(casted);
+            await ReloadExistingAsync(model);
         }
         else
         {
@@ -281,9 +414,9 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
             throw new ArgumentNullException(nameof(content));
         }
 
-        if (content is TModel casted)
+        if (content is TModel model)
         {
-            Detach(casted);
+            Detach(model);
         }
         else
         {
