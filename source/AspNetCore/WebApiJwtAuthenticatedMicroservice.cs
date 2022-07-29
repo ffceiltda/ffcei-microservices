@@ -121,11 +121,11 @@ public class WebApiJwtAuthenticatedMicroservice<TWebApiClaims> : WebApiMicroserv
         var encryptionKeyFactory = new JwtEncryptionKeyFactory(this.ConfigurationManager);
         var argon2KeyFactory = new Argon2KeyFactory(this.ConfigurationManager);
 
-        Builder.Services.AddSingleton(signingKeyFactory);
-        Builder.Services.AddSingleton(encryptionKeyFactory);
-        Builder.Services.AddSingleton(argon2KeyFactory);
+        Services.AddSingleton(signingKeyFactory);
+        Services.AddSingleton(encryptionKeyFactory);
+        Services.AddSingleton(argon2KeyFactory);
 
-        Builder.Services.AddAuthentication(options =>
+        Services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -162,7 +162,7 @@ public class WebApiJwtAuthenticatedMicroservice<TWebApiClaims> : WebApiMicroserv
     {
         if (WebApiUseAuthorization)
         {
-            Builder.Services.AddJwtPostAuthorization(options =>
+            Services.AddJwtPostAuthorization(options =>
             {
                 options.JwtPostAuthorization = JwtPostAuthorization;
             });

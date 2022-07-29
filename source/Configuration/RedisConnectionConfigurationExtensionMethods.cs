@@ -23,7 +23,7 @@ public static class RedisConnectionConfigurationExtensionMethods
     /// <param name="database">Use this Database if specified</param>
     /// <returns>redisConnectionConfiguration instance</returns>
     /// <exception cref="ArgumentNullException"></exception>
-    public static RedisConnectionConfiguration GetRedisConfiguration(this ConfigurationManager configurationManager,
+    public static RedisConnectionConfiguration GetRedisConfiguration(this IConfigurationManager configurationManager,
         string hostSettingName = "Redis.Host",
         string portSettingName = "Redis.Port",
         string usernameSettingName = "Redis.UserName",

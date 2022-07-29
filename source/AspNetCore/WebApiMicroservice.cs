@@ -3,6 +3,7 @@ using EFCoreSecondLevelCacheInterceptor;
 using FFCEI.Microservices.AspNetCore.Middlewares;
 using FFCEI.Microservices.AspNetCore.StaticFolderMappings;
 using FFCEI.Microservices.Configuration;
+using FFCEI.Microservices.Microservices;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -23,7 +24,7 @@ namespace FFCEI.Microservices.AspNetCore;
 /// <summary>
 /// Web Api microservice template
 /// </summary>
-public class WebApiMicroservice
+public class WebApiMicroservice : IMicroservice
 {
     private readonly string[] _args;
     private WebApplicationBuilder? _initialBuilder;
@@ -34,10 +35,20 @@ public class WebApiMicroservice
     private RedisConnectionConfiguration? _entityFrameworkSecondLevelCacheRedisConfiguration;
     private static WeakReference<WebApiMicroservice> _instance = null!;
 
+    IHostBuilder IMicroservice.Builder => Builder.Host;
+    IServiceCollection IMicroservice.Services => Services;
+    IHost IMicroservice.Application => Application;
+    IConfigurationManager IMicroservice.ConfigurationManager => ConfigurationManager;
+
     /// <summary>
     /// ASP.NET Core Mvc Web Application Builder
     /// </summary>
     public WebApplicationBuilder Builder => _builder ??= CreateBuilder();
+
+    /// <summary>
+    /// ASP.NET Core Mvc Dependency Injection Services
+    /// </summary>
+    public IServiceCollection Services => Builder.Services;
 
     /// <summary>
     /// ASP.NET Core Mvc Web Application
@@ -289,8 +300,18 @@ public class WebApiMicroservice
     /// <summary>
     /// Run microservice
     /// </summary>
+    public void Run()
+    {
+        MapControllers();
+
+        Application.Run();
+    }
+
+    /// <summary>
+    /// Run microservice
+    /// </summary>
     /// <param name="url">The URL to listen to if the server hasn't been configured directly</param>
-    public void Run(string? url = null)
+    public void Run(string? url)
     {
         MapControllers();
 
@@ -300,8 +321,20 @@ public class WebApiMicroservice
     /// <summary>
     /// Run microservice asynchronously
     /// </summary>
+    public async Task RunAsync()
+    {
+        MapControllers();
+
+#pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
+        await Application.RunAsync();
+#pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
+    }
+
+    /// <summary>
+    /// Run microservice asynchronously
+    /// </summary>
     /// <param name="url">The URL to listen to if the server hasn't been configured directly</param>
-    public async Task RunAsync(string? url = null)
+    public async Task RunAsync(string? url)
     {
         MapControllers();
 
@@ -312,6 +345,7 @@ public class WebApiMicroservice
 #pragma warning restore CA1054 // URI-like parameters should not be strings
 
 #pragma warning disable IDE0058 // Expression value is never used
+
     private bool ShouldGenerateSwagger()
     {
         bool generateSwagger = WebApiGenerateSwagger ?? false;
@@ -373,7 +407,7 @@ public class WebApiMicroservice
     {
         if (HttpUseCors)
         {
-            Builder.Services.AddCors(options => options
+            Services.AddCors(options => options
                 .AddDefaultPolicy(policy => CreateKestrelCorsPolicy(policy)));
         }
 
@@ -385,7 +419,7 @@ public class WebApiMicroservice
             });
         });
 
-        Builder.Services.AddHttpContextAccessor();
+        Services.AddHttpContextAccessor();
     }
 
     private void CreateKestrel()
@@ -416,16 +450,16 @@ public class WebApiMicroservice
 
     private void BuildWebApi()
     {
-        Builder.Services.AddHttpClient();
+        Services.AddHttpClient();
 
         if (!Builder.Environment.IsDevelopment())
         {
-            Builder.Services.AddTransient<ExceptionHandlerMiddeware>();
+            Services.AddTransient<ExceptionHandlerMiddeware>();
         }
 
         if (WebApiUseAuthorization)
         {
-            Builder.Services.AddAuthorization(options =>
+            Services.AddAuthorization(options =>
             {
                 if (WebApiUseAuthorizationByDefault)
                 {
@@ -436,7 +470,7 @@ public class WebApiMicroservice
             });
         }
 
-        var mvcBuilder = Builder.Services.AddControllers();
+        var mvcBuilder = Services.AddControllers();
 
         BuildWebApiJsonOptions(mvcBuilder);
         BuildWebApiFluentValidation(mvcBuilder);
@@ -500,13 +534,13 @@ public class WebApiMicroservice
             validators.RegisterValidatorsFromAssemblies(assemblies);
         });
 
-        Builder.Services.AddFluentValidationAutoValidation();
+        Services.AddFluentValidationAutoValidation();
     }
 
     private void BuildWebApiSwagger()
     {
-        Builder.Services.AddEndpointsApiExplorer();
-        Builder.Services.AddSwaggerGen(options =>
+        Services.AddEndpointsApiExplorer();
+        Services.AddSwaggerGen(options =>
         {
             options.SwaggerDoc(WebApiVersion,
                 new OpenApiInfo
@@ -711,7 +745,7 @@ public class WebApiMicroservice
 
     private void BuildMemoryEntityFrameworkCoreSecondLevelCache()
     {
-        Builder.Services.AddEFSecondLevelCache(options =>
+        Services.AddEFSecondLevelCache(options =>
         {
             BuildEntityFrameworkCoreSecondLevelCacheOptions(options.UseMemoryCacheProvider());
         });
@@ -719,12 +753,12 @@ public class WebApiMicroservice
 
     private void BuildRedisEntityFrameworkCoreSecondLevelCache()
     {
-        Builder.Services.AddEFSecondLevelCache(options =>
+        Services.AddEFSecondLevelCache(options =>
         {
             BuildEntityFrameworkCoreSecondLevelCacheOptions(options.UseEasyCachingCoreProvider("EFSecondLevelRedisCache"));
         });
 
-        Builder.Services.AddEasyCaching(option =>
+        Services.AddEasyCaching(option =>
         {
             option.WithJson();
             option.UseRedisLock();
@@ -773,7 +807,7 @@ public class WebApiMicroservice
 
         foreach (var assembly in assemblies)
         {
-            Builder.Services.AddAutoMapper(assembly);
+            Services.AddAutoMapper(assembly);
         }
     }
 #pragma warning restore IDE0058 // Expression value is never used

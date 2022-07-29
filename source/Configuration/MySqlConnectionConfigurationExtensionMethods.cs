@@ -23,7 +23,7 @@ public static class MySqlConnectionConfigurationExtensionMethods
     /// <param name="database">Use this Database if specified</param>
     /// <returns>MySqlConnectionConfiguration instance</returns>
     /// <exception cref="ArgumentNullException"></exception>
-    public static MySqlConnectionConfiguration GetMySqlConfiguration(this ConfigurationManager configurationManager,
+    public static MySqlConnectionConfiguration GetMySqlConfiguration(this IConfigurationManager configurationManager,
         string hostSettingName = "MySql.Host",
         string portSettingName = "MySql.Port",
         string usernameSettingName = "MySql.UserName",

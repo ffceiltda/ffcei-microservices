@@ -1,4 +1,4 @@
-namespace FFCEI.Microservices.AspNetCore;
+namespace FFCEI.Microservices.Microservices;
 
 /// <summary>
 /// Entity Framework Second Level Cache Type

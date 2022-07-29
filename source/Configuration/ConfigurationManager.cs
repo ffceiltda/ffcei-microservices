@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
+using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 
@@ -8,11 +9,15 @@ namespace FFCEI.Microservices.Configuration;
 /// <summary>
 /// Configuration Manager (with support for system environment, environment files and ASP.NET Core appSettings)
 /// </summary>
-public sealed class ConfigurationManager
+public sealed class ConfigurationManager : IConfigurationManager
 {
-    private Microsoft.Extensions.Configuration.ConfigurationManager _configuration;
+    private Microsoft.Extensions.Configuration.IConfiguration _configuration;
+    private bool _isDevelopment = Debugger.IsAttached;
+    private bool _isProduction = !Debugger.IsAttached;
     private string _allConfigurationsFilePath = string.Empty;
+    private IEnumerable<string>? _allConfigurations;
     private string _applicationConfigurationsFilePath = string.Empty;
+    private IEnumerable<string>? _applicationConfigurations;
 
     internal ConfigurationManager(WebApplicationBuilder builder)
     {
@@ -23,6 +28,26 @@ public sealed class ConfigurationManager
 
         _configuration = builder.Configuration;
 
+        _isDevelopment = builder.Environment.IsDevelopment();
+        _isProduction = builder.Environment.IsProduction();
+
+        LoadConfiguration();
+    }
+
+    internal ConfigurationManager(IHostBuilder builder, Microsoft.Extensions.Configuration.IConfiguration configuration)
+    {
+        if (builder is null)
+        {
+            throw new ArgumentNullException(nameof(builder));
+        }
+
+        _configuration = configuration;
+
+        LoadConfiguration();
+    }
+
+    private void LoadConfiguration()
+    {
         var mainAssemblyName = Assembly.GetEntryAssembly()?.GetName().Name;
         var mainAssemblyCodeBase = Assembly.GetEntryAssembly()?.Location;
 
@@ -37,12 +62,11 @@ public sealed class ConfigurationManager
 
                 if (Directory.Exists(environmentBasePath))
                 {
-                    if (builder.Environment.IsDevelopment())
+                    if (_isDevelopment)
                     {
                         environmentBasePath = Path.Combine(environmentBasePath, "Development");
                     }
-
-                    if (builder.Environment.IsProduction())
+                    else if (_isProduction)
                     {
                         environmentBasePath = Path.Combine(environmentBasePath, "Production");
                     }
@@ -60,6 +84,9 @@ public sealed class ConfigurationManager
                             {
                                 using var file = File.Open(allConfigurationsFilePath, FileMode.Open, FileAccess.Read);
 
+                                file.Close();
+
+                                _allConfigurations = File.ReadAllLines(allConfigurationsFilePath);
                                 _allConfigurationsFilePath = allConfigurationsFilePath;
                             }
                             catch
@@ -78,6 +105,9 @@ public sealed class ConfigurationManager
                             {
                                 using var file = File.Open(allConfigurationsFilePath, FileMode.Open, FileAccess.Read);
 
+                                file.Close();
+
+                                _allConfigurations = File.ReadAllLines(allConfigurationsFilePath);
                                 _allConfigurationsFilePath = allConfigurationsFilePath;
                             }
                             catch
@@ -96,6 +126,9 @@ public sealed class ConfigurationManager
                             {
                                 using var file = File.Open(applicationConfigurationsFilePath, FileMode.Open, FileAccess.Read);
 
+                                file.Close();
+
+                                _applicationConfigurations = File.ReadAllLines(applicationConfigurationsFilePath);
                                 _applicationConfigurationsFilePath = applicationConfigurationsFilePath;
                             }
                             catch
@@ -114,6 +147,9 @@ public sealed class ConfigurationManager
                             {
                                 using var file = File.Open(applicationConfigurationsFilePath, FileMode.Open, FileAccess.Read);
 
+                                file.Close();
+
+                                _applicationConfigurations = File.ReadAllLines(applicationConfigurationsFilePath);
                                 _applicationConfigurationsFilePath = applicationConfigurationsFilePath;
                             }
                             catch
@@ -138,11 +174,6 @@ public sealed class ConfigurationManager
         }
     }
 
-    /// <summary>
-    /// Obtains a configuration from repositories
-    /// </summary>
-    /// <param name="key">Setting name</param>
-    /// <returns>Setting value or null if not found</returns>
     public string? this[string key]
     {
         get
@@ -151,32 +182,16 @@ public sealed class ConfigurationManager
         }
     }
 
-    /// <summary>
-    /// Obtains a configuration from repositories
-    /// </summary>
-    /// <param name="key">Setting name</param>
-    /// <returns>Setting value or null if not found</returns>
     public string? GetKey(string key)
     {
         return TryGetKey(key, out var value) ? value : null;
     }
 
-    /// <summary>
-    /// Check if a configuration exists on repositories
-    /// </summary>
-    /// <param name="key">Setting name</param>
-    /// <returns>true if found, false otherwise</returns>
     public bool HasKey(string key)
     {
         return TryGetKey(key, out var _);
     }
 
-    /// <summary>
-    /// Obtains a configuration from repositories
-    /// </summary>
-    /// <param name="key">Setting name</param>
-    /// <param name="value">Value found, or null if not found</param>
-    /// <returns>true if found, false otherwise</returns>
     public bool TryGetKey(string key, out string? value)
     {
         if (TryGetKeyFromApplicationConfigurations(key, out value))
@@ -208,9 +223,9 @@ public sealed class ConfigurationManager
             Replace(":", "_", StringComparison.InvariantCulture).ToUpper(CultureInfo.InvariantCulture);
     }
 
-    private static bool TryGetKeyFromConfigurationFile(string filename, string key, out string? value)
+    private static bool TryGetKeyFromConfigurationFile(IEnumerable<string>? lines, string key, out string? value)
     {
-        if (string.IsNullOrEmpty(filename))
+        if (lines?.FirstOrDefault() is null)
         {
             value = null;
 
@@ -218,8 +233,6 @@ public sealed class ConfigurationManager
         }
 
         var environmentKey = FormatKeyAsEnvironmentVariable(key);
-
-        var lines = File.ReadAllLines(filename);
 
         foreach (var line in lines)
         {
@@ -248,12 +261,12 @@ public sealed class ConfigurationManager
 
     private bool TryGetKeyFromApplicationConfigurations(string key, out string? value)
     {
-        return TryGetKeyFromConfigurationFile(_applicationConfigurationsFilePath, key, out value);
+        return TryGetKeyFromConfigurationFile(_applicationConfigurations, key, out value);
     }
 
     private bool TryGetKeyFromAllConfigurations(string key, out string? value)
     {
-        return TryGetKeyFromConfigurationFile(_allConfigurationsFilePath, key, out value);
+        return TryGetKeyFromConfigurationFile(_allConfigurations, key, out value);
     }
 
     private static bool TryGetKeyFromEnvironmentVariable(string key, out string? value)
