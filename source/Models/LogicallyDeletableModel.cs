@@ -16,4 +16,14 @@ public class LogicallyDeletableModel : Model, ILogicallyDeletableModel
             IsLogicallyDeleted = modelCasted.IsLogicallyDeleted;
         }
     }
+
+    public void LogicallyDelete()
+    {
+        IsLogicallyDeleted = true;
+    }
+
+    public void LogicallyUndelete()
+    {
+        IsLogicallyDeleted = false;
+    }
 }

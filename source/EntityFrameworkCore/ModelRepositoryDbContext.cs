@@ -127,7 +127,7 @@ public abstract class ModelRepositoryDbContext : DbContext
 
                 if (isLogicallyDeletedProperty is not null)
                 {
-                    isLogicallyDeletedProperty.SetValue(entity.Entity, false);
+                    isLogicallyDeletedProperty.SetValue(entity.Entity, true);
 
                     entity.State = EntityState.Modified;
                 }

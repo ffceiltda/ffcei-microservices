@@ -170,7 +170,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
         if (model is ILogicallyDeletableModel logicallyDeletableModel)
         {
-            logicallyDeletableModel.IsLogicallyDeleted = true;
+            logicallyDeletableModel.LogicallyDelete();
 
             Set.Update(model);
         }
@@ -213,7 +213,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
             {
                 if (model is ILogicallyDeletableModel logicallyDeletableModel)
                 {
-                    logicallyDeletableModel.IsLogicallyDeleted = true;
+                    logicallyDeletableModel.LogicallyDelete();
                 }
             }
 

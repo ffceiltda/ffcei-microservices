@@ -9,4 +9,14 @@ public interface ILogicallyDeletableModel : IModel
     /// IsLogicallyDeleted property
     /// </summary>
     bool IsLogicallyDeleted { get; set; }
+
+    /// <summary>
+    /// Logically delete a model instance
+    /// </summary>
+    void LogicallyDelete();
+
+    /// <summary>
+    /// Logically undelete a model instance
+    /// </summary>
+    void LogicallyUndelete();
 }
