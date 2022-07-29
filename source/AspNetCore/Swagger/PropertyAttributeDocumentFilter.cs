@@ -4,6 +4,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Collections.Concurrent;
 using System.Dynamic;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace FFCEI.Microservices.AspNetCore.Swagger;
 
@@ -105,7 +106,11 @@ internal sealed class PropertyAttributeDocumentFilter : IDocumentFilter
                         continue;
                     }
 
-                    var options = new JsonSerializerOptions { WriteIndented = true };
+                    var options = new JsonSerializerOptions
+                    {
+                        WriteIndented = true,
+                        DefaultIgnoreCondition = JsonIgnoreCondition.Never
+                    };
 
                     var attribute = Attribute.GetCustomAttribute(type, typeof(SwaggerRequestAttribute), true);
 
@@ -131,17 +136,16 @@ internal sealed class PropertyAttributeDocumentFilter : IDocumentFilter
                             expandoDictionary.Add(requiredProperty.Name, requiredProperty.PropertyType.GetDefaultValue());
                         }
 
+                        /*
+                        TODO: fixup response generator to include all fields, and handle array types
+                        
+                        content.Value.Examples.Add("Complete Request Schema", new OpenApiExample { Value = new OpenApiString(JsonSerializer.Serialize(fullObject, options)) });
+
                         if (expandoDictionary.Any())
                         {
-                            content.Value.Examples.Add("Minimal request", new OpenApiExample { Value = new OpenApiString(JsonSerializer.Serialize(miniObject, options)) });
-                            content.Value.Examples.Add("Full request", new OpenApiExample { Value = new OpenApiString(JsonSerializer.Serialize(fullObject, options)) });
+                            content.Value.Examples.Add("Minimal Required Schema", new OpenApiExample { Value = new OpenApiString(JsonSerializer.Serialize(miniObject, options)) });
                         }
-                        else
-                        {
-                            content.Value.Examples.Add("Full request", new OpenApiExample { Value = new OpenApiString(JsonSerializer.Serialize(fullObject, options)) });
-                        }
-
-                        schema.Default = null;
+                        */
                     }
                 }
             }

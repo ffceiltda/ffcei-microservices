@@ -570,7 +570,6 @@ public class WebApiMicroservice
                     options.SchemaFilter<Swagger.EnumTypesSchemaFilter>(xmlFile);
                     options.SchemaFilter<Swagger.MessageAttributeSchemaFilter>(xmlFile);
                     options.DocumentFilter<Swagger.PropertyAttributeDocumentFilter>();
-                    // options.OperationFilter<SecurityRequirementsOperationFilter>(false);
                 }
                 catch (Exception e)
                 {
