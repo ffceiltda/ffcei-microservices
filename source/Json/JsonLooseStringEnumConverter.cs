@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace FFCEI.Microservices.AspNetCore.Json;
+namespace FFCEI.Microservices.Json;
 
 internal sealed class JsonLooseStringEnumConverter : JsonConverterFactory
 {

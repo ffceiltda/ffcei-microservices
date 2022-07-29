@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace FFCEI.Microservices.AspNetCore.Json;
+namespace FFCEI.Microservices.Json;
 
 internal sealed class JsonStringToDecimalConverter : JsonConverterFactory
 {

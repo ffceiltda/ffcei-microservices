@@ -1,8 +1,10 @@
 using Destructurama;
+using EasyCaching.Serialization.SystemTextJson.Configurations;
 using EFCoreSecondLevelCacheInterceptor;
 using FFCEI.Microservices.AspNetCore.Middlewares;
 using FFCEI.Microservices.AspNetCore.StaticFolderMappings;
 using FFCEI.Microservices.Configuration;
+using FFCEI.Microservices.Json;
 using FFCEI.Microservices.Microservices;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
@@ -17,6 +19,7 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Events;
 using System.Reflection;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace FFCEI.Microservices.AspNetCore;
@@ -96,11 +99,6 @@ public class WebApiMicroservice : IMicroservice
     public bool? WebApiGenerateSwagger { get; set; }
 
     /// <summary>
-    /// Web Api: ignore null values on Json serialization (default to true)
-    /// </summary>
-    public bool WebApiIgnoreNullsOnJsonSerialization { get; set; } = true;
-
-    /// <summary>
     /// Web Api: require authorization on controller and methods (defaults to false on web api microservices, true on web api jwt authenticated microservices)
     /// </summary>
     public bool WebApiUseAuthorization { get; set; } = true;
@@ -109,6 +107,26 @@ public class WebApiMicroservice : IMicroservice
     /// Web Api: require authorization by default, defaults to false
     /// </summary>
     public bool WebApiUseAuthorizationByDefault { get; set; }
+
+    /// <summary>
+    /// Json: ignore null values on serialization (default to true)
+    /// </summary>
+    public bool JsonIgnoreNullOnSerialization { get; set; } = true;
+
+    /// <summary>
+    /// Json: write indented on serialization (default to false)
+    /// </summary>
+    public bool JsonWriteIndented { get; set; }
+
+    /// <summary>
+    /// Json for Web Api: ignore null values on serialization (default to true)
+    /// </summary>
+    public bool JsonForWebApiIgnoreNullOnSerialization { get; set; } = true;
+
+    /// <summary>
+    /// Json for Web Api: write indented on serialization (default to true)
+    /// </summary>
+    public bool JsonForWebApiWriteIndented { get; set; } = true;
 
     /// <summary>
     /// Entity Framework Core: which Second Level Cache method must be used
@@ -485,17 +503,20 @@ public class WebApiMicroservice : IMicroservice
     {
         mvcBuilder.AddJsonOptions(options =>
         {
-            options.JsonSerializerOptions.Converters.Add(new Json.JsonTrimmingConverter());
-            options.JsonSerializerOptions.Converters.Add(new Json.JsonLooseStringEnumConverter());
-            options.JsonSerializerOptions.Converters.Add(new Json.JsonStringToDecimalConverter());
-            options.JsonSerializerOptions.Converters.Add(new Json.JsonStringToLongConverter());
-            options.JsonSerializerOptions.Converters.Add(new Json.JsonStringToIntegerConverter());
-
-            if (WebApiIgnoreNullsOnJsonSerialization)
-            {
-                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-            }
+            ConfigureJsonSerializerOptions(options.JsonSerializerOptions, true);
         });
+    }
+
+    private void ConfigureJsonSerializerOptions(JsonSerializerOptions options, bool isWebApi)
+    {
+        options.WriteIndented = isWebApi ? JsonForWebApiWriteIndented : JsonWriteIndented;
+        options.DefaultIgnoreCondition = (isWebApi ? JsonForWebApiIgnoreNullOnSerialization : JsonIgnoreNullOnSerialization) ? JsonIgnoreCondition.WhenWritingNull : JsonIgnoreCondition.Never;
+
+        options.Converters.Add(new JsonTrimmingConverter());
+        options.Converters.Add(new JsonLooseStringEnumConverter());
+        options.Converters.Add(new JsonStringToDecimalConverter());
+        options.Converters.Add(new JsonStringToLongConverter());
+        options.Converters.Add(new JsonStringToIntegerConverter());
     }
 
     private void BuildWebApiFluentValidation(IMvcBuilder mvcBuilder)
@@ -760,7 +781,11 @@ public class WebApiMicroservice : IMicroservice
 
         Services.AddEasyCaching(option =>
         {
-            option.WithJson();
+            option.WithSystemTextJson((JsonSerializerOptions options) =>
+            {
+                ConfigureJsonSerializerOptions(options, false);
+            }, "EFSecondLevelJsonSerializer");
+
             option.UseRedisLock();
             option.UseRedis(config =>
             {

@@ -1,6 +1,8 @@
 using Destructurama;
+using EasyCaching.Serialization.SystemTextJson.Configurations;
 using EFCoreSecondLevelCacheInterceptor;
 using FFCEI.Microservices.Configuration;
+using FFCEI.Microservices.Json;
 using FFCEI.Microservices.Microservices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +11,8 @@ using Serilog;
 using Serilog.Events;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace FFCEI.Microservices.Workers;
 
@@ -55,6 +59,16 @@ public class WorkerMicroservice : IMicroservice
     /// Set shutting down to true make all new requests to reply with HTTP Code 503 - Service unavailable, for load balancers
     /// </summary>
     public bool ShuttingDown { get; set; }
+
+    /// <summary>
+    /// Json: ignore null values on serialization (default to true)
+    /// </summary>
+    public bool JsonIgnoreNullOnSerialization { get; set; } = true;
+
+    /// <summary>
+    /// Json: write indented on serialization (default to false)
+    /// </summary>
+    public bool JsonWriteIndented { get; set; }
 
     /// <summary>
     /// Entity Framework Core: which Second Level Cache method must be used
@@ -313,6 +327,18 @@ public class WorkerMicroservice : IMicroservice
         });
     }
 
+    private void ConfigureJsonSerializerOptions(JsonSerializerOptions options)
+    {
+        options.WriteIndented = JsonWriteIndented;
+        options.DefaultIgnoreCondition = JsonIgnoreNullOnSerialization ? JsonIgnoreCondition.WhenWritingNull : JsonIgnoreCondition.Never;
+
+        options.Converters.Add(new JsonTrimmingConverter());
+        options.Converters.Add(new JsonLooseStringEnumConverter());
+        options.Converters.Add(new JsonStringToDecimalConverter());
+        options.Converters.Add(new JsonStringToLongConverter());
+        options.Converters.Add(new JsonStringToIntegerConverter());
+    }
+
     private void BuildRedisEntityFrameworkCoreSecondLevelCache()
     {
         Services.AddEFSecondLevelCache(options =>
@@ -322,7 +348,11 @@ public class WorkerMicroservice : IMicroservice
 
         Services.AddEasyCaching(option =>
         {
-            option.WithJson();
+            option.WithSystemTextJson((JsonSerializerOptions options) =>
+            {
+                ConfigureJsonSerializerOptions(options);
+            }, "EFSecondLevelJsonSerializer");
+
             option.UseRedisLock();
             option.UseRedis(config =>
             {
