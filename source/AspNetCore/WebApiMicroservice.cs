@@ -160,6 +160,8 @@ public class WebApiMicroservice : IMicroservice
         }
     }
 
+    public Microsoft.Extensions.Logging.ILogger Logger => null!;
+
     /// <summary>
     /// Microservice constructor
     /// </summary>
