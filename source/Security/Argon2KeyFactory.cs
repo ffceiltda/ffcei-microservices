@@ -9,7 +9,7 @@ namespace FFCEI.Microservices.Security
         private string? _secretKey;
         private int _defaultSaltLength = 64;
 
-        public Argon2KeyFactory(ConfigurationManager configurationManager)
+        public Argon2KeyFactory(IConfigurationManager configurationManager)
         {
             if (configurationManager is null)
             {

@@ -12,4 +12,4 @@ microservice.WebApiGenerateSwagger = true;
 // var application = microservice.Application;
 
 // Run your microservice
-await microservice.RunAsync();
+microservice.Run();

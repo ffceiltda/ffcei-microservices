@@ -50,7 +50,7 @@ public class SecurityKeyFactory
     /// <param name="configurationKeyStringPrefix">Configuration key string prefix</param>
     /// <param name="logger">Logger</param>
     /// <exception cref="ArgumentNullException">throw is configurationManager is null of configurationKeyStringPrefis is null or empty</exception>
-    public SecurityKeyFactory(ConfigurationManager configurationManager, string configurationKeyStringPrefix, ILogger? logger = null)
+    public SecurityKeyFactory(IConfigurationManager configurationManager, string configurationKeyStringPrefix, ILogger? logger = null)
     {
         if (configurationManager == null)
         {

@@ -83,8 +83,7 @@ public class WebApiJwtAuthenticatedMicroservice<TWebApiClaims> : WebApiMicroserv
     /// <summary>
     /// Microservice instance (singleton)
     /// </summary>
-    public static new WebApiJwtAuthenticatedMicroservice<TWebApiClaims>? Instance =>
-        WebApiMicroservice.Instance as WebApiJwtAuthenticatedMicroservice<TWebApiClaims>;
+    public static new WebApiJwtAuthenticatedMicroservice<TWebApiClaims>? Instance => WebApiMicroservice.Instance as WebApiJwtAuthenticatedMicroservice<TWebApiClaims>;
 #pragma warning restore CA1000
 
     /// <summary>
@@ -98,18 +97,18 @@ public class WebApiJwtAuthenticatedMicroservice<TWebApiClaims> : WebApiMicroserv
         WebApiUseAuthorizationByDefault = true;
     }
 
-    protected override void OnCreateBuilder()
+    protected override void OnBuildMicroservice()
     {
         BuildJwtAuthenticator();
 
-        base.OnCreateBuilder();
+        base.OnBuildMicroservice();
 
         BuildJwtPostAuthorizator();
     }
 
-    protected override void OnCreateApplication()
+    protected override void OnCreateMicroservice()
     {
-        base.OnCreateApplication();
+        base.OnCreateMicroservice();
 
         CreateJwtPostAuthorizator();
     }
@@ -135,7 +134,7 @@ public class WebApiJwtAuthenticatedMicroservice<TWebApiClaims> : WebApiMicroserv
         {
             jwt.Authority = JwtTokenAuthority;
             jwt.SaveToken = JwtSaveSigninToken;
-            jwt.IncludeErrorDetails = Debugger.IsAttached || Builder.Environment.IsDevelopment();
+            jwt.IncludeErrorDetails = IsDebugOrDevelopment;
 #pragma warning disable CA5404 // Do not disable token validation checks
             jwt.TokenValidationParameters = new TokenValidationParameters
             {

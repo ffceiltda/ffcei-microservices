@@ -14,7 +14,7 @@ public sealed class JwtEncryptionKeyFactory : SecurityKeyFactory
     /// </summary>
     /// <param name="configurationManager">ConfigurationManager</param>
     /// <param name="logger">Logger</param>
-    public JwtEncryptionKeyFactory(ConfigurationManager configurationManager, ILogger? logger = null)
+    public JwtEncryptionKeyFactory(IConfigurationManager configurationManager, ILogger? logger = null)
         : base(configurationManager, "Jwt.Encryption.", logger)
     {
     }

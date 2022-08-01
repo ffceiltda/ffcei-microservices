@@ -14,7 +14,7 @@ public sealed class JwtSigningKeyFactory : SecurityKeyFactory
     /// </summary>
     /// <param name="configurationManager">ConfigurationManager</param>
     /// <param name="logger">Loggert</param>
-    public JwtSigningKeyFactory(ConfigurationManager configurationManager, ILogger? logger = null)
+    public JwtSigningKeyFactory(IConfigurationManager configurationManager, ILogger? logger = null)
         : base(configurationManager, "Jwt.Signing.", logger)
     {
     }

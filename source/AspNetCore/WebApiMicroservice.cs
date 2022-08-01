@@ -1,10 +1,5 @@
-using Destructurama;
-using EasyCaching.Serialization.SystemTextJson.Configurations;
-using EFCoreSecondLevelCacheInterceptor;
 using FFCEI.Microservices.AspNetCore.Middlewares;
 using FFCEI.Microservices.AspNetCore.StaticFolderMappings;
-using FFCEI.Microservices.Configuration;
-using FFCEI.Microservices.Json;
 using FFCEI.Microservices.Microservices;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
@@ -17,8 +12,6 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Serilog;
-using Serilog.Events;
-using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -27,46 +20,17 @@ namespace FFCEI.Microservices.AspNetCore;
 /// <summary>
 /// Web Api microservice template
 /// </summary>
-public class WebApiMicroservice : IMicroservice
+public class WebApiMicroservice : Microservice
 {
-    private readonly string[] _args;
-    private WebApplicationBuilder? _initialBuilder;
-    private WebApplicationBuilder? _builder;
+    private IHostBuilder? _initialBuilder;
+    private WebApplicationBuilder? _applicationBuilder;
     private WebApplication? _application;
     private bool _controllersMapped;
-    private ConfigurationManager? _configurationManager;
-    private RedisConnectionConfiguration? _entityFrameworkSecondLevelCacheRedisConfiguration;
-    private static WeakReference<WebApiMicroservice> _instance = null!;
-
-    IHostBuilder IMicroservice.Builder => Builder.Host;
-    IServiceCollection IMicroservice.Services => Services;
-    IHost IMicroservice.Application => Application;
-    IConfigurationManager IMicroservice.ConfigurationManager => ConfigurationManager;
 
     /// <summary>
-    /// ASP.NET Core Mvc Web Application Builder
+    /// ASP.NET Web Application
     /// </summary>
-    public WebApplicationBuilder Builder => _builder ??= CreateBuilder();
-
-    /// <summary>
-    /// ASP.NET Core Mvc Dependency Injection Services
-    /// </summary>
-    public IServiceCollection Services => Builder.Services;
-
-    /// <summary>
-    /// ASP.NET Core Mvc Web Application
-    /// </summary>
-    public WebApplication Application => _application ??= CreateApplication();
-
-    /// <summary>
-    /// Configuration Manager (with support for system environment, environment files and ASP.NET Core appSettings)
-    /// </summary>
-    public ConfigurationManager ConfigurationManager => _configurationManager ??= CreateConfigurationManager();
-
-    /// <summary>
-    /// Set shutting down to true make all new requests to reply with HTTP Code 503 - Service unavailable, for load balancers
-    /// </summary>
-    public bool ShuttingDown { get; set; }
+    public WebApplication Application => _application ??= CreateWebApplication();
 
     /// <summary>
     /// HTTP settings: Web Api use CORS (defaults to true)
@@ -74,9 +38,9 @@ public class WebApiMicroservice : IMicroservice
     public bool HttpUseCors { get; set; } = true;
 
     /// <summary>
-    /// HTTP settings: Web Api use HSTS (defaults to false )
+    /// HTTP settings: Request max body length (defaults to 8 hexabytes)
     /// </summary>
-    public bool HttpUseHsts { get; set; }
+    public long HttpRequestMaxBodyLength { get; set; } = long.MaxValue;
 
     /// <summary>
     /// HTTP settings: Web Api redirect to HTTPS (defaults to false)
@@ -84,19 +48,19 @@ public class WebApiMicroservice : IMicroservice
     public bool HttpRedirectToHttps { get; set; }
 
     /// <summary>
-    /// HTTP settings: Request max body length (defaults to 8 hexabytes)
+    /// HTTP settings: Web Api use HSTS (defaults to false )
     /// </summary>
-    public long HttpRequestMaxBodyLength { get; set; } = long.MaxValue;
-
-    /// <summary>
-    /// Web Api: version (defaults to v1)
-    /// </summary>
-    public string WebApiVersion { get; set; } = "v1";
+    public bool HttpsUseHsts { get; set; }
 
     /// <summary>
     /// Web Api: generate swagger documentation (defaults to Development environment only)
     /// </summary>
     public bool? WebApiGenerateSwagger { get; set; }
+
+    /// <summary>
+    /// Web Api: version (defaults to v1)
+    /// </summary>
+    public string WebApiSwaggerVersion { get; set; } = "v1";
 
     /// <summary>
     /// Web Api: require authorization on controller and methods (defaults to false on web api microservices, true on web api jwt authenticated microservices)
@@ -109,198 +73,108 @@ public class WebApiMicroservice : IMicroservice
     public bool WebApiUseAuthorizationByDefault { get; set; }
 
     /// <summary>
-    /// Json: ignore null values on serialization (default to true)
-    /// </summary>
-    public bool JsonIgnoreNullOnSerialization { get; set; } = true;
-
-    /// <summary>
-    /// Json: write indented on serialization (default to false)
-    /// </summary>
-    public bool JsonWriteIndented { get; set; }
-
-    /// <summary>
     /// Json for Web Api: ignore null values on serialization (default to true)
     /// </summary>
-    public bool JsonForWebApiIgnoreNullOnSerialization { get; set; } = true;
+    public bool WebApiJsonIgnoreNullOnSerialization { get; set; } = true;
 
     /// <summary>
     /// Json for Web Api: write indented on serialization (default to true)
     /// </summary>
-    public bool JsonForWebApiWriteIndented { get; set; } = true;
+    public bool WebApiJsonWriteIndented { get; set; } = true;
+
+#pragma warning disable CA1000
+    /// <summary>
+    /// Microservice instance (singleton)
+    /// </summary>
+    public static new WebApiMicroservice? Instance => Microservice.Instance as WebApiMicroservice;
+#pragma warning restore CA1000
 
     /// <summary>
-    /// Entity Framework Core: which Second Level Cache method must be used
+    /// Web Api Microservice constructor
     /// </summary>
-    public EntityFrameworkSecondLevelCacheType EntityFrameworkSecondLevelCacheType { get; set; } = EntityFrameworkSecondLevelCacheType.NoCache;
-
-    /// <summary>
-    /// Entity Framework Core: second level cache expiration mode
-    /// </summary>
-    public CacheExpirationMode EntityFrameworkSecondLevelCacheExpirationMode { get; set; } = CacheExpirationMode.Absolute;
-
-    /// <summary>
-    /// Entity Framework Core: second level cache expiration period
-    /// </summary>
-    public TimeSpan EntityFrameworkSecondLevelCacheExpirationPeriod { get; set; } = TimeSpan.FromSeconds(60);
-
-    /// <summary>
-    /// Microservice instance
-    /// </summary>
-
-    public static WebApiMicroservice? Instance
+    /// <param name="commandLineArguments">Command line arguments</param>
+    public WebApiMicroservice(string[] commandLineArguments)
+        : base(commandLineArguments)
     {
-        get
-        {
-            if ((_instance is not null) && _instance.TryGetTarget(out var result))
-            {
-                return result;
-            }
+        _applicationBuilder = WebApplication.CreateBuilder(commandLineArguments);
+        _initialBuilder = _applicationBuilder.Host;
 
-            return null;
-        }
+        MicroserviceName = _applicationBuilder.Environment.ApplicationName;
     }
 
-    public Microsoft.Extensions.Logging.ILogger Logger => null!;
-
-    /// <summary>
-    /// Microservice constructor
-    /// </summary>
-    /// <param name="args">Command line arguments</param>
-    /// <exception cref="InvalidOperationException">Throws a invalid operation exception if you try to instantiante more than one instance</exception>
-    public WebApiMicroservice(string[] args)
+    protected override IHostBuilder? GetImplementationInitialBuilder()
     {
-        if (_instance is not null)
+        return _initialBuilder;
+    }
+
+    protected override IServiceCollection GetImplementationServices()
+    {
+        var result = _applicationBuilder?.Services;
+
+        if (result is null)
         {
-            throw new InvalidOperationException("WebApiMicroservice must be instantiated only once");
+            throw new InvalidOperationException("Microservice GetImplementationEnvironment() detected a internal error");
         }
 
-        _args = args;
-        _instance = new WeakReference<WebApiMicroservice>(this);
-        _initialBuilder = WebApplication.CreateBuilder(_args);
+        return result;
     }
 
-    private WebApplicationBuilder CreateBuilder()
+    protected override IHostEnvironment GetImplementationEnvironment()
     {
-        if ((_builder is not null) || (_initialBuilder is null))
+        var result = _application?.Environment ?? _applicationBuilder?.Environment;
+
+        if (result is null)
         {
-            throw new InvalidOperationException("WebApiMicroservice CreateBuilder() was already called before");
+            throw new InvalidOperationException("Microservice GetImplementationEnvironment() detected a internal error");
         }
 
-        _builder = _initialBuilder;
-        _initialBuilder = null;
-
-        OnCreateBuilder();
-
-        return _builder;
+        return result;
     }
 
-    /// <summary>
-    /// Create Web Application builder settings
-    /// </summary>
-    /// <exception cref="ArgumentNullException">Throws when builder is null</exception>
-    protected virtual void OnCreateBuilder()
-    {
-        BuildSerilog();
-        BuildKestrel();
-        BuildWebApi();
-        BuildEntityFramework();
-        BuildAutoMapper();
-    }
-
-    private WebApplication CreateApplication()
+    private WebApplication CreateWebApplication()
     {
         if (_application is not null)
         {
-            throw new InvalidOperationException("WebApiMicroservice CreateApplication() was already called before");
+            throw new InvalidOperationException("Web Api Microservice CreateWebApplication() was already called before");
         }
 
-        _application = Builder.Build();
+        var builder = _applicationBuilder;
+
+        if (builder is null)
+        {
+            throw new InvalidOperationException("Web Api Microservice CreateWebApplication() logic error");
+        }
+
+        _application = builder.Build();
+
+        return _application;
+    }
+
+    protected override IHost GetImplementationApplication() => Application;
+
+    protected override void OnBuildMicroservice()
+    {
+        base.OnBuildMicroservice();
+
+        BuildKestrel();
+        BuildWebApi();
+    }
+
+    protected override void OnCreateMicroservice()
+    {
+        base.OnCreateMicroservice();
 
 #pragma warning disable IDE0058 // Expression value is never used
         Application.UseShuttingDownHandler();
 #pragma warning restore IDE0058 // Expression value is never used
 
-        OnCreateApplication();
-
-        return _application;
-    }
-
-    /// <summary>
-    /// Create Web Application settings
-    /// </summary>
-    /// <exception cref="ArgumentNullException">Throws when webApplication is null</exception>
-    protected virtual void OnCreateApplication()
-    {
         CreateSerilog();
         CreateKestrel();
         CreateWebApi();
     }
 
-    private ConfigurationManager CreateConfigurationManager()
-    {
-        var builder = _builder ?? _initialBuilder;
-
-        if (builder is null)
-        {
-            throw new InvalidOperationException("WebApiMicroservice CreateConfigurationManager() internal error");
-        }
-
-        _configurationManager = new ConfigurationManager(builder);
-
-        return _configurationManager;
-    }
-
     /// <summary>
-    /// Use In-Memory Entity Framework Second Level Cache Provider
-    /// </summary>
-    /// <exception cref="InvalidOperationException">if HostBuilder is already created</exception>
-    public void UseMemoryEntityFrameworkSecondLevelCache()
-    {
-        if (_builder is not null)
-        {
-            throw new InvalidOperationException("UseRedisEntityFrameworkSecondLevelCache must be used before access WebApiMicroservice.Builder property");
-        }
-
-        EntityFrameworkSecondLevelCacheType = EntityFrameworkSecondLevelCacheType.MemoryCache;
-    }
-
-    /// <summary>
-    /// Use In-Memory Entity Framework Second Level Cache Provider
-    /// </summary>
-    /// <param name="configuration">Redis configuration (optional)</param>
-    /// <exception cref="InvalidOperationException">throws if HostBuilder is already created</exception>
-    /// <exception cref="ArgumentNullException">throws if redis configuration host or port is null</exception>
-    public void UseRedisEntityFrameworkSecondLevelCache(RedisConnectionConfiguration? configuration = null)
-    {
-        if (_builder is not null)
-        {
-            throw new InvalidOperationException("UseRedisEntityFrameworkSecondLevelCache must be used before access WebApiMicroservice.Builder property");
-        }
-
-        if (configuration is null)
-        {
-            var standardConfiguration = ConfigurationManager.GetRedisConfiguration(
-                hostSettingName: "Redis.Cache.Host",
-                portSettingName: "Redis.Cache.Port",
-                usernameSettingName: "Redis.Cache.UserName",
-                passwordSettingName: "Redis.Cache.Password",
-                databaseSettingName: "Redis.Cache.Database");
-
-            if ((standardConfiguration.Host is null) || (standardConfiguration.Port is null))
-            {
-                throw new ArgumentNullException(nameof(configuration));
-            }
-
-            configuration = standardConfiguration;
-        }
-
-        EntityFrameworkSecondLevelCacheType = EntityFrameworkSecondLevelCacheType.RedisCache;
-
-        _entityFrameworkSecondLevelCacheRedisConfiguration = configuration;
-    }
-
-    /// <summary>
-    /// Map Controolers
+    /// Map Asp.Net Controllers
     /// </summary>
     public void MapControllers()
     {
@@ -316,19 +190,25 @@ public class WebApiMicroservice : IMicroservice
         _controllersMapped = true;
     }
 
-#pragma warning disable CA1054 // URI-like parameters should not be strings
-    /// <summary>
-    /// Run microservice
-    /// </summary>
-    public void Run()
+    public override void Run()
     {
         MapControllers();
 
-        Application.Run();
+        base.Run();
     }
 
+    public override async Task RunAsync()
+    {
+        MapControllers();
+
+#pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
+        await base.RunAsync();
+#pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
+    }
+
+#pragma warning disable CA1054 // URI-like parameters should not be strings
     /// <summary>
-    /// Run microservice
+    /// Run Asp.Net microservice
     /// </summary>
     /// <param name="url">The URL to listen to if the server hasn't been configured directly</param>
     public void Run(string? url)
@@ -339,19 +219,7 @@ public class WebApiMicroservice : IMicroservice
     }
 
     /// <summary>
-    /// Run microservice asynchronously
-    /// </summary>
-    public async Task RunAsync()
-    {
-        MapControllers();
-
-#pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
-        await Application.RunAsync();
-#pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
-    }
-
-    /// <summary>
-    /// Run microservice asynchronously
+    /// Run Asp.Net microservice asynchronously
     /// </summary>
     /// <param name="url">The URL to listen to if the server hasn't been configured directly</param>
     public async Task RunAsync(string? url)
@@ -364,74 +232,27 @@ public class WebApiMicroservice : IMicroservice
     }
 #pragma warning restore CA1054 // URI-like parameters should not be strings
 
-#pragma warning disable IDE0058 // Expression value is never used
-
-    private bool ShouldGenerateSwagger()
+    private static CorsPolicyBuilder CreateKestrelCorsPolicy(CorsPolicyBuilder policy)
     {
-        bool generateSwagger = WebApiGenerateSwagger ?? false;
-
-        if (Builder.Environment.IsDevelopment())
-        {
-            generateSwagger = WebApiGenerateSwagger ?? true;
-        }
-
-        return generateSwagger;
-    }
-
-    private void BuildSerilog()
-    {
-        Serilog.Debugging.SelfLog.Enable(Console.Error);
-
-        Log.Logger = BuildSeriLogConfiguration(Builder, new LoggerConfiguration()).CreateBootstrapLogger();
-
-        Builder.Host.UseSerilog((context, serviceProvider, configuration) => BuildSeriLogConfiguration(Builder, configuration));
-    }
-
-    private static LoggerConfiguration BuildSeriLogConfiguration(WebApplicationBuilder builder, LoggerConfiguration configuration)
-    {
-        configuration
-            .Enrich.WithProperty("Application", builder.Environment.ApplicationName)
-            .Enrich.FromLogContext()
-            .Enrich.WithCorrelationIdHeader()
-            .Destructure.UsingAttributes()
-            .WriteTo.Console();
-
-        if (builder.Environment.IsProduction())
-        {
-            configuration
-                .MinimumLevel.Information()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
-                .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
-                .MinimumLevel.Override("EFCoreSecondLevelCacheInterceptor", LogEventLevel.Warning);
-        }
-        else
-        {
-            configuration
-                .MinimumLevel.Debug()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-                .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Information)
-                .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Information)
-                .MinimumLevel.Override("EFCoreSecondLevelCacheInterceptor", LogEventLevel.Information);
-        }
-
-        return configuration;
+        return policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
     }
 
     private void CreateSerilog()
     {
+#pragma warning disable IDE0058 // Expression value is never used
         Application.UseSerilogRequestLogging();
+#pragma warning restore IDE0058 // Expression value is never used
     }
 
     private void BuildKestrel()
     {
+#pragma warning disable IDE0058 // Expression value is never used
         if (HttpUseCors)
         {
-            Services.AddCors(options => options
-                .AddDefaultPolicy(policy => CreateKestrelCorsPolicy(policy)));
+            Services.AddCors(options => options.AddDefaultPolicy(policy => CreateKestrelCorsPolicy(policy)));
         }
 
-        Builder.Host.ConfigureServices((context, services) =>
+        Builder.ConfigureServices((context, services) =>
         {
             services.Configure<KestrelServerOptions>(options =>
             {
@@ -440,39 +261,35 @@ public class WebApiMicroservice : IMicroservice
         });
 
         Services.AddHttpContextAccessor();
+#pragma warning restore IDE0058 // Expression value is never used
     }
 
     private void CreateKestrel()
     {
+#pragma warning disable IDE0058 // Expression value is never used
         if (HttpUseCors)
         {
             Application.UseCors(policy => CreateKestrelCorsPolicy(policy));
-        }
-
-        if (HttpUseHsts)
-        {
-            Application.UseHsts();
         }
 
         if (HttpRedirectToHttps)
         {
             Application.UseHttpsRedirection();
         }
-    }
 
-    private static CorsPolicyBuilder CreateKestrelCorsPolicy(CorsPolicyBuilder policy)
-    {
-        return policy
-            .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+        if (HttpsUseHsts)
+        {
+            Application.UseHsts();
+        }
+#pragma warning restore IDE0058 // Expression value is never used
     }
 
     private void BuildWebApi()
     {
+#pragma warning disable IDE0058 // Expression value is never used
         Services.AddHttpClient();
 
-        if (!Builder.Environment.IsDevelopment())
+        if (!IsDebugOrDevelopment)
         {
             Services.AddTransient<ExceptionHandlerMiddeware>();
         }
@@ -489,6 +306,7 @@ public class WebApiMicroservice : IMicroservice
                 }
             });
         }
+#pragma warning restore IDE0058 // Expression value is never used
 
         var mvcBuilder = Services.AddControllers();
 
@@ -501,76 +319,61 @@ public class WebApiMicroservice : IMicroservice
         }
     }
 
+    private void ConfigureJsonSerializerOptions(JsonSerializerOptions options, bool isWebApi)
+    {
+        base.ConfigureJsonSerializerOptions(options);
+
+        options.WriteIndented = !isWebApi ? options.WriteIndented : WebApiJsonWriteIndented;
+        options.DefaultIgnoreCondition = !isWebApi ? options.DefaultIgnoreCondition : (WebApiJsonIgnoreNullOnSerialization ? JsonIgnoreCondition.WhenWritingNull : JsonIgnoreCondition.Never);
+    }
+
     private void BuildWebApiJsonOptions(IMvcBuilder mvcBuilder)
     {
+#pragma warning disable IDE0058 // Expression value is never used
         mvcBuilder.AddJsonOptions(options =>
         {
             ConfigureJsonSerializerOptions(options.JsonSerializerOptions, true);
         });
-    }
-
-    private void ConfigureJsonSerializerOptions(JsonSerializerOptions options, bool isWebApi)
-    {
-        options.WriteIndented = isWebApi ? JsonForWebApiWriteIndented : JsonWriteIndented;
-        options.DefaultIgnoreCondition = (isWebApi ? JsonForWebApiIgnoreNullOnSerialization : JsonIgnoreNullOnSerialization) ? JsonIgnoreCondition.WhenWritingNull : JsonIgnoreCondition.Never;
-
-        options.Converters.Add(new JsonTrimmingConverter());
-        options.Converters.Add(new JsonLooseStringEnumConverter());
-        options.Converters.Add(new JsonStringToDecimalConverter());
-        options.Converters.Add(new JsonStringToLongConverter());
-        options.Converters.Add(new JsonStringToIntegerConverter());
+#pragma warning restore IDE0058 // Expression value is never used
     }
 
     private void BuildWebApiFluentValidation(IMvcBuilder mvcBuilder)
     {
-        var entryAssembly = Assembly.GetEntryAssembly();
+        var assemblies = ReferencedAssembliesEndingWith(".Messages");
 
-        if (entryAssembly is null)
-        {
-            return;
-        }
-
-        var assemblies = new List<Assembly> { entryAssembly };
-
-        var referencedAssemblies = entryAssembly.GetReferencedAssemblies();
-
-        if (referencedAssemblies is not null)
-        {
-            foreach (var referencedAssembly in referencedAssemblies)
-            {
-                var assemblyName = referencedAssembly.Name ?? string.Empty;
-
-                if (assemblyName.EndsWith(".Messages", StringComparison.InvariantCulture))
-                {
-                    var assembly = Assembly.Load(assemblyName);
-
-                    if (assembly is not null)
-                    {
-                        assemblies.Add(assembly);
-                    }
-                }
-            }
-        }
-
+#pragma warning disable IDE0058 // Expression value is never used
         mvcBuilder.AddFluentValidation(validators =>
         {
             validators.RegisterValidatorsFromAssemblies(assemblies);
         });
 
         Services.AddFluentValidationAutoValidation();
+#pragma warning restore IDE0058 // Expression value is never used
+    }
+
+    private bool ShouldGenerateSwagger()
+    {
+        bool generateSwagger = WebApiGenerateSwagger ?? false;
+
+        if (IsDebugOrDevelopment)
+        {
+            generateSwagger = WebApiGenerateSwagger ?? true;
+        }
+
+        return generateSwagger;
     }
 
     private void BuildWebApiSwagger()
     {
+#pragma warning disable IDE0058 // Expression value is never used
         Services.AddEndpointsApiExplorer();
         Services.AddSwaggerGen(options =>
         {
-            options.SwaggerDoc(WebApiVersion,
-                new OpenApiInfo
-                {
-                    Title = Builder.Environment.ApplicationName,
-                    Version = WebApiVersion
-                });
+            options.SwaggerDoc(WebApiSwaggerVersion, new OpenApiInfo
+            {
+                Title = MicroserviceName,
+                Version = WebApiSwaggerVersion
+            });
 
             options.TagActionsBy(api =>
             {
@@ -635,11 +438,13 @@ public class WebApiMicroservice : IMicroservice
 #pragma warning restore CA1031 // Do not catch general exception types
             });
         });
+#pragma warning restore IDE0058 // Expression value is never used
     }
 
     private void CreateWebApi()
     {
-        if (Application.Environment.IsDevelopment())
+#pragma warning disable IDE0058 // Expression value is never used
+        if (IsDebugOrDevelopment)
         {
             Application.UseDeveloperExceptionPage();
         }
@@ -647,7 +452,7 @@ public class WebApiMicroservice : IMicroservice
         {
             Application.UseExceptionHandler(a => a.Run(async context =>
             {
-                var exceptionHandlerMiddeware = Application.Services.GetService<ExceptionHandlerMiddeware>();
+                var exceptionHandlerMiddeware = Host.Services.GetService<ExceptionHandlerMiddeware>();
 
                 if (exceptionHandlerMiddeware is not null)
                 {
@@ -664,30 +469,34 @@ public class WebApiMicroservice : IMicroservice
 
         CreateWebApiStaticFolderMappings();
         CreateWebApiAuthenticationAndAuthorization();
+#pragma warning restore IDE0058 // Expression value is never used
     }
 
     private void CreateWebApiSwagger()
     {
+#pragma warning disable IDE0058 // Expression value is never used
         if (ShouldGenerateSwagger())
         {
             Application.UseSwagger();
             Application.UseSwaggerUI(options =>
             {
                 options.RoutePrefix = "swagger";
-                options.SwaggerEndpoint($"/swagger/{WebApiVersion}/swagger.json", $"{Application.Environment.ApplicationName} ({WebApiVersion})");
+                options.SwaggerEndpoint($"/swagger/{WebApiSwaggerVersion}/swagger.json", $"{MicroserviceName} ({WebApiSwaggerVersion})");
             });
         }
+#pragma warning restore IDE0058 // Expression value is never used
     }
 
     private void CreateWebApiStaticFolderMappings()
     {
-        var options = Application.Services.GetService<StaticFolderMappingMiddlewareOptions>();
+        var options = Host.Services.GetService<StaticFolderMappingMiddlewareOptions>();
 
         if (options is null)
         {
             return;
         }
 
+#pragma warning disable IDE0058 // Expression value is never used
         Application.UseStaticFolderMappings();
 
         foreach (var mapping in options.MappedFolders.Values)
@@ -711,131 +520,18 @@ public class WebApiMicroservice : IMicroservice
                 });
             }
         }
+#pragma warning restore IDE0058 // Expression value is never used
     }
 
     private void CreateWebApiAuthenticationAndAuthorization()
     {
+#pragma warning disable IDE0058 // Expression value is never used
         Application.UseAuthentication();
 
         if (WebApiUseAuthorization)
         {
             Application.UseAuthorization();
         }
-    }
-
-    private void BuildEntityFramework()
-    {
-        BuildEntityFrameworkCoreSecondLevelCache();
-    }
-
-    private void BuildEntityFrameworkCoreSecondLevelCache()
-    {
-        switch (EntityFrameworkSecondLevelCacheType)
-        {
-        case EntityFrameworkSecondLevelCacheType.NoCache:
-            {
-                break;
-            }
-        case EntityFrameworkSecondLevelCacheType.MemoryCache:
-            {
-                BuildMemoryEntityFrameworkCoreSecondLevelCache();
-
-                break;
-            }
-        case EntityFrameworkSecondLevelCacheType.RedisCache:
-            {
-                BuildRedisEntityFrameworkCoreSecondLevelCache();
-
-                break;
-            }
-        default:
-            {
-                throw new InvalidOperationException(nameof(EntityFrameworkSecondLevelCacheType));
-            }
-        }
-    }
-
-    private void BuildEntityFrameworkCoreSecondLevelCacheOptions(EFCoreSecondLevelCacheOptions options)
-    {
-        var assemblyPrefix = Assembly.GetEntryAssembly()?.FullName?.Split(",")[0].Replace(".", "", StringComparison.InvariantCulture) ?? string.Empty;
-
-        options
-            .UseCacheKeyPrefix($"EFCoreSecondLevelCache_{assemblyPrefix}_")
-            .CacheAllQueries(EntityFrameworkSecondLevelCacheExpirationMode, EntityFrameworkSecondLevelCacheExpirationPeriod)
-            .SkipCachingResults(result => (result.Value is null) || ((result.Value is EFTableRows rows) && (rows.RowsCount == 0)))
-            .DisableLogging(!Builder.Environment.IsDevelopment());
-    }
-
-    private void BuildMemoryEntityFrameworkCoreSecondLevelCache()
-    {
-        Services.AddEFSecondLevelCache(options =>
-        {
-            BuildEntityFrameworkCoreSecondLevelCacheOptions(options.UseMemoryCacheProvider());
-        });
-    }
-
-    private void BuildRedisEntityFrameworkCoreSecondLevelCache()
-    {
-        Services.AddEFSecondLevelCache(options =>
-        {
-            BuildEntityFrameworkCoreSecondLevelCacheOptions(options.UseEasyCachingCoreProvider("EFSecondLevelRedisCache"));
-        });
-
-        Services.AddEasyCaching(option =>
-        {
-            option.WithSystemTextJson((JsonSerializerOptions options) =>
-            {
-                ConfigureJsonSerializerOptions(options, false);
-            }, "EFSecondLevelJsonSerializer");
-
-            option.UseRedisLock();
-            option.UseRedis(config =>
-            {
-                if (_entityFrameworkSecondLevelCacheRedisConfiguration is null)
-                {
-                    throw new InvalidOperationException("No Redis configuration for second level cache was specified");
-                }
-
-                _entityFrameworkSecondLevelCacheRedisConfiguration.Apply(config);
-            }, "EFSecondLevelRedisCache");
-        });
-    }
-
-    private void BuildAutoMapper()
-    {
-        var entryAssembly = Assembly.GetEntryAssembly();
-
-        if (entryAssembly is null)
-        {
-            return;
-        }
-
-        var assemblies = new List<Assembly> { entryAssembly };
-
-        var referencedAssemblies = entryAssembly.GetReferencedAssemblies();
-
-        if (referencedAssemblies is not null)
-        {
-            foreach (var referencedAssembly in referencedAssemblies)
-            {
-                var assemblyName = referencedAssembly.Name ?? string.Empty;
-
-                if (assemblyName.EndsWith(".Services", StringComparison.InvariantCulture))
-                {
-                    var assembly = Assembly.Load(assemblyName);
-
-                    if (assembly is not null)
-                    {
-                        assemblies.Add(assembly);
-                    }
-                }
-            }
-        }
-
-        foreach (var assembly in assemblies)
-        {
-            Services.AddAutoMapper(assembly);
-        }
-    }
 #pragma warning restore IDE0058 // Expression value is never used
+    }
 }

@@ -11,14 +11,24 @@ namespace FFCEI.Microservices.Microservices;
 public interface IMicroservice
 {
     /// <summary>
+    /// Microservice name
+    /// </summary>
+    string MicroserviceName { get; }
+
+    /// <summary>
     /// Command line arguments
     /// </summary>
-    string[] CommandLineArguments { get; }
+    IReadOnlyList<string> CommandLineArguments { get; }
 
     /// <summary>
     /// Microservice host builder
     /// </summary>
     IHostBuilder Builder { get; }
+
+    /// <summary>
+    /// Microservice host Environment
+    /// </summary>
+    IHostEnvironment Environment { get; }
 
     /// <summary>
     /// Microservice Dependency Injector service collection
@@ -28,7 +38,7 @@ public interface IMicroservice
     /// <summary>
     /// Microservice host application (built when called, with Builder settings)
     /// </summary>
-    IHost Application { get; }
+    IHost Host { get; }
 
     /// <summary>
     /// Microservice configuration manager
@@ -39,6 +49,11 @@ public interface IMicroservice
     /// Microservice default logger
     /// </summary>
     ILogger Logger { get; }
+
+    /// <summary>
+    /// Return true if is debugging or if it´s running in develoment environment
+    /// </summary>
+    bool IsDebugOrDevelopment { get; }
 
     /// <summary>
     /// Run service

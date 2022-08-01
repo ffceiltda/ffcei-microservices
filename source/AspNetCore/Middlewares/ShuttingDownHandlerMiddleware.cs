@@ -1,3 +1,4 @@
+using FFCEI.Microservices.Microservices;
 using Microsoft.AspNetCore.Http;
 using System.Text;
 
@@ -33,7 +34,7 @@ public sealed class ShuttingDownHandlerMiddleware
         }
 
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
-        if (WebApiMicroservice.Instance?.ShuttingDown ?? true)
+        if (Microservice.Instance?.ShuttingDown ?? true)
         {
             httpContext.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
             httpContext.Response.ContentType = "text/plain";
