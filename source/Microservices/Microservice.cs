@@ -37,6 +37,8 @@ public abstract class Microservice : IMicroservice
     /// <param name="commandLineArguments">Program command line arguments</param>
     protected Microservice(string[] commandLineArguments)
     {
+        _instance = new WeakReference<Microservice>(this);
+
         CommandLineArguments = commandLineArguments.ToList();
 
         IsDebugOrDevelopment = Debugger.IsAttached || string.Equals(System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ??
@@ -60,7 +62,7 @@ public abstract class Microservice : IMicroservice
 
     public IServiceCollection Services => _services ??= GetImplementationServices();
 
-    public IHost Host => _host ??= CreateApplication();
+    public IHost Host => _host ??= BuildHost();
 
     public IConfigurationManager ConfigurationManager => _configurationManager ??= CreateConfigurationManager();
 
@@ -284,7 +286,7 @@ public abstract class Microservice : IMicroservice
     /// Return IHost for application startup
     /// </summary>
     /// <returns></returns>
-    protected abstract IHost GetImplementationApplication();
+    protected abstract IHost GetImplementationHost();
 
     private ILogger CreateMicroserviceBootstrapLogger()
     {
@@ -353,7 +355,7 @@ public abstract class Microservice : IMicroservice
         options.Converters.Add(new JsonStringToIntegerConverter());
     }
 
-    private IHost CreateApplication()
+    private IHost BuildHost()
     {
         if (_host is not null)
         {
@@ -367,7 +369,7 @@ public abstract class Microservice : IMicroservice
             throw new InvalidOperationException("Microservice CreateApplication() logic error");
         }
 
-        _host = builder.Build();
+        _host = GetImplementationHost();
 
         OnCreateMicroservice();
 

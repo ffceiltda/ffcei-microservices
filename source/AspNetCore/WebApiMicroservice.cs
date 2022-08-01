@@ -140,7 +140,7 @@ public class WebApiMicroservice : Microservice
 
         var builder = _applicationBuilder;
 
-        if (builder is null)
+        if ((builder is null) || (Builder is null))
         {
             throw new InvalidOperationException("Web Api Microservice CreateWebApplication() logic error");
         }
@@ -150,7 +150,7 @@ public class WebApiMicroservice : Microservice
         return _application;
     }
 
-    protected override IHost GetImplementationApplication() => Application;
+    protected override IHost GetImplementationHost() => Application;
 
     protected override void OnBuildMicroservice()
     {
@@ -369,11 +369,12 @@ public class WebApiMicroservice : Microservice
         Services.AddEndpointsApiExplorer();
         Services.AddSwaggerGen(options =>
         {
-            options.SwaggerDoc(WebApiSwaggerVersion, new OpenApiInfo
-            {
-                Title = MicroserviceName,
-                Version = WebApiSwaggerVersion
-            });
+            options.SwaggerDoc(WebApiSwaggerVersion,
+                new OpenApiInfo
+                {
+                    Title = MicroserviceName,
+                    Version = WebApiSwaggerVersion
+                });
 
             options.TagActionsBy(api =>
             {

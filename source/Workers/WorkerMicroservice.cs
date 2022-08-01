@@ -19,7 +19,7 @@ namespace FFCEI.Microservices.Workers;
 /// <summary>
 /// Woker Microservice
 /// </summary>
-public sealed class WorkerMicroservice : Microservice
+public class WorkerMicroservice : Microservice
 {
     private IHostBuilder? _initialBuilder;
 
@@ -45,7 +45,7 @@ public sealed class WorkerMicroservice : Microservice
         return result;
     }
 
-    protected override IHost GetImplementationApplication()
+    protected override IHost GetImplementationHost()
     {
         if (_initialBuilder is null)
         {
