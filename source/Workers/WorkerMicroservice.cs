@@ -22,6 +22,7 @@ namespace FFCEI.Microservices.Workers;
 public class WorkerMicroservice : Microservice
 {
     private IHostBuilder? _initialBuilder;
+    private IServiceCollection? _services;
 
     /// <summary>
     /// Worker Microservice constructor
@@ -36,6 +37,25 @@ public class WorkerMicroservice : Microservice
     protected override IHostBuilder? GetImplementationInitialBuilder()
     {
         return _initialBuilder;
+    }
+
+    protected override IServiceCollection GetImplementationServices()
+    {
+        var builder = _initialBuilder ?? Builder;
+
+#pragma warning disable IDE0058 // Expression value is never used
+        builder.ConfigureServices((context, services) =>
+        {
+            _services = services;
+        });
+#pragma warning restore IDE0058 // Expression value is never used
+
+        if (_services is null)
+        {
+            throw new InvalidOperationException("ServiceCollection cannot be instantiated");
+        }
+
+        return _services;
     }
 
     protected override IHostEnvironment GetImplementationEnvironment()

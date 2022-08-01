@@ -227,11 +227,6 @@ public abstract class Microservice : IMicroservice
 
         _builder = initialBuilder;
 
-#pragma warning disable IDE0058 // Expression value is never used
-        CreateConfigurationManager();
-        GetImplementationServices();
-#pragma warning restore IDE0058 // Expression value is never used
-
         OnBuildMicroservice();
 
         return _builder;
@@ -242,22 +237,7 @@ public abstract class Microservice : IMicroservice
     /// </summary>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException">throws If cannot get ServiceCollection instance</exception>
-    protected virtual IServiceCollection GetImplementationServices()
-    {
-#pragma warning disable IDE0058 // Expression value is never used
-        Builder.ConfigureServices((context, services) =>
-        {
-            _services = services;
-        });
-#pragma warning restore IDE0058 // Expression value is never used
-
-        if (_services is null)
-        {
-            throw new InvalidOperationException("ConfigurationManager cannot be instantiated");
-        }
-
-        return _services;
-    }
+    protected abstract IServiceCollection GetImplementationServices();
 
     private IConfigurationManager CreateConfigurationManager()
     {
