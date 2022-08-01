@@ -319,21 +319,8 @@ public abstract class Microservice : IMicroservice
         return configuration;
     }
 
-    protected virtual void ConfigureJsonSerializerOptions(JsonSerializerOptions options)
-    {
-        if (options is null)
-        {
-            throw new ArgumentNullException(nameof(options));
-        }
-
-        options.WriteIndented = RedisCacheJsonWriteIndented;
-        options.DefaultIgnoreCondition = RedisCacheJsonIgnoreNullOnSerialization ? JsonIgnoreCondition.WhenWritingNull : JsonIgnoreCondition.Never;
-        options.Converters.Add(new JsonTrimmingConverter());
-        options.Converters.Add(new JsonLooseStringEnumConverter());
-        options.Converters.Add(new JsonStringToDecimalConverter());
-        options.Converters.Add(new JsonStringToLongConverter());
-        options.Converters.Add(new JsonStringToIntegerConverter());
-    }
+    protected virtual void ConfigureJsonSerializerOptions(JsonSerializerOptions options) =>
+        options.ConfigureJsonSerializerOptions(RedisCacheJsonWriteIndented, RedisCacheJsonIgnoreNullOnSerialization);
 
     private IHost BuildHost()
     {
