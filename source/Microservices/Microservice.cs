@@ -13,7 +13,6 @@ using Serilog.Extensions.Logging;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace FFCEI.Microservices.Microservices;
@@ -219,7 +218,7 @@ public abstract class Microservice : IMicroservice
         }
 
         var initialBuilder = GetImplementationInitialBuilder();
-        
+
         if (initialBuilder is null)
         {
             throw new InvalidOperationException("Microservice CreateBuilder() logic error");

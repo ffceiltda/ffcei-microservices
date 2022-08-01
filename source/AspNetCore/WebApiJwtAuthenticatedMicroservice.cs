@@ -3,9 +3,7 @@ using FFCEI.Microservices.AspNetCore.Middlewares;
 using FFCEI.Microservices.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using System.Diagnostics;
 
 namespace FFCEI.Microservices.AspNetCore;
 

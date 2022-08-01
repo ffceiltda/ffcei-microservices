@@ -1,18 +1,6 @@
-using Destructurama;
-using EasyCaching.Serialization.SystemTextJson.Configurations;
-using EFCoreSecondLevelCacheInterceptor;
-using FFCEI.Microservices.Configuration;
-using FFCEI.Microservices.Json;
 using FFCEI.Microservices.Microservices;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Serilog;
-using Serilog.Events;
-using System.Diagnostics;
-using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace FFCEI.Microservices.Workers;
 
