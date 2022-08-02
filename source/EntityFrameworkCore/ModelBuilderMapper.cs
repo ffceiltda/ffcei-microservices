@@ -59,9 +59,9 @@ public static class ModelBuilderMapper
             {
                 var assemblyName = referencedAssembly.Name ?? string.Empty;
 
-                if (assemblyName.EndsWith(".Model", StringComparison.InvariantCulture))
+                if (assemblyName.EndsWith(".Models", StringComparison.InvariantCulture))
                 {
-                    var newName = assemblyName.Replace(".Model", ".EntityFrameworkCore", StringComparison.InvariantCulture);
+                    var newName = assemblyName.Replace(".Models", ".EntityFrameworkCore", StringComparison.InvariantCulture);
                     var assembly = Assembly.Load(newName);
 
                     if (assembly is not null)

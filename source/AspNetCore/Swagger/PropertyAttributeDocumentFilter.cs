@@ -1,3 +1,4 @@
+using FFCEI.Microservices.Json;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Collections.Concurrent;
@@ -105,11 +106,7 @@ internal sealed class PropertyAttributeDocumentFilter : IDocumentFilter
                         continue;
                     }
 
-                    var options = new JsonSerializerOptions
-                    {
-                        WriteIndented = true,
-                        DefaultIgnoreCondition = JsonIgnoreCondition.Never
-                    };
+                    var options = JsonSerializerOptionsExtensionMethods.WebApiOptions;
 
                     var attribute = Attribute.GetCustomAttribute(type, typeof(SwaggerRequestAttribute), true);
 
