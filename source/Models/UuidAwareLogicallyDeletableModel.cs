@@ -60,14 +60,9 @@ public class UuidAwareLogicallyDeletableModel : LogicallyDeletableModel, IUuidAw
     /// <param name="left">left instance</param>
     /// <param name="right">right instance</param>
     /// <returns>true if equals, false otherwise</returns>
-    public static bool operator ==(UuidAwareLogicallyDeletableModel left, UuidAwareLogicallyDeletableModel right)
+    public static bool operator ==(UuidAwareLogicallyDeletableModel left, IUuidAwareModel right)
     {
-        if (ReferenceEquals(left, null))
-        {
-            return ReferenceEquals(right, null);
-        }
-
-        return left.Equals(right);
+        return ReferenceEquals(left, null) ? ReferenceEquals(right, null) : left.Equals(right);
     }
 
     /// <summary>
@@ -76,7 +71,7 @@ public class UuidAwareLogicallyDeletableModel : LogicallyDeletableModel, IUuidAw
     /// <param name="left">left instance</param>
     /// <param name="right">right instance</param>
     /// <returns>true if different, false otherwise</returns>
-    public static bool operator !=(UuidAwareLogicallyDeletableModel left, UuidAwareLogicallyDeletableModel right)
+    public static bool operator !=(UuidAwareLogicallyDeletableModel left, IUuidAwareModel right)
     {
         return !(left == right);
     }
@@ -87,7 +82,7 @@ public class UuidAwareLogicallyDeletableModel : LogicallyDeletableModel, IUuidAw
     /// <param name="left">left instance</param>
     /// <param name="right">right instance</param>
     /// <returns>true if left is less than right, false otherwise</returns>
-    public static bool operator <(UuidAwareLogicallyDeletableModel left, UuidAwareLogicallyDeletableModel right)
+    public static bool operator <(UuidAwareLogicallyDeletableModel left, IUuidAwareModel right)
     {
         return ReferenceEquals(left, null) ? !ReferenceEquals(right, null) : left.CompareTo(right) < 0;
     }
@@ -98,7 +93,7 @@ public class UuidAwareLogicallyDeletableModel : LogicallyDeletableModel, IUuidAw
     /// <param name="left">left instance</param>
     /// <param name="right">right instance</param>
     /// <returns>true if left is less or equals than right, false otherwise</returns>
-    public static bool operator <=(UuidAwareLogicallyDeletableModel left, UuidAwareLogicallyDeletableModel right)
+    public static bool operator <=(UuidAwareLogicallyDeletableModel left, IUuidAwareModel right)
     {
         return ReferenceEquals(left, null) || left.CompareTo(right) <= 0;
     }
@@ -109,7 +104,7 @@ public class UuidAwareLogicallyDeletableModel : LogicallyDeletableModel, IUuidAw
     /// <param name="left">left instance</param>
     /// <param name="right">right instance</param>
     /// <returns>true if left is greater than right, false otherwise</returns>
-    public static bool operator >(UuidAwareLogicallyDeletableModel left, UuidAwareLogicallyDeletableModel right)
+    public static bool operator >(UuidAwareLogicallyDeletableModel left, IUuidAwareModel right)
     {
         return !ReferenceEquals(left, null) && left.CompareTo(right) > 0;
     }
@@ -120,7 +115,7 @@ public class UuidAwareLogicallyDeletableModel : LogicallyDeletableModel, IUuidAw
     /// <param name="left">left instance</param>
     /// <param name="right">right instance</param>
     /// <returns>true if left is greater or equals than right, false otherwise</returns>
-    public static bool operator >=(UuidAwareLogicallyDeletableModel left, UuidAwareLogicallyDeletableModel right)
+    public static bool operator >=(UuidAwareLogicallyDeletableModel left, IUuidAwareModel right)
     {
         return ReferenceEquals(left, null) ? ReferenceEquals(right, null) : left.CompareTo(right) >= 0;
     }
