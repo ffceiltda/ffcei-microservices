@@ -76,4 +76,9 @@ public sealed class WebApiResultWith<TResult> : WebApiResultBase
         };
     }
 #pragma warning restore CA1000 // Do not declare static members on generic types
+
+#pragma warning disable CA2225 // Operator overloads have named alternates
+    public static implicit operator WebApiResult(WebApiResultWith<TResult> source) => new() { Status = source?.Status, Detail = source?.Detail };
+    public static implicit operator WebApiResultWith<TResult>(WebApiResult source) => new() { Status = source?.Status, Detail = source?.Detail };
+#pragma warning restore CA2225 // Operator overloads have named alternates
 }

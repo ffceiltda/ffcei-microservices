@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace FFCEI.Microservices.AspNetCore;
 
 /// <summary>
@@ -7,7 +9,7 @@ public class WebApiResultBase : IWebApiResponse
 {
     internal static int? StatusNotFound { get { return null; } }
     internal const int StatusSucceeded = 0;
-    internal const int StatusInternalError = 500;
+    internal const int StatusInternalError = int.MinValue;
     internal const string DetailNotFound = "Content not found on server";
     internal const string DetailSuceeded = "Succeeded";
     internal const string DetailInternalError = "A unexpected error has ocurred";

@@ -3,7 +3,7 @@ namespace FFCEI.Microservices.AspNetCore;
 /// <summary>
 /// Web Api result response
 /// </summary>
-public class WebApiResult : WebApiResultBase
+public sealed class WebApiResult : WebApiResultBase
 {
     /// <summary>
     /// Creates a 'suceeded' Web Api result response
@@ -62,4 +62,3 @@ public class WebApiResult : WebApiResultBase
         };
     }
 }
-
