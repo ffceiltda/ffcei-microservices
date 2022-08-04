@@ -101,7 +101,7 @@ public static class IWebApiResponseExtensionMethods
         {
             WebApiResultBase.StatusSucceeded => new OkObjectResult(response)
             {
-                Value = typeof(TResult).IsValueType || typeof(TResult).IsEnum ? response : response.Result
+                Value = typeof(TResult).IsValueType || typeof(TResult).IsEnum || typeof(TResult) == typeof(string) ? response : response.Result
             },
             WebApiResultBase.StatusInternalError => new ObjectResult(response)
             {
