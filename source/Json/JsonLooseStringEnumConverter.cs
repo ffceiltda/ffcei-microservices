@@ -48,6 +48,6 @@ internal sealed class JsonLooseStringEnumConverter : JsonConverterFactory
             throw new JsonException();
         }
 
-        public override void Write(Utf8JsonWriter writer, TValue value, JsonSerializerOptions options) => writer.WriteNumberValue((int)(object)value);
+        public override void Write(Utf8JsonWriter writer, TValue value, JsonSerializerOptions options) => writer.WriteNumberValue((long)(object)value);
     }
 }
