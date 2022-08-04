@@ -65,7 +65,7 @@ public class WebApiMicroservice : Microservice
     /// <summary>
     /// Web Api: require authorization on controller and methods (defaults to false on web api microservices, true on web api jwt authenticated microservices)
     /// </summary>
-    public bool WebApiUseAuthorization { get; set; } = true;
+    public bool WebApiUseAuthorization { get; set; }
 
     /// <summary>
     /// Web Api: require authorization by default, defaults to false

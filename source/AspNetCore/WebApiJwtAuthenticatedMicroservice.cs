@@ -92,7 +92,6 @@ public class WebApiJwtAuthenticatedMicroservice<TWebApiClaims> : WebApiMicroserv
         : base(args)
     {
         WebApiUseAuthorization = true;
-        WebApiUseAuthorizationByDefault = true;
     }
 
     protected override void OnBuildMicroservice()
