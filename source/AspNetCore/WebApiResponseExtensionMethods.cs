@@ -78,9 +78,24 @@ public static class IWebApiResponseExtensionMethods
     /// </summary>
     /// <typeparam name="TResult">Response type</typeparam>
     /// <param name="response">Response</param>
-    /// <param name="replyOnlyResultIfSucceeded">Only express response.Result as HTTP response, full JSON if false, or Resulty only if succeeded</param>
     /// <returns>NotFound if response is null or Status is null, OK if response status is 0, InternalError if status if 500, BadRequest if status &gt; 0, NotAcceptable if status &lt; 0</returns>
-    public static IActionResult ToHttpResponse<TResult>(this WebApiResultWith<TResult> response, bool? replyOnlyResultIfSucceeded = null)
+    public static IActionResult ToHttpResponse<TResult>(this WebApiResultWith<TResult> response)
+    {
+        return ToHttpResponseInternal(response, false);
+    }
+
+    /// <summary>
+    /// Returns a IActionResult from a WebApiResponseWith&lt;TResult&gt; using TResult value if succeeded
+    /// </summary>
+    /// <typeparam name="TResult">Response type</typeparam>
+    /// <param name="response">Response</param>
+    /// <returns>NotFound if response is null or Status is null, OK if response status is 0, InternalError if status if 500, BadRequest if status &gt; 0, NotAcceptable if status &lt; 0</returns>
+    public static IActionResult ToHttpResponseAsResult<TResult>(this WebApiResultWith<TResult> response)
+    {
+        return ToHttpResponseInternal(response, true);
+    }
+
+    private static IActionResult ToHttpResponseInternal<TResult>(WebApiResultWith<TResult> response, bool forceUsingResult)
     {
         if (response is null)
         {
@@ -102,8 +117,8 @@ public static class IWebApiResponseExtensionMethods
         {
             WebApiResultBase.StatusSucceeded => new OkObjectResult(response)
             {
-                Value = ((replyOnlyResultIfSucceeded is not null) && replyOnlyResultIfSucceeded.Value) || ((replyOnlyResultIfSucceeded is null) &&
-                    (typeof(TResult).IsValueType || typeof(TResult).IsEnum || typeof(TResult) == typeof(string))) ? response.Result : response
+                Value = (response.Result is null ? response : (forceUsingResult  ? response.Result :
+                    (typeof(TResult).IsValueType || typeof(TResult).IsEnum || typeof(TResult) == typeof(string) ? response : response.Result)))
             },
             WebApiResultBase.StatusInternalError => new ObjectResult(response)
             {
