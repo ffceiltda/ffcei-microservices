@@ -5,9 +5,9 @@ namespace FFCEI.Microservices.Models;
 /// </summary>
 public class TimestampedModel : Model, ITimestampedModel
 {
-    public DateTimeOffset? CreatedAt { get; protected internal set; }
+    public DateTimeOffset CreatedAt { get; protected internal set; } = DateTimeOffset.UtcNow;
 
-    public DateTimeOffset? UpdatedAt { get; protected internal set; }
+    public DateTimeOffset UpdatedAt { get; protected internal set; } = DateTimeOffset.UtcNow;
 
     public override void CopyModelPropertiesFrom(IModel model)
     {

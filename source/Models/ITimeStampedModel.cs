@@ -8,10 +8,10 @@ public interface ITimestampedModel : IModel
     /// <summary>
     /// CreatedAt property
     /// </summary>
-    DateTimeOffset? CreatedAt { get; }
+    DateTimeOffset CreatedAt { get; }
 
     /// <summary>
     /// UpdatedAt property
     /// </summary>
-    DateTimeOffset? UpdatedAt { get; }
+    DateTimeOffset UpdatedAt { get; }
 }
