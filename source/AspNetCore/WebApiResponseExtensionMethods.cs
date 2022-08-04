@@ -78,8 +78,9 @@ public static class IWebApiResponseExtensionMethods
     /// </summary>
     /// <typeparam name="TResult">Response type</typeparam>
     /// <param name="response">Response</param>
+    /// <param name="replyOnlyResultIfSucceeded">Only express response.Result as HTTP response, full JSON if false, or Resulty only if succeeded</param>
     /// <returns>NotFound if response is null or Status is null, OK if response status is 0, InternalError if status if 500, BadRequest if status &gt; 0, NotAcceptable if status &lt; 0</returns>
-    public static IActionResult ToHttpResponse<TResult>(this WebApiResultWith<TResult> response)
+    public static IActionResult ToHttpResponse<TResult>(this WebApiResultWith<TResult> response, bool? replyOnlyResultIfSucceeded = null)
     {
         if (response is null)
         {
@@ -101,7 +102,8 @@ public static class IWebApiResponseExtensionMethods
         {
             WebApiResultBase.StatusSucceeded => new OkObjectResult(response)
             {
-                Value = typeof(TResult).IsValueType || typeof(TResult).IsEnum || typeof(TResult) == typeof(string) ? response : response.Result
+                Value = ((replyOnlyResultIfSucceeded is not null) && replyOnlyResultIfSucceeded.Value) || ((replyOnlyResultIfSucceeded is null) &&
+                    (typeof(TResult).IsValueType || typeof(TResult).IsEnum || typeof(TResult) == typeof(string))) ? response.Result : response
             },
             WebApiResultBase.StatusInternalError => new ObjectResult(response)
             {
