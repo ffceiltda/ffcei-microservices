@@ -28,9 +28,17 @@ public class ReadOnlyModelRepository<TModel> : IReadOnlyModelRepository<TModel> 
     public IQueryable<TModel> WhereAll(bool ignoreQueryFilters = false) => ignoreQueryFilters ? Set.IgnoreQueryFilters() : Set;
 
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
-    public async Task<IEnumerable<TModel>> AllAsync(bool ignoreQueryFilters = false) => await WhereAll(ignoreQueryFilters).ToListAsync();
+    public IAsyncEnumerable<TModel> AllAsync(bool ignoreQueryFilters = false) => WhereAll(ignoreQueryFilters).AsAsyncEnumerable();
 
-    public async Task<IEnumerable<IModel>> AllModelsAsync(bool ignoreQueryFilters = false) => await AllAsync(ignoreQueryFilters);
+    public async Task<List<TModel>> AllAsListAsync(bool ignoreQueryFilters = false) => await WhereAll(ignoreQueryFilters).ToListAsync();
+
+    public async Task<HashSet<TModel>> AllAsHashSetAsync(bool ignoreQueryFilters = false) => (await AllAsListAsync(ignoreQueryFilters)).ToHashSet();
+
+    public IAsyncEnumerable<IModel> AllModelsAsync(bool ignoreQueryFilters = false) => WhereAll(ignoreQueryFilters).AsAsyncEnumerable();
+
+    public async Task<List<IModel>> AllModelsAsListAsync(bool ignoreQueryFilters = false) => await WhereAll(ignoreQueryFilters).ToListAsync<IModel>();
+
+    public async Task<HashSet<IModel>> AllModelsAsHashSetAsync(bool ignoreQueryFilters = false) => (await AllModelsAsListAsync(ignoreQueryFilters)).ToHashSet<IModel>();
 
     public async ValueTask<IModel?> FirstOrDefaultByKeyAsync(params object[] keys) => await Set.FindAsync(keys);
 

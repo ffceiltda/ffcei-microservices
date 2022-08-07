@@ -36,7 +36,21 @@ public interface IReadOnlyModelRepository<TModel> : IReadOnlyModelRepository whe
     /// </summary>
     /// <param name="ignoreQueryFilters">Ignore EF Core Query Filters</param>
     /// <returns>All models in repository</returns>
-    Task<IEnumerable<TModel>> AllAsync(bool ignoreQueryFilters = false);
+    IAsyncEnumerable<TModel> AllAsync(bool ignoreQueryFilters = false);
+
+    /// <summary>
+    /// Return all models in repository, allowing to ignore EF Query Filters, as a List
+    /// </summary>
+    /// <param name="ignoreQueryFilters">Ignore EF Core Query Filters</param>
+    /// <returns>All models in repository</returns>
+    Task<List<TModel>> AllAsListAsync(bool ignoreQueryFilters = false);
+
+    /// <summary>
+    /// Return all models in repository, allowing to ignore EF Query Filters, as a HashSet
+    /// </summary>
+    /// <param name="ignoreQueryFilters">Ignore EF Core Query Filters</param>
+    /// <returns>All models in repository</returns>
+    Task<HashSet<TModel>> AllAsHashSetAsync(bool ignoreQueryFilters = false);
 
     /// <summary>
     /// Return first model that match predicate or null

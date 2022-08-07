@@ -12,7 +12,21 @@ public interface IReadOnlyModelRepository
     /// </summary>
     /// <param name="ignoreQueryFilters">Ignore EF Core Query Filters</param>
     /// <returns>All models in repository</returns>
-    Task<IEnumerable<IModel>> AllModelsAsync(bool ignoreQueryFilters = false);
+    IAsyncEnumerable<IModel> AllModelsAsync(bool ignoreQueryFilters = false);
+
+    /// <summary>
+    /// Return all models in repository, as a List
+    /// </summary>
+    /// <param name="ignoreQueryFilters">Ignore EF Core Query Filters</param>
+    /// <returns>All models in repository</returns>
+    Task<List<IModel>> AllModelsAsListAsync(bool ignoreQueryFilters = false);
+
+    /// <summary>
+    /// Return all models in repository, as a HashSet
+    /// </summary>
+    /// <param name="ignoreQueryFilters">Ignore EF Core Query Filters</param>
+    /// <returns>All models in repository</returns>
+    Task<HashSet<IModel>> AllModelsAsHashSetAsync(bool ignoreQueryFilters = false);
 
     /// <summary>
     /// Return first model that match keys or null
