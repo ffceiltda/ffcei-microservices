@@ -1,6 +1,7 @@
 using FFCEI.Microservices.AspNetCore.Middlewares;
 using FFCEI.Microservices.AspNetCore.StaticFolderMappings;
 using FFCEI.Microservices.Microservices;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -70,7 +71,7 @@ public class WebApiMicroservice : Microservice
     /// <summary>
     /// Web Api: require authorization by default, defaults to false
     /// </summary>
-    public bool WebApiUseAuthorizationByDefault { get; set; }
+    public bool WebApiFallbackAuthorizationPolicyRequireAuthentication { get; set; }
 
     /// <summary>
     /// Json for Web Api: ignore null values on serialization (default to true)
@@ -298,7 +299,7 @@ public class WebApiMicroservice : Microservice
         {
             Services.AddAuthorization(options =>
             {
-                if (WebApiUseAuthorizationByDefault)
+                if (WebApiFallbackAuthorizationPolicyRequireAuthentication)
                 {
                     options.FallbackPolicy = new AuthorizationPolicyBuilder()
                         .RequireAuthenticatedUser()
@@ -311,7 +312,8 @@ public class WebApiMicroservice : Microservice
         var mvcBuilder = Services.AddControllers();
 
         BuildWebApiJsonOptions(mvcBuilder);
-        BuildWebApiFluentValidation(mvcBuilder);
+
+        BuildWebApiFluentValidation();
 
         if (ShouldGenerateSwagger())
         {
@@ -337,17 +339,14 @@ public class WebApiMicroservice : Microservice
 #pragma warning restore IDE0058 // Expression value is never used
     }
 
-    private void BuildWebApiFluentValidation(IMvcBuilder mvcBuilder)
+    private void BuildWebApiFluentValidation()
     {
         var assemblies = ReferencedAssembliesEndingWith(".Messages");
 
 #pragma warning disable IDE0058 // Expression value is never used
-        mvcBuilder.AddFluentValidation(validators =>
-        {
-            validators.RegisterValidatorsFromAssemblies(assemblies);
-        });
-
+        Services.AddValidatorsFromAssemblies(assemblies);
         Services.AddFluentValidationAutoValidation();
+        Services.AddFluentValidationClientsideAdapters();
 #pragma warning restore IDE0058 // Expression value is never used
     }
 
