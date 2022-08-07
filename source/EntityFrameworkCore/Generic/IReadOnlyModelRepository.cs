@@ -32,6 +32,40 @@ public interface IReadOnlyModelRepository<TModel> : IReadOnlyModelRepository whe
     IQueryable<TModel> WhereAll(bool ignoreQueryFilters = false);
 
     /// <summary>
+    /// Create queryable expression ordered by
+    /// </summary>
+    /// <typeparam name="TKey">Result key type</typeparam>
+    /// <param name="keySelector">Key selector</param>
+    /// <returns>A queryable instance</returns>
+    IQueryable<TModel> OrderBy<TKey>(Expression<Func<TModel, TKey>> keySelector);
+
+    /// <summary>
+    /// Create queryable expression ordered by
+    /// </summary>
+    /// <typeparam name="TKey">Result key type</typeparam>
+    /// <param name="ignoreQueryFilters">Ignore EF Core Query Filters</param>
+    /// <param name="keySelector">Key selector</param>
+    /// <returns>A queryable instance</returns>
+    IQueryable<TModel> OrderByAdvanced<TKey>(bool ignoreQueryFilters, Expression<Func<TModel, TKey>> keySelector);
+
+    /// <summary>
+    /// Create queryable expression ordered by descending
+    /// </summary>
+    /// <typeparam name="TKey">Result key type</typeparam>
+    /// <param name="keySelector">Key selector</param>
+    /// <returns>A queryable instance</returns>
+    IQueryable<TModel> OrderByDescending<TKey>(Expression<Func<TModel, TKey>> keySelector);
+
+    /// <summary>
+    /// Create queryable expression ordered by descending
+    /// </summary>
+    /// <typeparam name="TKey">Result key type</typeparam>
+    /// <param name="ignoreQueryFilters">Ignore EF Core Query Filters</param>
+    /// <param name="keySelector">Key selector</param>
+    /// <returns>A queryable instance</returns>
+    IQueryable<TModel> OrderByDescendingAdvanced<TKey>(bool ignoreQueryFilters, Expression<Func<TModel, TKey>> keySelector);
+
+    /// <summary>
     /// Return all models in repository, allowing to ignore EF Query Filters
     /// </summary>
     /// <param name="ignoreQueryFilters">Ignore EF Core Query Filters</param>
