@@ -27,13 +27,13 @@ public class ReadOnlyModelRepository<TModel> : IReadOnlyModelRepository<TModel> 
 
     public IQueryable<TModel> WhereAll(bool ignoreQueryFilters = false) => ignoreQueryFilters ? Set.IgnoreQueryFilters() : Set;
 
-    public IQueryable<TModel> OrderBy<TKey>(Expression<Func<TModel, TKey>> keySelector) => WhereAll().OrderBy(keySelector);
+    public IOrderedQueryable<TModel> OrderBy<TKey>(Expression<Func<TModel, TKey>> keySelector) => WhereAll().OrderBy(keySelector);
 
-    public IQueryable<TModel> OrderByAdvanced<TKey>(bool ignoreQueryFilters, Expression<Func<TModel, TKey>> keySelector) => WhereAll(ignoreQueryFilters).OrderBy(keySelector);
+    public IOrderedQueryable<TModel> OrderByAdvanced<TKey>(bool ignoreQueryFilters, Expression<Func<TModel, TKey>> keySelector) => WhereAll(ignoreQueryFilters).OrderBy(keySelector);
 
-    public IQueryable<TModel> OrderByDescending<TKey>(Expression<Func<TModel, TKey>> keySelector) => WhereAll().OrderBy(keySelector);
+    public IOrderedQueryable<TModel> OrderByDescending<TKey>(Expression<Func<TModel, TKey>> keySelector) => WhereAll().OrderByDescending(keySelector);
 
-    public IQueryable<TModel> OrderByDescendingAdvanced<TKey>(bool ignoreQueryFilters, Expression<Func<TModel, TKey>> keySelector) => WhereAll(ignoreQueryFilters).OrderBy(keySelector);
+    public IOrderedQueryable<TModel> OrderByDescendingAdvanced<TKey>(bool ignoreQueryFilters, Expression<Func<TModel, TKey>> keySelector) => WhereAll(ignoreQueryFilters).OrderByDescending(keySelector);
 
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
     public IAsyncEnumerable<TModel> AllAsync(bool ignoreQueryFilters = false) => WhereAll(ignoreQueryFilters).AsAsyncEnumerable();
