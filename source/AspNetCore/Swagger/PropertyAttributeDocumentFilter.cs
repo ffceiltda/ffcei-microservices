@@ -3,8 +3,6 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Collections.Concurrent;
 using System.Dynamic;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace FFCEI.Microservices.AspNetCore.Swagger;
 

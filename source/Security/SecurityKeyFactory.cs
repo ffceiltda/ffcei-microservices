@@ -52,7 +52,7 @@ public class SecurityKeyFactory
     /// <exception cref="ArgumentNullException">throw is configurationManager is null of configurationKeyStringPrefis is null or empty</exception>
     public SecurityKeyFactory(IConfigurationManager configurationManager, string configurationKeyStringPrefix, ILogger? logger = null)
     {
-        if (configurationManager == null)
+        if (configurationManager is null)
         {
             throw new ArgumentNullException(nameof(configurationManager));
         }
@@ -63,7 +63,7 @@ public class SecurityKeyFactory
         }
 
 #pragma warning disable CA1031 // Do not catch general exception types
-        if (_securityKey == null)
+        if (_securityKey is null)
         {
             var x509certificateFilename = configurationManager[$"{configurationKeyStringPrefix}X509Certificate.Filename"];
             var x509certificatePassword = configurationManager[$"{configurationKeyStringPrefix}X509Certificate.Password"];
@@ -88,7 +88,7 @@ public class SecurityKeyFactory
             }
         }
 
-        if (_securityKey == null)
+        if (_securityKey is null)
         {
             var certificateList = new List<X509Certificate2>();
 
@@ -191,7 +191,7 @@ public class SecurityKeyFactory
         }
 #pragma warning restore CA1031 // Do not catch general exception types
 
-        if (_securityKey == null)
+        if (_securityKey is null)
         {
             var symmetricSecurityKey = configurationManager[$"{configurationKeyStringPrefix}Symmetric.Key"];
             var symmetricSecuritySignatureAlgorithm = configurationManager[$"{configurationKeyStringPrefix}Symmetric.SignatureAlgorithm"];

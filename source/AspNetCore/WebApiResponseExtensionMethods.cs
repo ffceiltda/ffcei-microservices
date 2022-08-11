@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
+using System.Text;
 
 namespace FFCEI.Microservices.AspNetCore;
 
@@ -33,43 +34,34 @@ public static class IWebApiResponseExtensionMethods
     /// <returns>NotFound if response is null or Status is null, OK if response status is 0, InternalError if status if 500, BadRequest if status &gt; 0, NotAcceptable if status &lt; 0</returns>
     public static IActionResult ToHttpResponse(this WebApiResult response)
     {
-        if (response is null)
-        {
-            return new NotFoundObjectResult(response)
-            {
-                Value = WebApiResultBase.DetailNotFound
-            };
-        }
-
-        if (response.Status == WebApiResultBase.StatusNotFound)
-        {
-            return new NotFoundObjectResult(response)
-            {
-                Value = response
-            };
-        }
-
-        var httpResponse = response.Status switch
-        {
-            WebApiResultBase.StatusSucceeded => new OkObjectResult(response)
-            {
-                Value = response
-            },
-            WebApiResultBase.StatusInternalError => new ObjectResult(response)
-            {
-                StatusCode = StatusCodes.Status500InternalServerError,
-                Value = response
-            },
-            > 0 => new BadRequestObjectResult(response)
-            {
-                Value = response
-            },
-            _ => new ObjectResult(response)
-            {
-                StatusCode = StatusCodes.Status406NotAcceptable,
-                Value = response
-            }
-        };
+        var httpResponse = ((response is null) || (response.Status == WebApiResultBase.StatusNotFound))
+           ?
+           new NotFoundObjectResult(response)
+           {
+               Value = response is null ? WebApiResultBase.DetailNotFound : response
+           }
+           :
+           response.Status switch
+           {
+               WebApiResultBase.StatusSucceeded => new OkObjectResult(response)
+               {
+                   Value = response
+               },
+               WebApiResultBase.StatusInternalError => new ObjectResult(response)
+               {
+                   StatusCode = StatusCodes.Status500InternalServerError,
+                   Value = response
+               },
+               > 0 => new BadRequestObjectResult(response)
+               {
+                   Value = response
+               },
+               _ => new ObjectResult(response)
+               {
+                   StatusCode = StatusCodes.Status406NotAcceptable,
+                   Value = response
+               }
+           };
 
         return httpResponse;
     }
@@ -82,6 +74,11 @@ public static class IWebApiResponseExtensionMethods
     /// <returns>NotFound if response is null or Status is null, OK if response status is 0, InternalError if status if 500, BadRequest if status &gt; 0, NotAcceptable if status &lt; 0</returns>
     public static IActionResult ToHttpResponse<TResult>(this WebApiResultWith<TResult> response)
     {
+        if (response is null)
+        {
+            throw new ArgumentNullException(nameof(response));
+        }
+
         return ToHttpResponseInternal(response, false);
     }
 
@@ -93,55 +90,52 @@ public static class IWebApiResponseExtensionMethods
     /// <returns>NotFound if response is null or Status is null, OK if response status is 0, InternalError if status if 500, BadRequest if status &gt; 0, NotAcceptable if status &lt; 0</returns>
     public static IActionResult ToHttpResponseAsResult<TResult>(this WebApiResultWith<TResult> response)
     {
+        if (response is null)
+        {
+            throw new ArgumentNullException(nameof(response));
+        }
+
         return ToHttpResponseInternal(response, true);
     }
 
     private static IActionResult ToHttpResponseInternal<TResult>(WebApiResultWith<TResult> response, bool forceUsingResult)
     {
-        if (response is null)
-        {
-            return new NotFoundObjectResult(response)
+        var isPlainType = typeof(TResult).IsValueType || typeof(TResult).IsEnum || typeof(TResult) == typeof(string);
+        var writeResponseAsFileStream = forceUsingResult && isPlainType && (response.Result is not null);
+        var httpResponse = ((response is null) || (response.Status == WebApiResultBase.StatusNotFound))
+            ?
+            new NotFoundObjectResult(response)
             {
-                Value = WebApiResultBase.DetailNotFound
-            };
-        }
-
-        if (response.Status == WebApiResultBase.StatusNotFound)
-        {
-            return new NotFoundObjectResult(response)
-            {
-                Value = response
-            };
-        }
-
-        var httpResponse = response.Status switch
-        {
-            WebApiResultBase.StatusSucceeded => new OkObjectResult(response)
-            {
-                Value = (response.Result is null ? response : (forceUsingResult  ? response.Result :
-                    (typeof(TResult).IsValueType || typeof(TResult).IsEnum || typeof(TResult) == typeof(string) ? response : response.Result)))
-            },
-            WebApiResultBase.StatusInternalError => new ObjectResult(response)
-            {
-                StatusCode = StatusCodes.Status500InternalServerError,
-                Value = response
-            },
-            > 0 => new BadRequestObjectResult(response)
-            {
-                Value = response
-            },
-            _ => new ObjectResult(response)
-            {
-                StatusCode = StatusCodes.Status406NotAcceptable,
-                Value = response
+                Value = response is null ? WebApiResultBase.DetailNotFound : response
             }
-        };
-
-        if (!ReferenceEquals(httpResponse.Value, response))
-        {
-            httpResponse.ContentTypes.Add(new MediaTypeHeaderValue("text/plain"));
-        }
-
+            :
+            response.Status switch
+            {
+                WebApiResultBase.StatusSucceeded => writeResponseAsFileStream ? (IActionResult)
+                new FileContentResult(Encoding.UTF8.GetBytes(response.ResultAsString()), new MediaTypeHeaderValue("text/plain") { Charset = "utf-8" })
+                {
+                }
+                :
+                new OkObjectResult(response)
+                {
+                    Value = isPlainType ? response : response.Result
+                },
+                WebApiResultBase.StatusInternalError => new ObjectResult(response)
+                {
+                    StatusCode = StatusCodes.Status500InternalServerError,
+                    Value = response
+                },
+                > 0 => new BadRequestObjectResult(response)
+                {
+                    Value = response
+                },
+                _ => new ObjectResult(response)
+                {
+                    StatusCode = StatusCodes.Status406NotAcceptable,
+                    Value = response
+                }
+            };
+        
         return httpResponse;
     }
 }

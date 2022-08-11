@@ -1,14 +1,28 @@
+using System.Text;
+
 namespace FFCEI.Microservices.AspNetCore;
 
 /// <summary>
 /// Web Api result response with result data
 /// </summary>
-public sealed class WebApiResultWith<TResult> : WebApiResultBase
+public sealed class WebApiResultWith<TResult> : WebApiResultWithBase
 {
     /// <summary>
     /// Result data
     /// </summary>
     public TResult? Result { get; set; }
+
+    public override string ResultAsString()
+    {
+        var result = Result?.ToString();
+
+        if (result is null)
+        {
+            return string.Empty;
+        }
+
+        return result;
+    }
 
 #pragma warning disable CA1000 // Do not declare static members on generic types
     /// <summary>

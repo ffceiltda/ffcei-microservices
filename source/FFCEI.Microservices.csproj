@@ -23,7 +23,7 @@
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
     <AnalysisLevel>6.0-all</AnalysisLevel>
     <SignAssembly>False</SignAssembly>
-    <Version>0.3.5</Version>
+    <Version>0.3.6</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -59,20 +59,20 @@
     <PackageReference Include="Microsoft.AspNetCore.Localization" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Localization.Routing" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="6.0.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="6.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="6.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="6.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.DynamicLinq" Version="6.2.19" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="6.0.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.7">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="6.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="6.0.7" />
-    <PackageReference Include="Microsoft.Extensions.Localization" Version="6.0.7" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="6.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="6.0.8" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="6.0.2" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.Design" Version="1.1.2" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.Json.Microsoft" Version="6.0.2" />

@@ -43,7 +43,7 @@ public class WeatherForecastController : WebApiController
     /// <param name="request">New weather data</param>
     /// <returns>OK</returns>
     [HttpPut, Route("PutWeather")]
-    [ProducesResponseType(typeof(WebApiResultWith<string>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
