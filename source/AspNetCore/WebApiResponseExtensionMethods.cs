@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 
 namespace FFCEI.Microservices.AspNetCore;
 
@@ -135,6 +136,11 @@ public static class IWebApiResponseExtensionMethods
                 Value = response
             }
         };
+
+        if (!ReferenceEquals(httpResponse.Value, response))
+        {
+            httpResponse.ContentTypes.Add(new MediaTypeHeaderValue("text/plain"));
+        }
 
         return httpResponse;
     }

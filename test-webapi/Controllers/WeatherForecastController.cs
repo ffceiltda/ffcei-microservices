@@ -43,8 +43,15 @@ public class WeatherForecastController : WebApiController
     /// <param name="request">New weather data</param>
     /// <returns>OK</returns>
     [HttpPut, Route("PutWeather")]
-    public ActionResult Put([FromBody] WeatherForecastRequest request)
+    [ProducesResponseType(typeof(WebApiResultWith<string>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status406NotAcceptable)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public IActionResult Put([FromBody] WeatherForecastRequest request)
     {
-        return Ok();
+        return WebApiResultWith<string>.Succeeded("OK, it works").ToHttpResponseAsResult();
     }
 }
