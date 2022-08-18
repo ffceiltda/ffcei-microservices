@@ -40,6 +40,9 @@ public class EntityTypeQueryFilterBuilder<TEntity> : IEntityTypeQueryFilterBuild
 
     private readonly Dictionary<string, QueryFilterExpression> _queryFilterExpressions = new();
 
+    /// <summary>
+    /// Default constructor
+    /// </summary>
     public EntityTypeQueryFilterBuilder()
     {
     }
@@ -131,40 +134,31 @@ public class EntityTypeQueryFilterBuilder<TEntity> : IEntityTypeQueryFilterBuild
         return expression;
     }
 
-    //
-    // Summary:
-    //     Returns a string that represents the current object.
-    //
-    // Returns:
-    //     A string that represents the current object.
+    /// <summary>
+    /// Returns a string that represents the current object.
+    /// </summary>
+    /// <returns>A string that represents the current object.</returns>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public override string? ToString()
     {
         return base.ToString();
     }
 
-    //
-    // Summary:
-    //     Determines whether the specified object is equal to the current object.
-    //
-    // Parameters:
-    //   obj:
-    //     The object to compare with the current object.
-    //
-    // Returns:
-    //     true if the specified object is equal to the current object; otherwise, false.
+    /// <summary>
+    /// Determines whether the specified object is equal to the current object.
+    /// </summary>
+    /// <param name="obj">The object to compare with the current object.</param>
+    /// <returns>true if the specified object is equal to the current object; otherwise, false.</returns>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public override bool Equals(object? obj)
     {
         return base.Equals(obj);
     }
 
-    //
-    // Summary:
-    //     Serves as the default hash function.
-    //
-    // Returns:
-    //     A hash code for the current object.
+    /// <summary>
+    /// Serves as the default hash function.
+    /// </summary>
+    /// <returns>A hash code for the current object.</returns>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public override int GetHashCode()
     {
