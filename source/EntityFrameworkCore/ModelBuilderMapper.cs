@@ -121,6 +121,8 @@ public static class ModelBuilderMapper
         {
             var parameters = new object[2] { modelBuilder, databaseEngine };
             var _ = method.Invoke(null, parameters);
+
+            EntityTypeBuilderExtensionMethods.ApplyQueryFilters();
         }
 
         MapValueConverters(modelBuilder, databaseEngine);

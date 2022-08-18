@@ -31,7 +31,8 @@ public static class LogicallyDeletableModelBuilder
         if (filterLogicallyDeletedRows)
         {
             entityBuilder
-               .HasQueryFilter(p => !p.IsLogicallyDeleted);
+                .QueryFilter()
+                .AddFilter(p => !p.IsLogicallyDeleted);
         }
 #pragma warning restore IDE0058 // Expression value is never used
     }

@@ -6,7 +6,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore;
 /// <summary>
 /// Model Builder for ITimestampedModel derived model classes
 /// </summary>
-public static class TimestampedAwareModelBuilder
+public static class TimestampedRodelBuilder
 {
     /// <summary>
     /// Register ITimestampedModel properties
