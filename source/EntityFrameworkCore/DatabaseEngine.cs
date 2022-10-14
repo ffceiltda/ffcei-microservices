@@ -8,7 +8,7 @@ public enum DatabaseEngine
     /// <summary>
     /// Unkown
     /// </summary>
-    Unknown = 0,
+    Unknown,
     /// <summary>
     /// MySql database egine
     /// </summary>

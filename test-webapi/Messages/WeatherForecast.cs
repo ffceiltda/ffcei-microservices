@@ -6,7 +6,7 @@ namespace TestWebApi.Messages;
 /// Weather forecast response
 /// </summary>
 [SwaggerRequest]
-public class WeatherForecastRequest
+public class WeatherForecastRequest : WebApiSearchRequest
 {
     /// <summary>
     /// Timestamp of message
@@ -29,7 +29,7 @@ public class WeatherForecastRequest
 /// <summary>
 /// Weather forecast response
 /// </summary>
-public class WeatherForecastResponse
+public class WeatherForecastResponse : WebApiSearchResponse
 {
     /// <summary>
     /// Timestamp of message

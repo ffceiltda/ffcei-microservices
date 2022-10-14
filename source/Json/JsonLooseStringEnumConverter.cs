@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -48,6 +49,7 @@ internal sealed class JsonLooseStringEnumConverter : JsonConverterFactory
             throw new JsonException();
         }
 
-        public override void Write(Utf8JsonWriter writer, TValue value, JsonSerializerOptions options) => writer.WriteNumberValue((long)(object)value);
+        public override void Write(Utf8JsonWriter writer, TValue value, JsonSerializerOptions options) =>
+            writer.WriteNumberValue((long)Convert.ChangeType(Convert.ChangeType(value, value.GetTypeCode(), CultureInfo.InvariantCulture), typeof(long), CultureInfo.InvariantCulture));
     }
 }

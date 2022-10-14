@@ -1,9 +1,9 @@
-namespace FFCEI.Microservices.AspNetCore;
+namespace FFCEI.Microservices.EntityFrameworkCore;
 
 /// <summary>
-/// Web Api Search Expression Comparison Operator in expressions
+/// Dynamic Search Expression Comparison Operator in expressions
 /// </summary>
-public enum WebApiSearchExpressionComparisonOperator
+public enum DynamicSearchExpressionComparisonOperator : int
 {
     /// <summary>
     /// Equals comparison operator

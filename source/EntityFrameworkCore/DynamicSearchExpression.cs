@@ -1,28 +1,34 @@
 using System.Text.Json.Serialization;
 
-namespace FFCEI.Microservices.AspNetCore;
+namespace FFCEI.Microservices.EntityFrameworkCore;
 
 /// <summary>
-/// Web Api Search Expression
+/// Dynamic Search Expression
 /// </summary>
-public class WebApiSearchExpression : IWebApiSearchGroupExpression, IWebApiSearchConditionExpression
+public class DynamicSearchExpression : IDynamicSearchGroupExpression, IDynamicSearchConditionExpression
 {
-    public WebApiSearchExpressionConcatenator? Concatenator { get; set; }
+    public IDynamicSearchExpressionConcatenator? Concatenator { get; set; }
+
+    public bool? Negate { get; set; }
 
     [JsonIgnore]
-    IReadOnlyList<IWebApiSearchExpression> IWebApiSearchGroupExpression.Expressions => Expressions;
+    IReadOnlyList<IDynamicSearchExpression> IDynamicSearchGroupExpression.Expressions => Expressions;
+
 #pragma warning disable CA1002 // Do not expose generic lists
 #pragma warning disable CA2227 // Collection properties should be read only
-    public List<WebApiSearchExpression> Expressions { get; set; } = new();
+    public List<DynamicSearchExpression> Expressions { get; set; } = new();
 #pragma warning restore CA2227 // Collection properties should be read only
 #pragma warning restore CA1002 // Do not expose generic lists
 
-    public bool? Negate { get; set; }
-    public WebApiSearchExpressionComparisonOperator? ComparisonOperator { get; set; }
+    public string? ComparisionCondition { get; set; }
+
+    public DynamicSearchExpressionComparisonOperator? ComparisonOperator { get; set; }
+
     [JsonIgnore]
-    IReadOnlyList<string> IWebApiSearchConditionExpression.Values => Values;
+    IReadOnlyList<string> IDynamicSearchConditionExpression.Values => Values;
 #pragma warning disable CA1002 // Do not expose generic lists
 #pragma warning disable CA2227 // Collection properties should be read only
+
     public List<string> Values { get; set; } = new();
 #pragma warning restore CA2227 // Collection properties should be read only
 #pragma warning restore CA1002 // Do not expose generic lists

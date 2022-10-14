@@ -7,12 +7,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -39,9 +41,19 @@ public class WebApiMicroservice : Microservice
     public bool HttpUseCors { get; set; } = true;
 
     /// <summary>
-    /// HTTP settings: Request max body length (defaults to 8 hexabytes)
+    /// HTTP settings: Request max body length (defaults to 32 gigabytes)
     /// </summary>
-    public long HttpRequestMaxBodyLength { get; set; } = long.MaxValue;
+    public long HttpRequestMaxBodyLength { get; set; } = 34359738368;
+
+    /// <summary>
+    /// HTTP settings: use response compression (defaults to true)
+    /// </summary>
+    public bool HttpResponseCompression { get; set; } = true;
+
+    /// <summary>
+    /// HTTPS settings: use response compression (defaults to false)
+    /// </summary>
+    public bool HttpsResponseCompression { get; set; }
 
     /// <summary>
     /// HTTP settings: Web Api redirect to HTTPS (defaults to false)
@@ -253,12 +265,31 @@ public class WebApiMicroservice : Microservice
             Services.AddCors(options => options.AddDefaultPolicy(policy => CreateKestrelCorsPolicy(policy)));
         }
 
-        Builder.ConfigureServices((context, services) =>
+        if (HttpResponseCompression || HttpsResponseCompression)
         {
-            services.Configure<KestrelServerOptions>(options =>
+            Services.Configure<BrotliCompressionProviderOptions>(options =>
             {
-                options.Limits.MaxRequestBodySize = HttpRequestMaxBodyLength;
+                options.Level = CompressionLevel.Optimal;
             });
+
+            Services.Configure<GzipCompressionProviderOptions>(options =>
+            {
+                options.Level = CompressionLevel.Optimal;
+            });
+
+            Services.AddResponseCompression(options =>
+            {
+                options.Providers.Add<BrotliCompressionProvider>();
+                options.Providers.Add<GzipCompressionProvider>();
+                options.EnableForHttps = HttpsResponseCompression;
+                options.MimeTypes = ResponseCompressionDefaults.MimeTypes;
+                options.ExcludedMimeTypes = new List<string> { "text/json", "application/json" };
+            });
+        }
+
+        Services.Configure<KestrelServerOptions>(options =>
+        {
+            options.Limits.MaxRequestBodySize = HttpRequestMaxBodyLength;
         });
 
         Services.AddHttpContextAccessor();
@@ -271,6 +302,11 @@ public class WebApiMicroservice : Microservice
         if (HttpUseCors)
         {
             Application.UseCors(policy => CreateKestrelCorsPolicy(policy));
+        }
+
+        if (HttpResponseCompression || HttpsResponseCompression)
+        {
+            Application.UseResponseCompression();
         }
 
         if (HttpRedirectToHttps)

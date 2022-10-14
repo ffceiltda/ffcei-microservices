@@ -58,9 +58,9 @@ public class WebApiJwtAuthenticatedMicroservice<TWebApiClaims> : WebApiMicroserv
     public bool JwtValidateLifetime { get; set; } = true;
 
     /// <summary>
-    /// Javascript Web Token: clock skew to validate token lifetime
+    /// Javascript Web Token: clock skew in seconds to validate token lifetime
     /// </summary>
-    public int JwtLifetimeClockSkew { get; set; } = 120;
+    public int JwtLifetimeClockSkewSeconds { get; set; } = 120;
 
     /// <summary>
     /// Javascript Web Token: save sign-in web token
@@ -135,7 +135,7 @@ public class WebApiJwtAuthenticatedMicroservice<TWebApiClaims> : WebApiMicroserv
 #pragma warning disable CA5404 // Do not disable token validation checks
             jwt.TokenValidationParameters = new TokenValidationParameters
             {
-                ClockSkew = TimeSpan.FromSeconds(JwtLifetimeClockSkew),
+                ClockSkew = TimeSpan.FromSeconds(JwtLifetimeClockSkewSeconds),
                 RequireSignedTokens = true,
                 IssuerSigningKey = signingKeyFactory.SecurityKey,
                 ValidateIssuer = JwtValidateIssuer && (JwtValidIssuers.Count > 0),
