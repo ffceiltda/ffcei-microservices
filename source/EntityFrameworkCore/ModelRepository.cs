@@ -161,6 +161,20 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
         await UpdateManyAsync(models, autoCommit);
     }
 
+    public async Task<IEnumerable<TModel>> LogicallyDeleteByPredicateAsync(Expression<Func<TModel, bool>> predicate, bool autoCommit = true)
+    {
+        var models = await WhereAdvanced(false, predicate).ToListAsync();
+
+        if (models is null)
+        {
+            throw new ArgumentNullException(nameof(predicate), "predicate returned null");
+        }
+
+        await LogicallyDeleteManyAsync(models, autoCommit);
+
+        return models;
+    }
+
     public async Task LogicallyDeleteExistingAsync(TModel model, bool autoCommit = true)
     {
         if (model is null)
@@ -174,11 +188,27 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
             Set.Update(model);
         }
+        else
+        {
+            throw new InvalidCastException("model does not implement interface ILogicallyDeletableModel");
+        }
 
         if (autoCommit)
         {
             await Context.SaveChangesAsync();
         }
+    }
+
+    public async ValueTask<IModel?> LogicallyDeleteByKeyAsync(bool autoCommit, params object[] keys)
+    {
+        var model = await FirstOrDefaultByKeyAdvancedAsync(false, keys);
+
+        if (model is not null)
+        {
+            await LogicallyDeleteExistingAsync(model, autoCommit);
+        }
+
+        return model;
     }
 
     public async Task LogicallyDeleteExistingAsync(IModel content, bool autoCommit = true)
@@ -209,19 +239,27 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
         if (modelType is ILogicallyDeletableModel)
         {
+            var index = 0;
+
             foreach (var model in models)
             {
                 if (model is ILogicallyDeletableModel logicallyDeletableModel)
                 {
                     logicallyDeletableModel.LogicallyDelete();
                 }
+                else
+                {
+                    throw new InvalidCastException($"models[{index}] does not implement interface ILogicallyDeletableModel");
+                }
+
+                ++index;
             }
 
             Set.UpdateRange(models);
         }
-        else
+        else if (modelType is not null)
         {
-            Set.RemoveRange(models);
+            throw new InvalidCastException($"models does not implement interface ILogicallyDeletableModel");
         }
 
         if (autoCommit)
@@ -252,6 +290,137 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
         }
 
         await LogicallyDeleteManyAsync(models, autoCommit);
+    }
+
+    public async Task<IEnumerable<TModel>> LogicallyUndeleteByPredicateAsync(Expression<Func<TModel, bool>> predicate, bool autoCommit = true)
+    {
+        var models = await WhereAdvanced(true, predicate).ToListAsync();
+
+        if (models is null)
+        {
+            throw new ArgumentNullException(nameof(predicate), "predicate returned null");
+        }
+
+        await LogicallyUndeleteManyAsync(models, autoCommit);
+
+        return models;
+    }
+
+    public async Task LogicallyUndeleteExistingAsync(TModel model, bool autoCommit = true)
+    {
+        if (model is null)
+        {
+            throw new ArgumentNullException(nameof(model));
+        }
+
+        if (model is ILogicallyDeletableModel logicallyDeletableModel)
+        {
+            logicallyDeletableModel.LogicallyUndelete();
+
+            Set.Update(model);
+        }
+        else
+        {
+            throw new InvalidCastException("model does not implement interface ILogicallyDeletableModel");
+        }
+
+        if (autoCommit)
+        {
+            await Context.SaveChangesAsync();
+        }
+    }
+
+    public async ValueTask<IModel?> LogicallyUndeleteByKeyAsync(bool autoCommit, params object[] keys)
+    {
+        var model = await FirstOrDefaultByKeyAdvancedAsync(true, keys);
+
+        if (model is not null)
+        {
+            await LogicallyUndeleteExistingAsync(model, autoCommit);
+        }
+
+        return model;
+    }
+
+    public async Task LogicallyUndeleteExistingAsync(IModel content, bool autoCommit = true)
+    {
+        if (content is null)
+        {
+            throw new ArgumentNullException(nameof(content));
+        }
+
+        if (content is TModel model)
+        {
+            await LogicallyUndeleteExistingAsync(model, autoCommit);
+        }
+        else
+        {
+            throw new IncompatibleModelObjectTypeForDbSetException(typeof(TModel), content.GetType());
+        }
+    }
+
+    public async Task LogicallyUndeleteManyAsync(IEnumerable<TModel> models, bool autoCommit = true)
+    {
+        if (models is null)
+        {
+            throw new ArgumentNullException(nameof(models));
+        }
+
+        var modelType = models.FirstOrDefault();
+
+        if (modelType is ILogicallyDeletableModel)
+        {
+            var index = 0;
+
+            foreach (var model in models)
+            {
+                if (model is ILogicallyDeletableModel logicallyDeletableModel)
+                {
+                    logicallyDeletableModel.LogicallyUndelete();
+                }
+                else
+                {
+                    throw new InvalidCastException($"models[{index}] does not implement interface ILogicallyDeletableModel");
+                }
+
+                ++index;
+            }
+
+            Set.UpdateRange(models);
+        }
+        else if (modelType is not null)
+        {
+            throw new InvalidCastException($"models does not implement interface ILogicallyDeletableModel");
+        }
+
+        if (autoCommit)
+        {
+            await Context.SaveChangesAsync();
+        }
+    }
+
+    public async Task LogicallyUndeleteManyAsync(IEnumerable<IModel> contents, bool autoCommit = true)
+    {
+        if (contents is null)
+        {
+            throw new ArgumentNullException(nameof(contents));
+        }
+
+        var models = new List<TModel>();
+
+        foreach (var content in contents)
+        {
+            if (content is TModel model)
+            {
+                models.Add(model);
+            }
+            else
+            {
+                throw new IncompatibleModelObjectTypeForDbSetException(typeof(TModel), content.GetType());
+            }
+        }
+
+        await LogicallyUndeleteManyAsync(models, autoCommit);
     }
 
     public async Task RemoveExistingAsync(TModel model, bool autoCommit = true)
@@ -358,7 +527,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task RemoveManyByPredicateAsync(Expression<Func<TModel, bool>> predicate, bool autoCommit = true)
     {
-        var models = await Set.Where(predicate).ToListAsync();
+        var models = await Where(predicate).ToListAsync();
 
         if (models is null)
         {
@@ -394,6 +563,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
             throw new IncompatibleModelObjectTypeForDbSetException(typeof(TModel), content.GetType());
         }
     }
+
 #pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
 #pragma warning restore IDE0058 // Expression value is never used
 

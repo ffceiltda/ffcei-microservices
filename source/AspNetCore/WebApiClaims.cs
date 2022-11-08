@@ -245,17 +245,23 @@ public class WebApiClaims
                 continue;
             }
 
-            var claimValue = claimObjectValue.ToString();
+            string? claimValue;
 
             if ((instanceClaim.PropertyType == typeof(DateTime)) || (instanceClaim.PropertyType == typeof(DateTime?)))
             {
                 var dateTimeValue = (DateTime)claimObjectValue;
+
                 claimValue = new DateTimeOffset(dateTimeValue).ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture);
             }
             else if ((instanceClaim.PropertyType == typeof(DateTimeOffset)) || (instanceClaim.PropertyType == typeof(DateTimeOffset?)))
             {
                 var dateTimeOffsetValue = (DateTimeOffset)claimObjectValue;
+
                 claimValue = dateTimeOffsetValue.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                claimValue = claimObjectValue.ToString();
             }
 
             if (string.IsNullOrEmpty(claimValue))

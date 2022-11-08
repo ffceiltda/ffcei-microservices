@@ -12,7 +12,7 @@ public interface IReadOnlyModelRepository<TModel> : IReadOnlyModelRepository whe
     /// <summary>
     /// Create queryable expression by predicate
     /// </summary>
-    /// <param name="predicate"></param>
+    /// <param name="predicate">Predicate for match</param>
     /// <returns>A queryable instance</returns>
     IQueryable<TModel> Where(Expression<Func<TModel, bool>> predicate);
 
@@ -20,7 +20,7 @@ public interface IReadOnlyModelRepository<TModel> : IReadOnlyModelRepository whe
     /// Create queryable expression by predicate
     /// </summary>
     /// <param name="ignoreQueryFilters">Ignore EF Core Query Filters</param>
-    /// <param name="predicate"></param>
+    /// <param name="predicate">Predicate for match</param>
     /// <returns>A queryable instance</returns>
     IQueryable<TModel> WhereAdvanced(bool ignoreQueryFilters, Expression<Func<TModel, bool>> predicate);
 

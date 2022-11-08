@@ -40,6 +40,14 @@ public interface IModelRepository : IReadOnlyModelRepository
     Task UpdateManyAsync(IEnumerable<IModel> contents, bool autoCommit = true);
 
     /// <summary>
+    /// Logically delete first model that match keys or null
+    /// </summary>
+    /// <param name="autoCommit">Save changes after operation succeeds</param>
+    /// <param name="keys">Model lookup keys</param>
+    /// <returns>First model that match keys or null</returns>
+    ValueTask<IModel?> LogicallyDeleteByKeyAsync(bool autoCommit, params object[] keys);
+
+    /// <summary>
     /// Logically delete a existing Model from repository if TModel implements ILogicallyDeletableModel
     /// </summary>
     /// <param name="content">Model instance</param>
@@ -54,6 +62,30 @@ public interface IModelRepository : IReadOnlyModelRepository
     /// <param name="autoCommit">Save changes after operation succeeds</param>
     /// <returns>void</returns>
     Task LogicallyDeleteManyAsync(IEnumerable<IModel> contents, bool autoCommit = true);
+
+    /// <summary>
+    /// Logically undelete first model that match keys or null
+    /// </summary>
+    /// <param name="autoCommit">Save changes after operation succeeds</param>
+    /// <param name="keys">Model lookup keys</param>
+    /// <returns>First model that match keys or null</returns>
+    ValueTask<IModel?> LogicallyUndeleteByKeyAsync(bool autoCommit, params object[] keys);
+
+    /// <summary>
+    /// Logically undelete a existing Model from repository if TModel implements ILogicallyDeletableModel
+    /// </summary>
+    /// <param name="content">Model instance</param>
+    /// <param name="autoCommit">Save changes after operation succeeds</param>
+    /// <returns>void</returns>
+    Task LogicallyUndeleteExistingAsync(IModel content, bool autoCommit = true);
+
+    /// <summary>
+    /// Logically undelete existing ModelS from repository if TModel implements ILogicallyDeletableModel
+    /// </summary>
+    /// <param name="contents">Collection of Model instances</param>
+    /// <param name="autoCommit">Save changes after operation succeeds</param>
+    /// <returns>void</returns>
+    Task LogicallyUndeleteManyAsync(IEnumerable<IModel> contents, bool autoCommit = true);
 
     /// <summary>
     /// Remove existing Model from repository
