@@ -31,6 +31,11 @@ public abstract class Microservice : IMicroservice
     private static WeakReference<Microservice> _instance = null!;
 
     /// <summary>
+    /// Registry path for environment settings search in HKCU, then HKLM
+    /// </summary>
+    public static string? RegistryPathForEnvironment { get; set; }
+
+    /// <summary>
     /// Default constructor
     /// </summary>
     /// <param name="commandLineArguments">Program command line arguments</param>
@@ -288,12 +293,14 @@ public abstract class Microservice : IMicroservice
         }
 
 #pragma warning disable IDE0058 // Expression value is never used
+#pragma warning disable CA1305 // Specify IFormatProvider
         configuration
             .Enrich.WithProperty("Application", MicroserviceName)
             .Enrich.FromLogContext()
             .Enrich.WithCorrelationIdHeader()
             .Destructure.UsingAttributes()
             .WriteTo.Console();
+#pragma warning restore CA1305 // Specify IFormatProvider
 
         if (!IsDebugOrDevelopment)
         {

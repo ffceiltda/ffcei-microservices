@@ -23,7 +23,7 @@
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
     <AnalysisLevel>6.0-all</AnalysisLevel>
     <SignAssembly>False</SignAssembly>
-    <Version>0.4.2</Version>
+    <Version>0.4.3</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -41,7 +41,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="12.0.0" />
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
     <PackageReference Include="AutoMapper.Collection" Version="9.0.0" />
     <PackageReference Include="AutoMapper.Collection.EntityFrameworkCore" Version="9.0.0" />
     <PackageReference Include="AutoMapper.Extensions.EnumMapping" Version="3.0.1" />
@@ -49,12 +49,12 @@
     <PackageReference Include="Destructurama.Attributed" Version="3.0.0" />
     <PackageReference Include="Destructurama.ByIgnoring" Version="1.1.0" />
     <PackageReference Include="Destructurama.JsonNet" Version="2.0.0" />
-    <PackageReference Include="EasyCaching.Redis" Version="1.7.0" />
-    <PackageReference Include="EasyCaching.Serialization.Json" Version="1.7.0" />
-    <PackageReference Include="EasyCaching.Serialization.MessagePack" Version="1.7.0" />
-    <PackageReference Include="EasyCaching.Serialization.Protobuf" Version="1.7.0" />
-    <PackageReference Include="EasyCaching.Serialization.SystemTextJson" Version="1.7.0" />
-    <PackageReference Include="EFCoreSecondLevelCacheInterceptor" Version="3.7.3" />
+    <PackageReference Include="EasyCaching.Redis" Version="1.9.0" />
+    <PackageReference Include="EasyCaching.Serialization.Json" Version="1.9.0" />
+    <PackageReference Include="EasyCaching.Serialization.MessagePack" Version="1.9.0" />
+    <PackageReference Include="EasyCaching.Serialization.Protobuf" Version="1.9.0" />
+    <PackageReference Include="EasyCaching.Serialization.SystemTextJson" Version="1.9.0" />
+    <PackageReference Include="EFCoreSecondLevelCacheInterceptor" Version="3.8.6" />
     <PackageReference Include="EntityFrameworkCore.Exceptions.MySQL.Pomelo" Version="6.0.3" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.2.2" />
     <PackageReference Include="Isopoh.Cryptography.Argon2" Version="1.1.12" />
@@ -77,21 +77,22 @@
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="6.0.10" />
     <PackageReference Include="Microsoft.Extensions.Localization" Version="6.0.10" />
+    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="6.0.2" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.Design" Version="1.1.2" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.Json.Microsoft" Version="6.0.2" />
-    <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
-    <PackageReference Include="RestSharp" Version="108.0.2" />
-    <PackageReference Include="Serilog.AspNetCore" Version="6.0.1" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.5.0" />
+    <PackageReference Include="RestSharp" Version="109.0.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
     <PackageReference Include="Serilog.AspNetCore.Enrichers.CorrelationId" Version="1.0.0" />
     <PackageReference Include="Serilog.Enrichers.ClientInfo" Version="1.2.0" />
     <PackageReference Include="Serilog.Enrichers.ExceptionData" Version="1.0.0" />
     <PackageReference Include="Serilog.Enrichers.ExceptionStackTraceHash" Version="1.3.0" />
     <PackageReference Include="Serilog.Sinks.RabbitMQ" Version="6.0.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.4.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.5" />
-    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.2.22" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.6" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.3.1" />
   </ItemGroup>
 
 </Project>
