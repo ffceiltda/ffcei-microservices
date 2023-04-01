@@ -1,6 +1,7 @@
 using FFCEI.Microservices.Microservices;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using System.Diagnostics;
 using System.Globalization;
@@ -15,6 +16,7 @@ namespace FFCEI.Microservices.Configuration;
 public sealed class ConfigurationManager : IConfigurationManager
 {
     private Microsoft.Extensions.Configuration.IConfiguration _configuration;
+    private Microsoft.Extensions.Logging.ILogger _logger;
     private bool _isDevelopment = Debugger.IsAttached;
     private bool _isProduction = !Debugger.IsAttached;
     private string _allConfigurationsFilePath = string.Empty;
@@ -22,13 +24,14 @@ public sealed class ConfigurationManager : IConfigurationManager
     private string _applicationConfigurationsFilePath = string.Empty;
     private IEnumerable<string>? _applicationConfigurations;
 
-    internal ConfigurationManager(WebApplicationBuilder builder)
+    internal ConfigurationManager(ILogger logger, WebApplicationBuilder builder)
     {
         if (builder is null)
         {
             throw new ArgumentNullException(nameof(builder));
         }
 
+        _logger = logger;
         _configuration = builder.Configuration;
 
         _isDevelopment = builder.Environment.IsDevelopment();
@@ -37,13 +40,14 @@ public sealed class ConfigurationManager : IConfigurationManager
         LoadConfiguration();
     }
 
-    internal ConfigurationManager(IHostBuilder builder, Microsoft.Extensions.Configuration.IConfiguration configuration)
+    internal ConfigurationManager(ILogger logger, IHostBuilder builder, Microsoft.Extensions.Configuration.IConfiguration configuration)
     {
         if (builder is null)
         {
             throw new ArgumentNullException(nameof(builder));
         }
 
+        _logger = logger;
         _configuration = configuration;
 
         LoadConfiguration();
@@ -51,58 +55,66 @@ public sealed class ConfigurationManager : IConfigurationManager
 
     private void LoadConfiguration()
     {
+        var configurationSearchPath = new List<string>();
+        var configurationSearchUserName = new List<string?>();
+
         var mainAssemblyName = Assembly.GetEntryAssembly()?.GetName().Name;
-        var mainAssemblyCodeBase = Assembly.GetEntryAssembly()?.Location;
 
         if (string.IsNullOrEmpty(mainAssemblyName))
         {
             return;
         }
 
+        var mainAssemblyCodeBase = Assembly.GetEntryAssembly()?.Location;
+
         if (!string.IsNullOrEmpty(mainAssemblyCodeBase))
         {
             var mainAssemblyFilenamePath = Path.GetDirectoryName(mainAssemblyCodeBase);
 
-            while (!string.IsNullOrEmpty(mainAssemblyFilenamePath) &&
-                (string.IsNullOrEmpty(_allConfigurationsFilePath) || string.IsNullOrEmpty(_applicationConfigurationsFilePath)))
+            if (!string.IsNullOrEmpty(mainAssemblyFilenamePath))
             {
-                TryLoadEnvironmentSettingsFromPath(mainAssemblyName, mainAssemblyFilenamePath);
-
-                var parentDirectory = Path.GetDirectoryName(mainAssemblyFilenamePath);
-
-                if (parentDirectory == mainAssemblyFilenamePath)
+                if (Directory.Exists(mainAssemblyFilenamePath))
                 {
-                    mainAssemblyFilenamePath = null;
-                }
-                else
-                {
-                    mainAssemblyFilenamePath = parentDirectory;
+                    configurationSearchPath.Insert(0, mainAssemblyFilenamePath);
+                    configurationSearchUserName.Insert(0, null);
                 }
             }
         }
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            if ((string.IsNullOrEmpty(_allConfigurationsFilePath) || string.IsNullOrEmpty(_applicationConfigurationsFilePath)))
-            {
-                TryLoadEnvironmentSettingsFromRegistry(Registry.CurrentUser, mainAssemblyName);
-            }
+            (var machineSettingsPath, var machineSettingsUserName) = TryLoadEnvironmentSettingsFromRegistry(Registry.LocalMachine);
 
-            if ((string.IsNullOrEmpty(_allConfigurationsFilePath) || string.IsNullOrEmpty(_applicationConfigurationsFilePath)))
-            {
-                TryLoadEnvironmentSettingsFromRegistry(Registry.LocalMachine, mainAssemblyName);
-            }
+            InsertDirectoryInSearchPath(ref configurationSearchPath, machineSettingsPath);
+
+            configurationSearchUserName.Insert(0, machineSettingsUserName);
+
+            (var userSettingsPath, var userSettingsUserName) = TryLoadEnvironmentSettingsFromRegistry(Registry.CurrentUser);
+
+            InsertDirectoryInSearchPath(ref configurationSearchPath, userSettingsPath);
+
+            configurationSearchUserName.Insert(0, userSettingsUserName);
+        }
+
+        TryLoadEnvironmentSettingsFromPath(mainAssemblyName, configurationSearchPath, configurationSearchUserName);
+    }
+
+    private static void InsertDirectoryInSearchPath(ref List<string> searchPaths, string? path)
+    {
+        if (!string.IsNullOrEmpty(path) && Directory.Exists(path) && (searchPaths.IndexOf(path) == -1))
+        {
+            searchPaths.Insert(0, path);
         }
     }
 
-    private void TryLoadEnvironmentSettingsFromRegistry(RegistryKey registryKey, string mainAssemblyName)
+    private static (string? registryPath, string? registryUserName) TryLoadEnvironmentSettingsFromRegistry(RegistryKey registryKey)
     {
 #pragma warning disable CA1031 // Do not catch general exception types
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !string.IsNullOrEmpty(Microservice.RegistryPathForEnvironment))
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            try
+            if (!string.IsNullOrEmpty(Microservice.RegistryPathForEnvironment))
             {
-                if ((string.IsNullOrEmpty(_allConfigurationsFilePath) || string.IsNullOrEmpty(_applicationConfigurationsFilePath)))
+                try
                 {
                     string? registryPath = null;
                     string? registryUserName = null;
@@ -123,169 +135,179 @@ public sealed class ConfigurationManager : IConfigurationManager
                             registryUserName = key?.GetValue("EnvironmentUserName")?.ToString();
                         }
 
-                        if (!string.IsNullOrEmpty(registryPath))
-                        {
-                            TryLoadEnvironmentSettingsFromPath(mainAssemblyName, registryPath, registryUserName);
-                        }
+                        return (registryPath, registryUserName);
                     }
                 }
-            }
-            catch
-            {
+                catch
+                {
+                }
             }
         }
 #pragma warning restore CA1031 // Do not catch general exception types
+
+        return (null, null);
     }
 
-    private void TryLoadEnvironmentSettingsFromPath(string mainAssemblyName, string environmentSearchPath, string? environmentUserName = null)
+    private void TryLoadEnvironmentSettingsFromPath(string mainAssemblyName, List<string> environmentSearchPaths, List<string?> environmentUserNames)
     {
-        var environmentBasePath = Path.Combine(environmentSearchPath, "Environment");
+        var searchPaths = new List<string>();
 
-        if (Directory.Exists(environmentBasePath))
+        foreach (var environmentSearchPath in environmentSearchPaths)
         {
-            if (_isDevelopment)
+            if (!Directory.Exists(environmentSearchPath))
             {
-                environmentBasePath = Path.Combine(environmentBasePath, "Development");
-            }
-            else if (_isProduction)
-            {
-                environmentBasePath = Path.Combine(environmentBasePath, "Production");
+                continue;
             }
 
-            var environmentUserBasePath = Path.Combine(environmentBasePath,
-                string.IsNullOrEmpty(environmentUserName) ? Environment.UserName : environmentUserName);
+            foreach (var environmentUserName in environmentUserNames)
+            {
+                var userNameToCombine = string.IsNullOrEmpty(environmentUserName) ? Environment.UserName : environmentUserName;
 
+                InsertDirectoryInSearchPath(ref searchPaths, environmentSearchPath);
+
+                var environmentSearchUserPath = Path.Combine(environmentSearchPath, userNameToCombine);
+
+                InsertDirectoryInSearchPath(ref searchPaths, environmentSearchUserPath);
+
+                var environmentPath = Path.Combine(environmentSearchPath, "Environment");
+
+                InsertDirectoryInSearchPath(ref searchPaths, environmentPath);
+
+                var environmentUserPath = Path.Combine(environmentPath, userNameToCombine);
+
+                InsertDirectoryInSearchPath(ref searchPaths, environmentUserPath);
+
+                var environmentRuntimePath = environmentPath;
+
+                if (_isDevelopment)
+                {
+                    environmentRuntimePath = Path.Combine(environmentRuntimePath, "Development");
+                }
+                else if (_isProduction)
+                {
+                    environmentRuntimePath = Path.Combine(environmentRuntimePath, "Production");
+                }
+
+                InsertDirectoryInSearchPath(ref searchPaths, environmentRuntimePath);
+
+                var environmentRuntimeUserPath = Path.Combine(environmentRuntimePath, userNameToCombine);
+
+                InsertDirectoryInSearchPath(ref searchPaths, environmentRuntimeUserPath);
+            }
+        }
+
+        if (System.Diagnostics.Debugger.IsAttached)
+        {
+#pragma warning disable CA1848 // Use the LoggerMessage delegates
+#pragma warning disable CA2254 // Template should be a static expression
+            _logger.LogInformation($"Configuration search path: {searchPaths.Count}");
+
+            foreach (var searchPath in searchPaths)
+            {
+                _logger.LogInformation(searchPath);
+            }
+#pragma warning restore CA2254 // Template should be a static expression
+#pragma warning restore CA1848 // Use the LoggerMessage delegates
+        }
+
+        foreach (var searchPath in searchPaths)
+        {
+            if (!string.IsNullOrEmpty(_allConfigurationsFilePath) &&
+                !string.IsNullOrEmpty(_applicationConfigurationsFilePath))
+            {
+                break;
+            }
+
+            if (string.IsNullOrEmpty(_allConfigurationsFilePath))
+            {
+                var allConfigurationsFilePath = Path.Combine(searchPath, "ALL.env");
+
+                if (File.Exists(allConfigurationsFilePath))
+                {
 #pragma warning disable CA1031 // Do not catch general exception types
-            if (string.IsNullOrEmpty(_allConfigurationsFilePath))
-            {
-                var allConfigurationsFilePath = Path.Combine(environmentUserBasePath, "ALL.env");
-
-                if (File.Exists(allConfigurationsFilePath))
-                {
                     try
                     {
+                        if (System.Diagnostics.Debugger.IsAttached)
+                        {
+#pragma warning disable CA1848 // Use the LoggerMessage delegates
+#pragma warning disable CA2254 // Template should be a static expression
+                            _logger.LogInformation($"Trying to load system-wide configurations from {allConfigurationsFilePath} ...");
+#pragma warning restore CA2254 // Template should be a static expression
+#pragma warning restore CA1848 // Use the LoggerMessage delegates
+                        }
+
                         using var file = File.Open(allConfigurationsFilePath, FileMode.Open, FileAccess.Read);
 
                         file.Close();
 
                         _allConfigurations = File.ReadAllLines(allConfigurationsFilePath);
                         _allConfigurationsFilePath = allConfigurationsFilePath;
+
+#pragma warning disable CA1848 // Use the LoggerMessage delegates
+#pragma warning disable CA2254 // Template should be a static expression
+                        _logger.LogInformation($"Loaded system-wide configurations from {allConfigurationsFilePath}");
+#pragma warning restore CA2254 // Template should be a static expression
+#pragma warning restore CA1848 // Use the LoggerMessage delegates
                     }
                     catch
                     {
                     }
-                }
-            }
-
-            if (string.IsNullOrEmpty(_allConfigurationsFilePath))
-            {
-                var allConfigurationsFilePath = Path.Combine(environmentBasePath, "ALL.env");
-
-                if (File.Exists(allConfigurationsFilePath))
-                {
-                    try
-                    {
-                        using var file = File.Open(allConfigurationsFilePath, FileMode.Open, FileAccess.Read);
-
-                        file.Close();
-
-                        _allConfigurations = File.ReadAllLines(allConfigurationsFilePath);
-                        _allConfigurationsFilePath = allConfigurationsFilePath;
-                    }
-                    catch
-                    {
-                    }
-                }
-            }
-
-            if (string.IsNullOrEmpty(_applicationConfigurationsFilePath))
-            {
-                var applicationConfigurationsFilePath = Path.Combine(environmentUserBasePath, $"{mainAssemblyName}.env");
-
-                if (File.Exists(applicationConfigurationsFilePath))
-                {
-                    try
-                    {
-                        using var file = File.Open(applicationConfigurationsFilePath, FileMode.Open, FileAccess.Read);
-
-                        file.Close();
-
-                        _applicationConfigurations = File.ReadAllLines(applicationConfigurationsFilePath);
-                        _applicationConfigurationsFilePath = applicationConfigurationsFilePath;
-                    }
-                    catch
-                    {
-                    }
-                }
-            }
-
-            if (string.IsNullOrEmpty(_applicationConfigurationsFilePath))
-            {
-                var applicationConfigurationsFilePath = Path.Combine(environmentBasePath, $"{mainAssemblyName}.env");
-
-                if (File.Exists(applicationConfigurationsFilePath))
-                {
-                    try
-                    {
-                        using var file = File.Open(applicationConfigurationsFilePath, FileMode.Open, FileAccess.Read);
-
-                        file.Close();
-
-                        _applicationConfigurations = File.ReadAllLines(applicationConfigurationsFilePath);
-                        _applicationConfigurationsFilePath = applicationConfigurationsFilePath;
-                    }
-                    catch
-                    {
-                    }
-                }
-            }
-        }
-
-        if (Directory.Exists(environmentSearchPath))
-        {
-            if (string.IsNullOrEmpty(_allConfigurationsFilePath))
-            {
-                var allConfigurationsFilePath = Path.Combine(environmentSearchPath, "ALL.env");
-
-                if (File.Exists(allConfigurationsFilePath))
-                {
-                    try
-                    {
-                        using var file = File.Open(allConfigurationsFilePath, FileMode.Open, FileAccess.Read);
-
-                        file.Close();
-
-                        _allConfigurations = File.ReadAllLines(allConfigurationsFilePath);
-                        _allConfigurationsFilePath = allConfigurationsFilePath;
-                    }
-                    catch
-                    {
-                    }
-                }
-            }
-
-            if (string.IsNullOrEmpty(_applicationConfigurationsFilePath))
-            {
-                var applicationConfigurationsFilePath = Path.Combine(environmentSearchPath, $"{mainAssemblyName}.env");
-
-                if (File.Exists(applicationConfigurationsFilePath))
-                {
-                    try
-                    {
-                        using var file = File.Open(applicationConfigurationsFilePath, FileMode.Open, FileAccess.Read);
-
-                        file.Close();
-
-                        _applicationConfigurations = File.ReadAllLines(applicationConfigurationsFilePath);
-                        _applicationConfigurationsFilePath = applicationConfigurationsFilePath;
-                    }
-                    catch
-                    {
-                    }
-                }
-            }
 #pragma warning restore CA1031 // Do not catch general exception types
+                }
+            }
+
+            if (string.IsNullOrEmpty(_applicationConfigurationsFilePath))
+            {
+                var applicationConfigurationsFilePath = Path.Combine(searchPath, $"{mainAssemblyName}.env");
+
+                if (File.Exists(applicationConfigurationsFilePath))
+                {
+#pragma warning disable CA1031 // Do not catch general exception types
+                    try
+                    {
+                        if (System.Diagnostics.Debugger.IsAttached)
+                        {
+#pragma warning disable CA1848 // Use the LoggerMessage delegates
+#pragma warning disable CA2254 // Template should be a static expression
+                            _logger.LogInformation($"Trying to load application-specific configurations from {applicationConfigurationsFilePath} ...");
+#pragma warning restore CA2254 // Template should be a static expression
+#pragma warning restore CA1848 // Use the LoggerMessage delegates
+                        }
+
+                        using var file = File.Open(applicationConfigurationsFilePath, FileMode.Open, FileAccess.Read);
+
+                        file.Close();
+
+                        _applicationConfigurations = File.ReadAllLines(applicationConfigurationsFilePath);
+                        _applicationConfigurationsFilePath = applicationConfigurationsFilePath;
+
+#pragma warning disable CA1848 // Use the LoggerMessage delegates
+#pragma warning disable CA2254 // Template should be a static expression
+                        _logger.LogInformation($"Loaded application-specific configurations from {applicationConfigurationsFilePath}");
+#pragma warning restore CA2254 // Template should be a static expression
+#pragma warning restore CA1848 // Use the LoggerMessage delegates
+                    }
+                    catch
+                    {
+                    }
+#pragma warning restore CA1031 // Do not catch general exception types
+                }
+            }
         }
+
+#pragma warning disable CA1848 // Use the LoggerMessage delegates
+#pragma warning disable CA2254 // Template should be a static expression
+        if (string.IsNullOrEmpty(_allConfigurationsFilePath))
+        {
+            _logger.LogWarning("cannot load file ALL.env");
+        }
+
+        if (string.IsNullOrEmpty(_applicationConfigurationsFilePath))
+        {
+            _logger.LogWarning($"{mainAssemblyName} cannot load file {mainAssemblyName}.env");
+        }
+#pragma warning restore CA2254 // Template should be a static expression
+#pragma warning restore CA1848 // Use the LoggerMessage delegates
     }
 
     public string? this[string key]

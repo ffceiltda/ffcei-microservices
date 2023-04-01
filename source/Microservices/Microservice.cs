@@ -248,7 +248,7 @@ public abstract class Microservice : IMicroservice
 #pragma warning disable IDE0058 // Expression value is never used
         Builder.ConfigureServices((context, services) =>
         {
-            _configurationManager = new ConfigurationManager(Builder, context.Configuration);
+            _configurationManager = new ConfigurationManager(Logger, Builder, context.Configuration);
         });
 #pragma warning restore IDE0058 // Expression value is never used
 
