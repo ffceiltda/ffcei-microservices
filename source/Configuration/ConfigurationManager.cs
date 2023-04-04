@@ -228,19 +228,16 @@ public sealed class ConfigurationManager : IConfigurationManager
             }
         }
 
-        if (System.Diagnostics.Debugger.IsAttached)
-        {
 #pragma warning disable CA1848 // Use the LoggerMessage delegates
 #pragma warning disable CA2254 // Template should be a static expression
-            _logger.LogInformation($"Configuration search path: {searchPaths.Count}");
+        _logger.LogInformation($"Configuration search path: {searchPaths.Count}");
 
-            foreach (var searchPath in searchPaths)
-            {
-                _logger.LogInformation(searchPath);
-            }
+        foreach (var searchPath in searchPaths)
+        {
+            _logger.LogInformation(searchPath);
+        }
 #pragma warning restore CA2254 // Template should be a static expression
 #pragma warning restore CA1848 // Use the LoggerMessage delegates
-        }
 
         foreach (var searchPath in searchPaths)
         {
@@ -259,14 +256,11 @@ public sealed class ConfigurationManager : IConfigurationManager
 #pragma warning disable CA1031 // Do not catch general exception types
                     try
                     {
-                        if (System.Diagnostics.Debugger.IsAttached)
-                        {
 #pragma warning disable CA1848 // Use the LoggerMessage delegates
 #pragma warning disable CA2254 // Template should be a static expression
-                            _logger.LogInformation($"Trying to load system-wide configurations from {allConfigurationsFilePath} ...");
+                        _logger.LogInformation($"Trying to load system-wide configurations from {allConfigurationsFilePath} ...");
 #pragma warning restore CA2254 // Template should be a static expression
 #pragma warning restore CA1848 // Use the LoggerMessage delegates
-                        }
 
                         using var file = File.Open(allConfigurationsFilePath, FileMode.Open, FileAccess.Read);
 
@@ -286,6 +280,14 @@ public sealed class ConfigurationManager : IConfigurationManager
                     }
 #pragma warning restore CA1031 // Do not catch general exception types
                 }
+                else
+                {
+#pragma warning disable CA1848 // Use the LoggerMessage delegates
+#pragma warning disable CA2254 // Template should be a static expression
+                    _logger.LogWarning($"File ALL.env not found in {searchPath} ...");
+#pragma warning restore CA2254 // Template should be a static expression
+#pragma warning restore CA1848 // Use the LoggerMessage delegates
+                }
             }
 
             if (string.IsNullOrEmpty(_applicationConfigurationsFilePath))
@@ -297,14 +299,11 @@ public sealed class ConfigurationManager : IConfigurationManager
 #pragma warning disable CA1031 // Do not catch general exception types
                     try
                     {
-                        if (System.Diagnostics.Debugger.IsAttached)
-                        {
 #pragma warning disable CA1848 // Use the LoggerMessage delegates
 #pragma warning disable CA2254 // Template should be a static expression
-                            _logger.LogInformation($"Trying to load application-specific configurations from {applicationConfigurationsFilePath} ...");
+                        _logger.LogInformation($"Trying to load application-specific configurations from {applicationConfigurationsFilePath} ...");
 #pragma warning restore CA2254 // Template should be a static expression
 #pragma warning restore CA1848 // Use the LoggerMessage delegates
-                        }
 
                         using var file = File.Open(applicationConfigurationsFilePath, FileMode.Open, FileAccess.Read);
 
@@ -323,6 +322,14 @@ public sealed class ConfigurationManager : IConfigurationManager
                     {
                     }
 #pragma warning restore CA1031 // Do not catch general exception types
+                }
+                else
+                {
+#pragma warning disable CA1848 // Use the LoggerMessage delegates
+#pragma warning disable CA2254 // Template should be a static expression
+                    _logger.LogWarning($"File {mainAssemblyName}.env not found in {searchPath} ...");
+#pragma warning restore CA2254 // Template should be a static expression
+#pragma warning restore CA1848 // Use the LoggerMessage delegates
                 }
             }
         }
