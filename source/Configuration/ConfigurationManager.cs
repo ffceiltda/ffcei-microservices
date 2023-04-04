@@ -55,9 +55,6 @@ public sealed class ConfigurationManager : IConfigurationManager
 
     private void LoadConfiguration()
     {
-        var configurationSearchPath = new List<string>();
-        var configurationSearchUserName = new List<string?>();
-
         var mainAssemblyName = Assembly.GetEntryAssembly()?.GetName().Name;
 
         if (string.IsNullOrEmpty(mainAssemblyName))
@@ -66,18 +63,44 @@ public sealed class ConfigurationManager : IConfigurationManager
         }
 
         var mainAssemblyCodeBase = Assembly.GetEntryAssembly()?.Location;
+        var mainAssemblySearchPaths = new List<string>();
 
         if (!string.IsNullOrEmpty(mainAssemblyCodeBase))
         {
-            var mainAssemblyFilenamePath = Path.GetDirectoryName(mainAssemblyCodeBase);
+            var searchPath = Path.GetDirectoryName(mainAssemblyCodeBase);
 
-            if (!string.IsNullOrEmpty(mainAssemblyFilenamePath))
+            while (!string.IsNullOrEmpty(searchPath))
             {
-                if (Directory.Exists(mainAssemblyFilenamePath))
+                if (Directory.Exists(searchPath))
                 {
-                    configurationSearchPath.Insert(0, mainAssemblyFilenamePath);
-                    configurationSearchUserName.Insert(0, null);
+                    mainAssemblySearchPaths.Add(searchPath);
                 }
+
+#pragma warning disable CA1031 // Do not catch general exception types
+                try
+                {
+                    var parent = Directory.GetParent(searchPath);
+
+                    searchPath = parent?.FullName;
+                }
+                catch
+                {
+                    break;
+                }
+#pragma warning restore CA1031 // Do not catch general exception types
+            }
+        }
+
+        mainAssemblySearchPaths.Reverse();
+
+        var configurationSearchPath = new List<string>();
+        var configurationSearchUserName = new List<string?>();
+
+        foreach (var mainAssemblySearchPath in mainAssemblySearchPaths)
+        {
+            if (InsertDirectoryInSearchPath(ref configurationSearchPath, mainAssemblySearchPath))
+            {
+                configurationSearchUserName.Insert(0, null);
             }
         }
 
@@ -85,26 +108,32 @@ public sealed class ConfigurationManager : IConfigurationManager
         {
             (var machineSettingsPath, var machineSettingsUserName) = TryLoadEnvironmentSettingsFromRegistry(Registry.LocalMachine);
 
-            InsertDirectoryInSearchPath(ref configurationSearchPath, machineSettingsPath);
-
-            configurationSearchUserName.Insert(0, machineSettingsUserName);
+            if (InsertDirectoryInSearchPath(ref configurationSearchPath, machineSettingsPath))
+            {
+                configurationSearchUserName.Insert(0, machineSettingsUserName);
+            }
 
             (var userSettingsPath, var userSettingsUserName) = TryLoadEnvironmentSettingsFromRegistry(Registry.CurrentUser);
 
-            InsertDirectoryInSearchPath(ref configurationSearchPath, userSettingsPath);
-
-            configurationSearchUserName.Insert(0, userSettingsUserName);
+            if (InsertDirectoryInSearchPath(ref configurationSearchPath, userSettingsPath))
+            {
+                configurationSearchUserName.Insert(0, userSettingsUserName);
+            }
         }
 
         TryLoadEnvironmentSettingsFromPath(mainAssemblyName, configurationSearchPath, configurationSearchUserName);
     }
 
-    private static void InsertDirectoryInSearchPath(ref List<string> searchPaths, string? path)
+    private static bool InsertDirectoryInSearchPath(ref List<string> searchPaths, string? path)
     {
         if (!string.IsNullOrEmpty(path) && Directory.Exists(path) && (searchPaths.IndexOf(path) == -1))
         {
             searchPaths.Insert(0, path);
+
+            return true;
         }
+
+        return false;
     }
 
     private static (string? registryPath, string? registryUserName) TryLoadEnvironmentSettingsFromRegistry(RegistryKey registryKey)
@@ -163,19 +192,21 @@ public sealed class ConfigurationManager : IConfigurationManager
             {
                 var userNameToCombine = string.IsNullOrEmpty(environmentUserName) ? Environment.UserName : environmentUserName;
 
-                InsertDirectoryInSearchPath(ref searchPaths, environmentSearchPath);
+                if (InsertDirectoryInSearchPath(ref searchPaths, environmentSearchPath))
+                {
+                    var environmentSearchUserPath = Path.Combine(environmentSearchPath, userNameToCombine);
 
-                var environmentSearchUserPath = Path.Combine(environmentSearchPath, userNameToCombine);
-
-                InsertDirectoryInSearchPath(ref searchPaths, environmentSearchUserPath);
+                    var _ = InsertDirectoryInSearchPath(ref searchPaths, environmentSearchUserPath);
+                }
 
                 var environmentPath = Path.Combine(environmentSearchPath, "Environment");
 
-                InsertDirectoryInSearchPath(ref searchPaths, environmentPath);
+                if (InsertDirectoryInSearchPath(ref searchPaths, environmentPath))
+                {
+                    var environmentUserPath = Path.Combine(environmentPath, userNameToCombine);
 
-                var environmentUserPath = Path.Combine(environmentPath, userNameToCombine);
-
-                InsertDirectoryInSearchPath(ref searchPaths, environmentUserPath);
+                    var _ = InsertDirectoryInSearchPath(ref searchPaths, environmentUserPath);
+                }
 
                 var environmentRuntimePath = environmentPath;
 
@@ -188,11 +219,12 @@ public sealed class ConfigurationManager : IConfigurationManager
                     environmentRuntimePath = Path.Combine(environmentRuntimePath, "Production");
                 }
 
-                InsertDirectoryInSearchPath(ref searchPaths, environmentRuntimePath);
+                if (InsertDirectoryInSearchPath(ref searchPaths, environmentRuntimePath))
+                {
+                    var environmentRuntimeUserPath = Path.Combine(environmentRuntimePath, userNameToCombine);
 
-                var environmentRuntimeUserPath = Path.Combine(environmentRuntimePath, userNameToCombine);
-
-                InsertDirectoryInSearchPath(ref searchPaths, environmentRuntimeUserPath);
+                    var _ = InsertDirectoryInSearchPath(ref searchPaths, environmentRuntimeUserPath);
+                }
             }
         }
 
