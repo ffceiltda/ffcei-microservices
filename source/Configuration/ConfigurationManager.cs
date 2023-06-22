@@ -100,7 +100,10 @@ public sealed class ConfigurationManager : IConfigurationManager
         {
             if (InsertDirectoryInSearchPath(ref configurationSearchPath, mainAssemblySearchPath))
             {
-                configurationSearchUserName.Insert(0, null);
+                if (configurationSearchUserName.IndexOf(null) == -1)
+                {
+                    configurationSearchUserName.Insert(0, null);
+                }
             }
         }
 
@@ -110,25 +113,38 @@ public sealed class ConfigurationManager : IConfigurationManager
 
             if (InsertDirectoryInSearchPath(ref configurationSearchPath, machineSettingsPath))
             {
-                configurationSearchUserName.Insert(0, machineSettingsUserName);
+                if (configurationSearchUserName.IndexOf(machineSettingsUserName) == -1)
+                {
+                    configurationSearchUserName.Insert(0, machineSettingsUserName);
+                }
             }
 
             (var userSettingsPath, var userSettingsUserName) = TryLoadEnvironmentSettingsFromRegistry(Registry.CurrentUser);
 
             if (InsertDirectoryInSearchPath(ref configurationSearchPath, userSettingsPath))
             {
-                configurationSearchUserName.Insert(0, userSettingsUserName);
+                if (configurationSearchUserName.IndexOf(userSettingsUserName) == -1)
+                {
+                    configurationSearchUserName.Insert(0, userSettingsUserName);
+                }
             }
         }
 
         TryLoadEnvironmentSettingsFromPath(mainAssemblyName, configurationSearchPath, configurationSearchUserName);
     }
 
-    private static bool InsertDirectoryInSearchPath(ref List<string> searchPaths, string? path)
+    private static bool InsertDirectoryInSearchPath(ref List<string> searchPaths, string? path, bool append = false)
     {
         if (!string.IsNullOrEmpty(path) && Directory.Exists(path) && (searchPaths.IndexOf(path) == -1))
         {
-            searchPaths.Insert(0, path);
+            if (append)
+            {
+                searchPaths.Add(path);
+            }
+            else
+            {
+                searchPaths.Insert(0, path);
+            }
 
             return true;
         }
@@ -188,44 +204,36 @@ public sealed class ConfigurationManager : IConfigurationManager
                 continue;
             }
 
+            var environmentPath = Path.Combine(environmentSearchPath, "Environment");
+            var environmentRuntimePath = environmentPath;
+
+            if (_isDevelopment)
+            {
+                environmentRuntimePath = Path.Combine(environmentRuntimePath, "Development");
+            }
+            else if (_isProduction)
+            {
+                environmentRuntimePath = Path.Combine(environmentRuntimePath, "Production");
+            }
+
             foreach (var environmentUserName in environmentUserNames)
             {
                 var userNameToCombine = string.IsNullOrEmpty(environmentUserName) ? Environment.UserName : environmentUserName;
 
-                if (InsertDirectoryInSearchPath(ref searchPaths, environmentSearchPath))
-                {
-                    var environmentSearchUserPath = Path.Combine(environmentSearchPath, userNameToCombine);
+                var environmentRuntimeUserPath = Path.Combine(environmentRuntimePath, userNameToCombine);
+                var environmentUserPath = Path.Combine(environmentPath, userNameToCombine);
+                var environmentSearchUserPath = Path.Combine(environmentSearchPath, userNameToCombine);
 
-                    var _ = InsertDirectoryInSearchPath(ref searchPaths, environmentSearchUserPath);
-                }
-
-                var environmentPath = Path.Combine(environmentSearchPath, "Environment");
-
-                if (InsertDirectoryInSearchPath(ref searchPaths, environmentPath))
-                {
-                    var environmentUserPath = Path.Combine(environmentPath, userNameToCombine);
-
-                    var _ = InsertDirectoryInSearchPath(ref searchPaths, environmentUserPath);
-                }
-
-                var environmentRuntimePath = environmentPath;
-
-                if (_isDevelopment)
-                {
-                    environmentRuntimePath = Path.Combine(environmentRuntimePath, "Development");
-                }
-                else if (_isProduction)
-                {
-                    environmentRuntimePath = Path.Combine(environmentRuntimePath, "Production");
-                }
-
-                if (InsertDirectoryInSearchPath(ref searchPaths, environmentRuntimePath))
-                {
-                    var environmentRuntimeUserPath = Path.Combine(environmentRuntimePath, userNameToCombine);
-
-                    var _ = InsertDirectoryInSearchPath(ref searchPaths, environmentRuntimeUserPath);
-                }
+#pragma warning disable IDE0058 // Expression value is never used
+                InsertDirectoryInSearchPath(ref searchPaths, environmentRuntimeUserPath, true);
+                InsertDirectoryInSearchPath(ref searchPaths, environmentUserPath, true);
+                InsertDirectoryInSearchPath(ref searchPaths, environmentSearchUserPath, true);
             }
+
+            InsertDirectoryInSearchPath(ref searchPaths, environmentRuntimePath, true);
+            InsertDirectoryInSearchPath(ref searchPaths, environmentPath, true);
+            InsertDirectoryInSearchPath(ref searchPaths, environmentSearchPath, true);
+#pragma warning restore IDE0058 // Expression value is never used
         }
 
 #pragma warning disable CA1848 // Use the LoggerMessage delegates
