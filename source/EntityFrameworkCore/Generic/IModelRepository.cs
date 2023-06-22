@@ -23,7 +23,7 @@ public interface IModelRepository<TModel> : IReadOnlyModelRepository<TModel>, IM
     /// <param name="models">Collection of Model instances</param>
     /// <param name="autoCommit">Save changes after operation succeeds</param>
     /// <returns>void</returns>
-    Task AddManyAsync(IEnumerable<TModel> models, bool autoCommit = true);
+    Task AddManyAsync(ICollection<TModel> models, bool autoCommit = true);
 
     /// <summary>
     /// Update existing Model in repository
@@ -39,7 +39,7 @@ public interface IModelRepository<TModel> : IReadOnlyModelRepository<TModel>, IM
     /// <param name="models">Collection of Model instances</param>
     /// <param name="autoCommit">Save changes after operation succeeds</param>
     /// <returns>void</returns>
-    Task UpdateManyAsync(IEnumerable<TModel> models, bool autoCommit = true);
+    Task UpdateManyAsync(ICollection<TModel> models, bool autoCommit = true);
 
     /// <summary>
     /// Logically delete existing ModelS by predicate from repository if TModel implements ILogicallyDeletableModel
@@ -63,7 +63,7 @@ public interface IModelRepository<TModel> : IReadOnlyModelRepository<TModel>, IM
     /// <param name="models">Collection of Model instances</param>
     /// <param name="autoCommit">Save changes after operation succeeds</param>
     /// <returns>void</returns>
-    Task LogicallyDeleteManyAsync(IEnumerable<TModel> models, bool autoCommit = true);
+    Task LogicallyDeleteManyAsync(ICollection<TModel> models, bool autoCommit = true);
 
     /// <summary>
     /// Logically undelete existing ModelS by predicate from repository if TModel implements ILogicallyDeletableModel
@@ -87,7 +87,7 @@ public interface IModelRepository<TModel> : IReadOnlyModelRepository<TModel>, IM
     /// <param name="models">Collection of Model instances</param>
     /// <param name="autoCommit">Save changes after operation succeeds</param>
     /// <returns>void</returns>
-    Task LogicallyUndeleteManyAsync(IEnumerable<TModel> models, bool autoCommit = true);
+    Task LogicallyUndeleteManyAsync(ICollection<TModel> models, bool autoCommit = true);
 
     /// <summary>
     /// Remove existing Model from repository
@@ -103,7 +103,7 @@ public interface IModelRepository<TModel> : IReadOnlyModelRepository<TModel>, IM
     /// <param name="models">Collection of Model instances</param>
     /// <param name="autoCommit">Save changes after operation succeeds</param>
     /// <returns></returns>
-    Task RemoveManyAsync(IEnumerable<TModel> models, bool autoCommit = true);
+    Task RemoveManyAsync(ICollection<TModel> models, bool autoCommit = true);
 
     /// <summary>
     /// Remove existing Model from repository that match predicate

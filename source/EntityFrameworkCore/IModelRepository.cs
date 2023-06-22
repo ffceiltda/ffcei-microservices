@@ -21,7 +21,7 @@ public interface IModelRepository : IReadOnlyModelRepository
     /// <param name="contents">Collection of Model instances</param>
     /// <param name="autoCommit">Save changes after operation succeeds</param>
     /// <returns>void</returns>
-    Task AddManyAsync(IEnumerable<IModel> contents, bool autoCommit = true);
+    Task AddManyAsync(ICollection<IModel> contents, bool autoCommit = true);
 
     /// <summary>
     /// Update existing Model in repository
@@ -37,7 +37,7 @@ public interface IModelRepository : IReadOnlyModelRepository
     /// <param name="contents">Collection of Model instances</param>
     /// <param name="autoCommit">Save changes after operation succeeds</param>
     /// <returns>void</returns>
-    Task UpdateManyAsync(IEnumerable<IModel> contents, bool autoCommit = true);
+    Task UpdateManyAsync(ICollection<IModel> contents, bool autoCommit = true);
 
     /// <summary>
     /// Logically delete first model that match keys or null
@@ -61,7 +61,7 @@ public interface IModelRepository : IReadOnlyModelRepository
     /// <param name="contents">Collection of Model instances</param>
     /// <param name="autoCommit">Save changes after operation succeeds</param>
     /// <returns>void</returns>
-    Task LogicallyDeleteManyAsync(IEnumerable<IModel> contents, bool autoCommit = true);
+    Task LogicallyDeleteManyAsync(ICollection<IModel> contents, bool autoCommit = true);
 
     /// <summary>
     /// Logically undelete first model that match keys or null
@@ -85,7 +85,7 @@ public interface IModelRepository : IReadOnlyModelRepository
     /// <param name="contents">Collection of Model instances</param>
     /// <param name="autoCommit">Save changes after operation succeeds</param>
     /// <returns>void</returns>
-    Task LogicallyUndeleteManyAsync(IEnumerable<IModel> contents, bool autoCommit = true);
+    Task LogicallyUndeleteManyAsync(ICollection<IModel> contents, bool autoCommit = true);
 
     /// <summary>
     /// Remove existing Model from repository
@@ -109,7 +109,7 @@ public interface IModelRepository : IReadOnlyModelRepository
     /// <param name="contents">Collection of Model instances</param>
     /// <param name="autoCommit">Save changes after operation succeeds</param>
     /// <returns></returns>
-    Task RemoveManyAsync(IEnumerable<IModel> contents, bool autoCommit = true);
+    Task RemoveManyAsync(ICollection<IModel> contents, bool autoCommit = true);
 
     /// <summary>
     /// Reload existing Model from repository

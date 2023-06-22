@@ -15,7 +15,7 @@ public static class EntityTypeBuilderExtensionMethods
         void Visit();
     }
 
-    private class EntityTypeQueryFilterBuilderApplyVisitor<TEntity> : IEntityTypeQueryFilterBuilderApplyVisitor where TEntity : class, IModel
+    private sealed class EntityTypeQueryFilterBuilderApplyVisitor<TEntity> : IEntityTypeQueryFilterBuilderApplyVisitor where TEntity : class, IModel
     {
         public EntityTypeBuilder<TEntity> Builder { get; set; }
         public IEntityTypeQueryFilterBuilder<TEntity> QueryFilterBuilder { get; set; }

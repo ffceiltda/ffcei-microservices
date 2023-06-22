@@ -10,7 +10,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore;
 /// <typeparam name="TEntity">Model entity type</typeparam>
 public class EntityTypeQueryFilterBuilder<TEntity> : IEntityTypeQueryFilterBuilder<TEntity> where TEntity : class, IModel
 {
-    private class QueryFilterExpressionBuilderReplaceParameterVisitor : ExpressionVisitor
+    private sealed class QueryFilterExpressionBuilderReplaceParameterVisitor : ExpressionVisitor
     {
         private readonly ParameterExpression _oldParameter;
         private readonly ParameterExpression _newParameter;
@@ -24,7 +24,7 @@ public class EntityTypeQueryFilterBuilder<TEntity> : IEntityTypeQueryFilterBuild
         protected override Expression VisitParameter(ParameterExpression node) => ReferenceEquals(node, _oldParameter) ? _newParameter : base.VisitParameter(node);
     }
 
-    private class QueryFilterExpression
+    private sealed class QueryFilterExpression
     {
         public string? Name { get; set; }
         public Expression<Func<TEntity, bool>>? Expression { get; set; }

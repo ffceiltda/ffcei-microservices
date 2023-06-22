@@ -51,7 +51,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
         }
     }
 
-    public async Task AddManyAsync(IEnumerable<TModel> models, bool autoCommit = true)
+    public async Task AddManyAsync(ICollection<TModel> models, bool autoCommit = true)
     {
         if (models is null)
         {
@@ -66,7 +66,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
         }
     }
 
-    public async Task AddManyAsync(IEnumerable<IModel> contents, bool autoCommit = true)
+    public async Task AddManyAsync(ICollection<IModel> contents, bool autoCommit = true)
     {
         if (contents is null)
         {
@@ -122,7 +122,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
         }
     }
 
-    public async Task UpdateManyAsync(IEnumerable<TModel> models, bool autoCommit = true)
+    public async Task UpdateManyAsync(ICollection<TModel> models, bool autoCommit = true)
     {
         if (models is null)
         {
@@ -137,7 +137,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
         }
     }
 
-    public async Task UpdateManyAsync(IEnumerable<IModel> contents, bool autoCommit = true)
+    public async Task UpdateManyAsync(ICollection<IModel> contents, bool autoCommit = true)
     {
         if (contents is null)
         {
@@ -228,7 +228,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
         }
     }
 
-    public async Task LogicallyDeleteManyAsync(IEnumerable<TModel> models, bool autoCommit = true)
+    public async Task LogicallyDeleteManyAsync(ICollection<TModel> models, bool autoCommit = true)
     {
         if (models is null)
         {
@@ -268,7 +268,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
         }
     }
 
-    public async Task LogicallyDeleteManyAsync(IEnumerable<IModel> contents, bool autoCommit = true)
+    public async Task LogicallyDeleteManyAsync(ICollection<IModel> contents, bool autoCommit = true)
     {
         if (contents is null)
         {
@@ -359,7 +359,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
         }
     }
 
-    public async Task LogicallyUndeleteManyAsync(IEnumerable<TModel> models, bool autoCommit = true)
+    public async Task LogicallyUndeleteManyAsync(ICollection<TModel> models, bool autoCommit = true)
     {
         if (models is null)
         {
@@ -399,7 +399,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
         }
     }
 
-    public async Task LogicallyUndeleteManyAsync(IEnumerable<IModel> contents, bool autoCommit = true)
+    public async Task LogicallyUndeleteManyAsync(ICollection<IModel> contents, bool autoCommit = true)
     {
         if (contents is null)
         {
@@ -462,7 +462,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
         }
     }
 
-    public async Task RemoveManyAsync(IEnumerable<TModel> models, bool autoCommit = true)
+    public async Task RemoveManyAsync(ICollection<TModel> models, bool autoCommit = true)
     {
         if (models is null)
         {
@@ -486,7 +486,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
         }
     }
 
-    public async Task RemoveManyAsync(IEnumerable<IModel> contents, bool autoCommit = true)
+    public async Task RemoveManyAsync(ICollection<IModel> contents, bool autoCommit = true)
     {
         if (contents is null)
         {
