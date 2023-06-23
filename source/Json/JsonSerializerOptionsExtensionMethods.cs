@@ -15,6 +15,7 @@ namespace FFCEI.Microservices.Json
             options.WriteIndented = writeIndented;
             options.DefaultIgnoreCondition = ignoreNullsOrSerialization ? JsonIgnoreCondition.WhenWritingNull : JsonIgnoreCondition.Never;
             options.PropertyNameCaseInsensitive = true;
+
             options.Converters.Add(new JsonTrimmingConverter());
             options.Converters.Add(new JsonLooseStringEnumConverter());
             options.Converters.Add(new JsonStringToDecimalConverter());

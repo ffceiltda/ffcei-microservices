@@ -30,8 +30,21 @@ internal sealed class JsonLooseStringEnumConverter : JsonConverterFactory
             if (reader.TokenType == JsonTokenType.Number)
             {
                 var numberValue = reader.GetInt64();
+                var numberString = numberValue.ToString(CultureInfo.InvariantCulture);
 
-                return (TValue)(object)numberValue;
+                if (Enum.TryParse(numberString, false, out TValue value) || Enum.TryParse(numberString, true, out value))
+                {
+                    return value;
+                }
+
+                try
+                {
+                    return (TValue)(object)numberValue;
+                }
+                catch (InvalidCastException)
+                {
+                    throw new JsonException($"Unable to convert \"{numberValue}\" to Enum \"{typeof(TValue)}\".");
+                }
             }
 
             if (reader.TokenType == JsonTokenType.String)
@@ -43,10 +56,20 @@ internal sealed class JsonLooseStringEnumConverter : JsonConverterFactory
                     return value;
                 }
 
-                throw new JsonException($"Unable to convert \"{valueString}\" to Enum \"{typeof(TValue)}\".");
+                try
+                {
+                    if (valueString is not null)
+                    {
+                        return (TValue)(object)valueString;
+                    }
+                }
+                catch (InvalidCastException)
+                {
+                    throw new JsonException($"Unable to convert \"{valueString}\" to Enum \"{typeof(TValue)}\".");
+                }
             }
 
-            throw new JsonException();
+            throw new JsonException($"Unable to convert to Enum \"{typeof(TValue)}\".");
         }
 
         public override void Write(Utf8JsonWriter writer, TValue value, JsonSerializerOptions options) =>

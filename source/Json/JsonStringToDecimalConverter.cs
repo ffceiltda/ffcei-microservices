@@ -31,10 +31,9 @@ internal sealed class JsonStringToDecimalConverter : JsonConverterFactory
                 }
 
                 throw new JsonException($"Unable to convert \"{valueString}\" to \"{typeof(decimal)}\".");
-
             }
 
-            throw new JsonException();
+            throw new JsonException($"Unable to convert to \"{typeof(decimal)}\".");
         }
 
         public override void Write(Utf8JsonWriter writer, decimal value, JsonSerializerOptions options) => writer.WriteNumberValue(value);

@@ -31,10 +31,9 @@ internal sealed class JsonStringToIntegerConverter : JsonConverterFactory
                 }
 
                 throw new JsonException($"Unable to convert \"{valueString}\" to \"{typeof(int)}\".");
-
             }
 
-            throw new JsonException();
+            throw new JsonException($"Unable to convert to \"{typeof(int)}\".");
         }
 
         public override void Write(Utf8JsonWriter writer, int value, JsonSerializerOptions options) => writer.WriteNumberValue(value);

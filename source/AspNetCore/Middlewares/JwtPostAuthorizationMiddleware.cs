@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.Extensions.Options;
 using System.Text;
+using System.Text.Json;
 
 namespace FFCEI.Microservices.AspNetCore.Middlewares;
 
@@ -88,7 +89,24 @@ public sealed class JwtPostAuthorizationMiddleware
 
         if (authorized)
         {
-            await _next(httpContext);
+            try
+            {
+                await _next(httpContext);
+            }
+            catch (JsonException)
+            {
+                httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                httpContext.Response.ContentType = "text/plain";
+
+                await httpContext.Response.Body.WriteAsync(Encoding.UTF8.GetBytes("Internal server error converting request data"));
+            }
+            catch (InvalidCastException)
+            {
+                httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                httpContext.Response.ContentType = "text/plain";
+
+                await httpContext.Response.Body.WriteAsync(Encoding.UTF8.GetBytes("Internal server error parsing request data"));
+            }
         }
         else
         {

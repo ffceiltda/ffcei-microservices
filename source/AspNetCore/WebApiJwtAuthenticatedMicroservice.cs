@@ -3,6 +3,7 @@ using FFCEI.Microservices.AspNetCore.Middlewares;
 using FFCEI.Microservices.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace FFCEI.Microservices.AspNetCore;
@@ -71,6 +72,11 @@ public class WebApiJwtAuthenticatedMicroservice<TWebApiClaims> : WebApiMicroserv
     /// Javascript Web Token: require HTTPS for web token
     /// </summary>
     public bool JwtRequireHttpsMetadata { get; set; }
+
+    /// <summary>
+    /// Javascript Web Token: break debugger on validation errror
+    /// </summary>
+    public bool JwtDebugBreakOnValidationError { get; set; }
 
     /// <summary>
     /// Javascript Web Token: late authorization delegate for validating claims or anything you needed after Jwt validation
@@ -151,6 +157,24 @@ public class WebApiJwtAuthenticatedMicroservice<TWebApiClaims> : WebApiMicroserv
                 SaveSigninToken = JwtSaveSigninToken,
             };
 #pragma warning restore CA5404 // Do not disable token validation checks
+
+            if (JwtDebugBreakOnValidationError)
+            {
+                jwt.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = (ctx) =>
+                    {
+                        var exceptionMessage = ctx.Exception;
+
+                        if (System.Diagnostics.Debugger.IsAttached)
+                        {
+                            System.Diagnostics.Debugger.Break();
+                        }
+
+                        return Task.CompletedTask;
+                    },
+                };
+            }
         });
     }
 

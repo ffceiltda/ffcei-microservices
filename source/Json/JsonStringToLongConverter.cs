@@ -34,10 +34,9 @@ internal sealed class JsonStringToLongConverter : JsonConverterFactory
                 }
 
                 throw new JsonException($"Unable to convert \"{valueString}\" to \"{typeof(long)}\".");
-
             }
 
-            throw new JsonException();
+            throw new JsonException($"Unable to convert to \"{typeof(long)}\".");
         }
 
         public override void Write(Utf8JsonWriter writer, long value, JsonSerializerOptions options) => writer.WriteNumberValue(value);
