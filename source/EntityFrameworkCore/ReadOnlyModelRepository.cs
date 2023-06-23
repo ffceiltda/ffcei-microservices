@@ -25,7 +25,7 @@ public class ReadOnlyModelRepository<TModel> : IReadOnlyModelRepository<TModel> 
 
     public IQueryable<TModel> WhereAdvanced(bool ignoreQueryFilters, Expression<Func<TModel, bool>> predicate) => Set.IgnoreQueryFilters().Where(predicate);
 
-    public IQueryable<TModel> WhereAll(bool ignoreQueryFilters = false) => ignoreQueryFilters ? Set.IgnoreQueryFilters() : Set;
+    public IQueryable<TModel> WhereAll(bool ignoreQueryFilters = false) => ignoreQueryFilters ? Set.IgnoreQueryFilters().Where(x => true) : Set.Where(x => true);
 
     public IOrderedQueryable<TModel> OrderBy<TKey>(Expression<Func<TModel, TKey>> keySelector) => WhereAll().OrderBy(keySelector);
 
