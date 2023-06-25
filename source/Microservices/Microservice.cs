@@ -12,6 +12,7 @@ using Serilog.Events;
 using Serilog.Extensions.Logging;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -230,6 +231,11 @@ public abstract class Microservice : IMicroservice
         }
 
         _builder = initialBuilder;
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            var unused = _builder.UseSystemd();
+        }
 
         OnBuildMicroservice();
 
