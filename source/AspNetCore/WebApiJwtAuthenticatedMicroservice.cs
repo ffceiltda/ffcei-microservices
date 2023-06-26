@@ -137,7 +137,7 @@ public class WebApiJwtAuthenticatedMicroservice<TWebApiClaims> : WebApiMicroserv
         {
             jwt.Authority = JwtTokenAuthority;
             jwt.SaveToken = JwtSaveSigninToken;
-            jwt.IncludeErrorDetails = IsDebugOrDevelopment;
+            jwt.IncludeErrorDetails = IsDebugOrDevelopmentEnvironment;
 #pragma warning disable CA5404 // Do not disable token validation checks
             jwt.TokenValidationParameters = new TokenValidationParameters
             {

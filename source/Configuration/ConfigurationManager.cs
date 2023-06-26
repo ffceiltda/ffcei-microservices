@@ -17,8 +17,6 @@ public sealed class ConfigurationManager : IConfigurationManager
 {
     private Microsoft.Extensions.Configuration.IConfiguration _configuration;
     private Microsoft.Extensions.Logging.ILogger _logger;
-    private bool _isDevelopment = Debugger.IsAttached;
-    private bool _isProduction = !Debugger.IsAttached;
     private string _allConfigurationsFilePath = string.Empty;
     private IEnumerable<string>? _allConfigurations;
     private string _applicationConfigurationsFilePath = string.Empty;
@@ -33,9 +31,6 @@ public sealed class ConfigurationManager : IConfigurationManager
 
         _logger = logger;
         _configuration = builder.Configuration;
-
-        _isDevelopment = builder.Environment.IsDevelopment();
-        _isProduction = builder.Environment.IsProduction();
 
         LoadConfiguration();
     }
@@ -219,6 +214,9 @@ public sealed class ConfigurationManager : IConfigurationManager
     {
         var existingPaths = new List<string>();
 
+        bool isDevelopment = Microservice.Instance?.IsDevelopmentEnvironment ?? true;
+        bool isDebugOrDevelopment = Microservice.Instance?.IsDebugOrDevelopmentEnvironment ?? true;
+
         foreach (var searchPath in searchPaths)
         {
             if (!Directory.Exists(searchPath))
@@ -229,11 +227,11 @@ public sealed class ConfigurationManager : IConfigurationManager
             var environmentPath = Path.Combine(searchPath, "Environment");
             var environmentRuntimePath = string.Empty;
 
-            if (_isDevelopment)
+            if (isDevelopment)
             {
                 environmentRuntimePath = Path.Combine(environmentPath, "Development");
             }
-            else if (_isProduction)
+            else 
             {
                 environmentRuntimePath = Path.Combine(environmentPath, "Production");
             }
@@ -263,7 +261,7 @@ public sealed class ConfigurationManager : IConfigurationManager
 
 #pragma warning disable CA1848 // Use the LoggerMessage delegates
 #pragma warning disable CA2254 // Template should be a static expression
-        if (System.Diagnostics.Debugger.IsAttached || _isDevelopment)
+        if (isDebugOrDevelopment)
         {
             _logger.LogInformation($"Configuration search path: {existingPaths.Count}");
 
@@ -292,7 +290,7 @@ public sealed class ConfigurationManager : IConfigurationManager
 #pragma warning disable CA1031 // Do not catch general exception types
                     try
                     {
-                        if (System.Diagnostics.Debugger.IsAttached || _isDevelopment)
+                        if (isDebugOrDevelopment)
                         {
 #pragma warning disable CA1848 // Use the LoggerMessage delegates
 #pragma warning disable CA2254 // Template should be a static expression
@@ -319,7 +317,7 @@ public sealed class ConfigurationManager : IConfigurationManager
                     }
 #pragma warning restore CA1031 // Do not catch general exception types
                 }
-                else if (System.Diagnostics.Debugger.IsAttached || _isDevelopment)
+                else if (isDebugOrDevelopment)
                 {
 #pragma warning disable CA1848 // Use the LoggerMessage delegates
 #pragma warning disable CA2254 // Template should be a static expression
@@ -338,7 +336,7 @@ public sealed class ConfigurationManager : IConfigurationManager
 #pragma warning disable CA1031 // Do not catch general exception types
                     try
                     {
-                        if (System.Diagnostics.Debugger.IsAttached || _isDevelopment)
+                        if (isDebugOrDevelopment)
                         {
 #pragma warning disable CA1848 // Use the LoggerMessage delegates
 #pragma warning disable CA2254 // Template should be a static expression
@@ -365,7 +363,7 @@ public sealed class ConfigurationManager : IConfigurationManager
                     }
 #pragma warning restore CA1031 // Do not catch general exception types
                 }
-                else if (System.Diagnostics.Debugger.IsAttached || _isDevelopment)
+                else if (isDebugOrDevelopment)
                 {
 #pragma warning disable CA1848 // Use the LoggerMessage delegates
 #pragma warning disable CA2254 // Template should be a static expression

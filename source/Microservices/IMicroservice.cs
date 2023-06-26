@@ -51,9 +51,14 @@ public interface IMicroservice
     ILogger Logger { get; }
 
     /// <summary>
-    /// Return true if is debugging or if it´s running in develoment environment
+    /// Return true if it´s running in .NET 'develoment' environment
     /// </summary>
-    bool IsDebugOrDevelopment { get; }
+    bool IsDevelopmentEnvironment { get; }
+
+    /// <summary>
+    /// Return true if is debugging or if it´s running in .NET 'develoment' environment
+    /// </summary>
+    bool IsDebugOrDevelopmentEnvironment { get; }
 
     /// <summary>
     /// Machine configuration search path

@@ -52,14 +52,14 @@ public abstract class Microservice : IMicroservice
 
         CommandLineArguments = commandLineArguments.ToList();
 
-        IsDebugOrDevelopment = Debugger.IsAttached || string.Equals(System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ??
+        IsDevelopmentEnvironment = string.Equals(System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ??
             System.Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? string.Empty, "development", StringComparison.OrdinalIgnoreCase);
 
         Logger = CreateMicroserviceBootstrapLogger();
 
 #pragma warning disable CA1848 // Use the LoggerMessage delegates
-        Logger.LogInformation("Microservice {MicroserviceName} starting at {DateTimeOffsetNow} (in Debug or Development mode: {IsDebugOrDevelopment})",
-            MicroserviceName, DateTimeOffset.Now, IsDebugOrDevelopment);
+        Logger.LogInformation("Microservice {MicroserviceName} starting at {DateTimeOffsetNow} (in Debug: {DebuggerIsAttached} / .NET Development environment: {IsDevelopment})",
+            MicroserviceName, DateTimeOffset.Now, Debugger.IsAttached, IsDevelopmentEnvironment);
 #pragma warning restore CA1848 // Use the LoggerMessage delegates
     }
 
@@ -79,7 +79,9 @@ public abstract class Microservice : IMicroservice
 
     public ILogger Logger { get; private set; }
 
-    public bool IsDebugOrDevelopment { get; protected set; }
+    public bool IsDevelopmentEnvironment { get; private set; }
+
+    public bool IsDebugOrDevelopmentEnvironment => Debugger.IsAttached || IsDevelopmentEnvironment;
 
     public string? ConfigurationMachineSearchPath { get; set; }
 
@@ -320,7 +322,7 @@ public abstract class Microservice : IMicroservice
             .WriteTo.Console();
 #pragma warning restore CA1305 // Specify IFormatProvider
 
-        if (!IsDebugOrDevelopment)
+        if (!IsDebugOrDevelopmentEnvironment)
         {
             configuration
                 .MinimumLevel.Information()
@@ -432,7 +434,7 @@ public abstract class Microservice : IMicroservice
             .UseCacheKeyPrefix($"EFCoreSecondLevelCache_{assemblyPrefix}_")
             .CacheAllQueries(EntityFrameworkSecondLevelCacheExpirationMode, EntityFrameworkSecondLevelCacheExpirationPeriod)
             .SkipCachingResults(result => (result.Value is null) || ((result.Value is EFTableRows rows) && (rows.RowsCount == 0)))
-            .DisableLogging(!IsDebugOrDevelopment);
+            .DisableLogging(!IsDebugOrDevelopmentEnvironment);
 #pragma warning restore IDE0058 // Expression value is never used
     }
 
