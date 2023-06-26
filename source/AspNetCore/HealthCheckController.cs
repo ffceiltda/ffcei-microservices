@@ -7,9 +7,9 @@ namespace FFCEI.Microservices.AspNetCore;
 
 [AllowAnonymous]
 [Route("/")]
-public class WebApiHaProxyHealthCheckController : WebApiController
+public class HealthCheckController : WebApiController
 {
-    public WebApiHaProxyHealthCheckController(ILogger<WebApiHaProxyHealthCheckController> logger)
+    public HealthCheckController(ILogger<HealthCheckController> logger)
         : base(logger)
     {
     }
