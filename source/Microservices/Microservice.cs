@@ -44,6 +44,17 @@ public abstract class Microservice : IMicroservice
     {
         _instance = new WeakReference<Microservice>(this);
 
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            ConfigurationMachineSearchPath = "C:\\etc";
+        }
+        else
+        {
+            ConfigurationMachineSearchPath = "/etc";
+        }
+
+        ConfigurationUserSearchPath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), "etc");
+
         CommandLineArguments = commandLineArguments.ToList();
 
         IsDebugOrDevelopment = Debugger.IsAttached || string.Equals(System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ??
@@ -106,7 +117,7 @@ public abstract class Microservice : IMicroservice
     /// <summary>
     /// Machine configuration search path
     /// </summary>
-    public string? ConfigurationMachineSearchPath { get; set; } = "/etc";
+    public string? ConfigurationMachineSearchPath { get; set; }
 
     /// <summary>
     /// User configuration search path

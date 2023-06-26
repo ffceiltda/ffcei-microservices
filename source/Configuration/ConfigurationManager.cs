@@ -136,7 +136,7 @@ public sealed class ConfigurationManager : IConfigurationManager
         {
             if (Directory.Exists(machineSearchPath))
             {
-                InsertDirectoryInSearchPath(ref configurationSearchPath, machineSearchPath);
+                var _ = InsertDirectoryInSearchPath(ref configurationSearchPath, machineSearchPath);
             }
         }
         
@@ -146,7 +146,7 @@ public sealed class ConfigurationManager : IConfigurationManager
         {
             if (Directory.Exists(userSearchPath))
             {
-                InsertDirectoryInSearchPath(ref configurationSearchPath, userSearchPath);
+                var _ = InsertDirectoryInSearchPath(ref configurationSearchPath, userSearchPath);
             }
         }
 
