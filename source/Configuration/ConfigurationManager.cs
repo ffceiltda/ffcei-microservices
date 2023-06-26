@@ -109,28 +109,48 @@ public sealed class ConfigurationManager : IConfigurationManager
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            (var machineSettingsPath, var machineSettingsUserName) = TryLoadEnvironmentSettingsFromRegistry(Registry.LocalMachine);
+            (var machinePath, var machineUserName) = TryLoadEnvironmentFromRegistry(Registry.LocalMachine);
 
-            if (InsertDirectoryInSearchPath(ref configurationSearchPath, machineSettingsPath))
+            if (InsertDirectoryInSearchPath(ref configurationSearchPath, machinePath))
             {
-                if (configurationSearchUserName.IndexOf(machineSettingsUserName) == -1)
+                if (configurationSearchUserName.IndexOf(machineUserName) == -1)
                 {
-                    configurationSearchUserName.Insert(0, machineSettingsUserName);
+                    configurationSearchUserName.Insert(0, machineUserName);
                 }
             }
 
-            (var userSettingsPath, var userSettingsUserName) = TryLoadEnvironmentSettingsFromRegistry(Registry.CurrentUser);
+            (var userPath, var userUserName) = TryLoadEnvironmentFromRegistry(Registry.CurrentUser);
 
-            if (InsertDirectoryInSearchPath(ref configurationSearchPath, userSettingsPath))
+            if (InsertDirectoryInSearchPath(ref configurationSearchPath, userPath))
             {
-                if (configurationSearchUserName.IndexOf(userSettingsUserName) == -1)
+                if (configurationSearchUserName.IndexOf(userUserName) == -1)
                 {
-                    configurationSearchUserName.Insert(0, userSettingsUserName);
+                    configurationSearchUserName.Insert(0, userUserName);
                 }
             }
         }
+        
+        var machineSearchPath = Microservice.Instance?.ConfigurationMachineSearchPath;
 
-        TryLoadEnvironmentSettingsFromPath(mainAssemblyName, configurationSearchPath, configurationSearchUserName);
+        if (!string.IsNullOrEmpty(machineSearchPath))
+        {
+            if (Directory.Exists(machineSearchPath))
+            {
+                InsertDirectoryInSearchPath(ref configurationSearchPath, machineSearchPath);
+            }
+        }
+        
+        var userSearchPath = Microservice.Instance?.ConfigurationUserSearchPath;
+
+        if (!string.IsNullOrEmpty(userSearchPath))
+        {
+            if (Directory.Exists(userSearchPath))
+            {
+                InsertDirectoryInSearchPath(ref configurationSearchPath, userSearchPath);
+            }
+        }
+
+        TryLoadEnvironmentFromPath(mainAssemblyName, configurationSearchPath, configurationSearchUserName);
     }
 
     private static bool InsertDirectoryInSearchPath(ref List<string> searchPaths, string? path, bool append = false)
@@ -152,7 +172,7 @@ public sealed class ConfigurationManager : IConfigurationManager
         return false;
     }
 
-    private static (string? registryPath, string? registryUserName) TryLoadEnvironmentSettingsFromRegistry(RegistryKey registryKey)
+    private static (string? registryPath, string? registryUserName) TryLoadEnvironmentFromRegistry(RegistryKey registryKey)
     {
 #pragma warning disable CA1031 // Do not catch general exception types
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -193,7 +213,7 @@ public sealed class ConfigurationManager : IConfigurationManager
         return (null, null);
     }
 
-    private void TryLoadEnvironmentSettingsFromPath(string mainAssemblyName, List<string> environmentSearchPaths, List<string?> environmentUserNames)
+    private void TryLoadEnvironmentFromPath(string mainAssemblyName, List<string> environmentSearchPaths, List<string?> environmentUserNames)
     {
         var searchPaths = new List<string>();
 
