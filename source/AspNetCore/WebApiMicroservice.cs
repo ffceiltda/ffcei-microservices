@@ -153,16 +153,26 @@ public class WebApiMicroservice : MicroserviceCoreImplementation
         _controllersMapped = true;
     }
 
-    public override void Run()
+    private void PrepareForRun()
     {
         MapControllers();
+
+        if (Host is null)
+        {
+            throw new ArgumentNullException(nameof(Host));
+        }
+    }
+
+    public override void Run()
+    {
+        PrepareForRun();
 
         base.Run();
     }
 
     public override async Task RunAsync()
     {
-        MapControllers();
+        PrepareForRun();
 
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
         await base.RunAsync();
@@ -176,7 +186,7 @@ public class WebApiMicroservice : MicroserviceCoreImplementation
     /// <param name="url">The URL to listen to if the server hasn't been configured directly</param>
     public void Run(string? url)
     {
-        MapControllers();
+        PrepareForRun();
 
         Application.Run(url);
     }
@@ -187,7 +197,7 @@ public class WebApiMicroservice : MicroserviceCoreImplementation
     /// <param name="url">The URL to listen to if the server hasn't been configured directly</param>
     public async Task RunAsync(string? url)
     {
-        MapControllers();
+        PrepareForRun();
 
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
         await Application.RunAsync(url);
@@ -341,14 +351,7 @@ public class WebApiMicroservice : MicroserviceCoreImplementation
 
     private bool ShouldGenerateSwagger()
     {
-        bool generateSwagger = WebApiGenerateSwagger ?? false;
-
-        if (IsDebugOrDevelopmentEnvironment)
-        {
-            generateSwagger = WebApiGenerateSwagger ?? true;
-        }
-
-        return generateSwagger;
+        return WebApiGenerateSwagger ?? IsDebugOrDevelopmentEnvironment;
     }
 
     private void BuildWebApiSwagger()
@@ -381,18 +384,20 @@ public class WebApiMicroservice : MicroserviceCoreImplementation
 
             options.DocInclusionPredicate((docName, apiDesc) => true);
 
-            options.AddSecurityDefinition("Bearer",
-                new OpenApiSecurityScheme
-                {
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer",
-                    BearerFormat = "JWT",
-                    Description = "JWT Authorization header using the Bearer scheme.\r\n\r\nPlease, enter 'Bearer'[space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 12345abcdef\"\r\n\r\n",
-                    In = ParameterLocation.Header
-                });
+            if (WebApiUseAuthorization)
+            {
+                options.AddSecurityDefinition("Bearer",
+                    new OpenApiSecurityScheme
+                    {
+                        Name = "Authorization",
+                        Type = SecuritySchemeType.ApiKey,
+                        Scheme = "Bearer",
+                        BearerFormat = "JWT",
+                        Description = "JWT Authorization header using the Bearer scheme.\r\n\r\nPlease, enter 'Bearer'[space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 12345abcdef\"\r\n\r\n",
+                        In = ParameterLocation.Header
+                    });
 
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
                     {
                         new OpenApiSecurityScheme
@@ -406,6 +411,7 @@ public class WebApiMicroservice : MicroserviceCoreImplementation
                         Array.Empty<string>()
                     }
                 });
+            }
 
             var xmlFiles = Directory.GetFiles(AppContext.BaseDirectory, "*.xml", SearchOption.TopDirectoryOnly).ToList();
 
