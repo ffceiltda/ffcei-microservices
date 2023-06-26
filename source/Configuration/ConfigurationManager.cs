@@ -17,8 +17,6 @@ public sealed class ConfigurationManager : IConfigurationManager
 {
     private Microsoft.Extensions.Configuration.IConfiguration _configuration;
     private Microsoft.Extensions.Logging.ILogger _logger;
-    private bool _isDevelopment = Debugger.IsAttached;
-    private bool _isProduction = !Debugger.IsAttached;
     private string _allConfigurationsFilePath = string.Empty;
     private IEnumerable<string>? _allConfigurations;
     private string _applicationConfigurationsFilePath = string.Empty;
@@ -33,9 +31,6 @@ public sealed class ConfigurationManager : IConfigurationManager
 
         _logger = logger;
         _configuration = builder.Configuration;
-
-        _isDevelopment = builder.Environment.IsDevelopment();
-        _isProduction = builder.Environment.IsProduction();
 
         LoadConfiguration();
     }
@@ -130,7 +125,7 @@ public sealed class ConfigurationManager : IConfigurationManager
             }
         }
         
-        var machineSearchPath = Microservice.Instance?.ConfigurationMachineSearchPath;
+        var machineSearchPath = MicroserviceBase.Instance?.ConfigurationMachineSearchPath;
 
         if (!string.IsNullOrEmpty(machineSearchPath))
         {
@@ -140,7 +135,7 @@ public sealed class ConfigurationManager : IConfigurationManager
             }
         }
         
-        var userSearchPath = Microservice.Instance?.ConfigurationUserSearchPath;
+        var userSearchPath = MicroserviceBase.Instance?.ConfigurationUserSearchPath;
 
         if (!string.IsNullOrEmpty(userSearchPath))
         {
@@ -177,7 +172,7 @@ public sealed class ConfigurationManager : IConfigurationManager
 #pragma warning disable CA1031 // Do not catch general exception types
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            var registryPathForConfiguration = Microservice.Instance?.RegistryPathForConfiguration;
+            var registryPathForConfiguration = MicroserviceBase.Instance?.RegistryPathForConfiguration;
 
             if (!string.IsNullOrEmpty(registryPathForConfiguration))
             {

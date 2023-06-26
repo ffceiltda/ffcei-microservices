@@ -56,6 +56,11 @@ public interface IMicroservice
     bool IsDebugOrDevelopment { get; }
 
     /// <summary>
+    /// Return true it´s running in develoment environment
+    /// </summary>
+    bool IsDevelopment { get; }
+
+    /// <summary>
     /// Machine configuration search path
     /// </summary>
     public string? ConfigurationMachineSearchPath { get; set; }
