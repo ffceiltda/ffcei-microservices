@@ -177,14 +177,16 @@ public sealed class ConfigurationManager : IConfigurationManager
 #pragma warning disable CA1031 // Do not catch general exception types
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            if (!string.IsNullOrEmpty(Microservice.RegistryPathForEnvironment))
+            var registryPathForConfiguration = Microservice.Instance?.RegistryPathForConfiguration;
+
+            if (!string.IsNullOrEmpty(registryPathForConfiguration))
             {
                 try
                 {
                     string? registryPath = null;
                     string? registryUserName = null;
 
-                    using (var key = registryKey.OpenSubKey(Microservice.RegistryPathForEnvironment))
+                    using (var key = registryKey.OpenSubKey(registryPathForConfiguration))
                     {
                         var kind = key?.GetValueKind("EnvironmentFilesPath") ?? RegistryValueKind.None;
 
@@ -213,46 +215,49 @@ public sealed class ConfigurationManager : IConfigurationManager
         return (null, null);
     }
 
-    private void TryLoadEnvironmentFromPath(string mainAssemblyName, List<string> environmentSearchPaths, List<string?> environmentUserNames)
+    private void TryLoadEnvironmentFromPath(string mainAssemblyName, List<string> searchPaths, List<string?> searchUserNames)
     {
-        var searchPaths = new List<string>();
+        var existingPaths = new List<string>();
 
-        foreach (var environmentSearchPath in environmentSearchPaths)
+        foreach (var searchPath in searchPaths)
         {
-            if (!Directory.Exists(environmentSearchPath))
+            if (!Directory.Exists(searchPath))
             {
                 continue;
             }
 
-            var environmentPath = Path.Combine(environmentSearchPath, "Environment");
-            var environmentRuntimePath = environmentPath;
+            var environmentPath = Path.Combine(searchPath, "Environment");
+            var environmentRuntimePath = string.Empty;
 
             if (_isDevelopment)
             {
-                environmentRuntimePath = Path.Combine(environmentRuntimePath, "Development");
+                environmentRuntimePath = Path.Combine(environmentPath, "Development");
             }
             else if (_isProduction)
             {
-                environmentRuntimePath = Path.Combine(environmentRuntimePath, "Production");
+                environmentRuntimePath = Path.Combine(environmentPath, "Production");
             }
 
-            foreach (var environmentUserName in environmentUserNames)
+            foreach (var searchUserName in searchUserNames)
             {
-                var userNameToCombine = string.IsNullOrEmpty(environmentUserName) ? Environment.UserName : environmentUserName;
+                var userNameToCombine = string.IsNullOrEmpty(searchUserName) ? Environment.UserName : searchUserName;
 
-                var environmentRuntimeUserPath = Path.Combine(environmentRuntimePath, userNameToCombine);
-                var environmentUserPath = Path.Combine(environmentPath, userNameToCombine);
-                var environmentSearchUserPath = Path.Combine(environmentSearchPath, userNameToCombine);
+                var userEnvironmentRuntimePath = Path.Combine(environmentRuntimePath, userNameToCombine);
+                var userEnvironmentPath = Path.Combine(environmentPath, userNameToCombine);
+                var userSearchPath = Path.Combine(searchPath, userNameToCombine);
 
 #pragma warning disable IDE0058 // Expression value is never used
-                InsertDirectoryInSearchPath(ref searchPaths, environmentRuntimeUserPath, true);
-                InsertDirectoryInSearchPath(ref searchPaths, environmentUserPath, true);
-                InsertDirectoryInSearchPath(ref searchPaths, environmentSearchUserPath, true);
+                InsertDirectoryInSearchPath(ref existingPaths, userEnvironmentRuntimePath, true);
+                InsertDirectoryInSearchPath(ref existingPaths, environmentRuntimePath, true);
+                InsertDirectoryInSearchPath(ref existingPaths, userEnvironmentPath, true);
+                InsertDirectoryInSearchPath(ref existingPaths, environmentPath, true);
+                InsertDirectoryInSearchPath(ref existingPaths, userSearchPath, true);
+                InsertDirectoryInSearchPath(ref existingPaths, searchPath, true);
             }
 
-            InsertDirectoryInSearchPath(ref searchPaths, environmentRuntimePath, true);
-            InsertDirectoryInSearchPath(ref searchPaths, environmentPath, true);
-            InsertDirectoryInSearchPath(ref searchPaths, environmentSearchPath, true);
+            InsertDirectoryInSearchPath(ref existingPaths, environmentRuntimePath, true);
+            InsertDirectoryInSearchPath(ref existingPaths, environmentPath, true);
+            InsertDirectoryInSearchPath(ref existingPaths, searchPath, true);
 #pragma warning restore IDE0058 // Expression value is never used
         }
 
@@ -260,17 +265,17 @@ public sealed class ConfigurationManager : IConfigurationManager
 #pragma warning disable CA2254 // Template should be a static expression
         if (System.Diagnostics.Debugger.IsAttached || _isDevelopment)
         {
-            _logger.LogInformation($"Configuration search path: {searchPaths.Count}");
+            _logger.LogInformation($"Configuration search path: {existingPaths.Count}");
 
-            foreach (var searchPath in searchPaths)
+            foreach (var existingPath in existingPaths)
             {
-                _logger.LogInformation(searchPath);
+                _logger.LogInformation(existingPath);
             }
         }
 #pragma warning restore CA2254 // Template should be a static expression
 #pragma warning restore CA1848 // Use the LoggerMessage delegates
 
-        foreach (var searchPath in searchPaths)
+        foreach (var existingPath in existingPaths)
         {
             if (!string.IsNullOrEmpty(_allConfigurationsFilePath) &&
                 !string.IsNullOrEmpty(_applicationConfigurationsFilePath))
@@ -280,7 +285,7 @@ public sealed class ConfigurationManager : IConfigurationManager
 
             if (string.IsNullOrEmpty(_allConfigurationsFilePath))
             {
-                var allConfigurationsFilePath = Path.Combine(searchPath, "ALL.env");
+                var allConfigurationsFilePath = Path.Combine(existingPath, "ALL.env");
 
                 if (File.Exists(allConfigurationsFilePath))
                 {
@@ -318,7 +323,7 @@ public sealed class ConfigurationManager : IConfigurationManager
                 {
 #pragma warning disable CA1848 // Use the LoggerMessage delegates
 #pragma warning disable CA2254 // Template should be a static expression
-                    _logger.LogWarning($"File ALL.env not found in {searchPath} ...");
+                    _logger.LogWarning($"File ALL.env not found in {existingPath} ...");
 #pragma warning restore CA2254 // Template should be a static expression
 #pragma warning restore CA1848 // Use the LoggerMessage delegates
                 }
@@ -326,7 +331,7 @@ public sealed class ConfigurationManager : IConfigurationManager
 
             if (string.IsNullOrEmpty(_applicationConfigurationsFilePath))
             {
-                var applicationConfigurationsFilePath = Path.Combine(searchPath, $"{mainAssemblyName}.env");
+                var applicationConfigurationsFilePath = Path.Combine(existingPath, $"{mainAssemblyName}.env");
 
                 if (File.Exists(applicationConfigurationsFilePath))
                 {
@@ -364,7 +369,7 @@ public sealed class ConfigurationManager : IConfigurationManager
                 {
 #pragma warning disable CA1848 // Use the LoggerMessage delegates
 #pragma warning disable CA2254 // Template should be a static expression
-                    _logger.LogWarning($"File {mainAssemblyName}.env not found in {searchPath} ...");
+                    _logger.LogWarning($"File {mainAssemblyName}.env not found in {existingPath} ...");
 #pragma warning restore CA2254 // Template should be a static expression
 #pragma warning restore CA1848 // Use the LoggerMessage delegates
                 }

@@ -32,11 +32,6 @@ public abstract class Microservice : IMicroservice
     private static WeakReference<Microservice> _instance = null!;
 
     /// <summary>
-    /// Registry path for environment settings search in HKCU, then HKLM
-    /// </summary>
-    public static string? RegistryPathForEnvironment { get; set; }
-
-    /// <summary>
     /// Default constructor
     /// </summary>
     /// <param name="commandLineArguments">Program command line arguments</param>
@@ -68,61 +63,29 @@ public abstract class Microservice : IMicroservice
 #pragma warning restore CA1848 // Use the LoggerMessage delegates
     }
 
-    /// <summary>
-    /// Microservice Name
-    /// </summary>
     public string MicroserviceName { get; protected set; } = Process.GetCurrentProcess().ProcessName;
 
-    /// <summary>
-    /// Command Line Arguments
-    /// </summary>
-    /// <value></value>
     public IReadOnlyList<string> CommandLineArguments { get; private set; }
 
-    /// <summary>
-    /// C# Host Builder
-    /// </summary>
     public IHostBuilder Builder => _builder ??= CreateBuilder();
 
-    /// <summary>
-    /// C# Host Environment
-    /// </summary>
     public IHostEnvironment Environment => _environment ??= GetImplementationEnvironment();
 
-    /// <summary>
-    /// C# Service Collection
-    /// </summary>
     public IServiceCollection Services => _services ??= GetImplementationServices();
 
-    /// <summary>
-    /// C# Host
-    /// </summary>
     public IHost Host => _host ??= BuildHost();
 
-    /// <summary>
-    /// Microservice Configuration Manager
-    /// </summary>
     public IConfigurationManager ConfigurationManager => _configurationManager ??= CreateConfigurationManager();
 
-    /// <summary>
-    /// Default Logger
-    /// </summary>
     public ILogger Logger { get; private set; }
 
-    /// <summary>
-    /// Indicate if running in Debugging on Developing mode
-    /// </summary>
     public bool IsDebugOrDevelopment { get; protected set; }
 
-    /// <summary>
-    /// Machine configuration search path
-    /// </summary>
     public string? ConfigurationMachineSearchPath { get; set; }
 
-    /// <summary>
-    /// User configuration search path
-    /// </summary>
     public string? ConfigurationUserSearchPath { get; set; }
+
+    public string? RegistryPathForConfiguration { get; set; }
 
 #pragma warning disable CA1000
     /// <summary>
