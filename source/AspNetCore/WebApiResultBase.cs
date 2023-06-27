@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace FFCEI.Microservices.AspNetCore;
 
 /// <summary>
@@ -27,10 +29,12 @@ public class WebApiResultBase : IWebApiResponse
     /// <summary>
     /// Succeeded
     /// </summary>
+    [JsonIgnore]
     public bool HasSucceeded => (Status == StatusSucceeded);
 
     /// <summary>
     /// Failed
     /// </summary>
+    [JsonIgnore]
     public bool HasFailed => !HasSucceeded;
 }
