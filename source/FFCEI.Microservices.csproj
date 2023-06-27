@@ -74,6 +74,7 @@
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="7.0.8" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
     <PackageReference Include="Microsoft.Extensions.Localization" Version="7.0.8" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />

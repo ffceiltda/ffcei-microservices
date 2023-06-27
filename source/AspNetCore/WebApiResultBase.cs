@@ -23,4 +23,14 @@ public class WebApiResultBase : IWebApiResponse
     /// Detail message
     /// </summary>
     public string? Detail { get; set; }
+
+    /// <summary>
+    /// Succeeded
+    /// </summary>
+    public bool HasSucceeded => (Status == StatusSucceeded);
+
+    /// <summary>
+    /// Failed
+    /// </summary>
+    public bool HasFailed => !HasSucceeded;
 }
