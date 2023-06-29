@@ -1,7 +1,7 @@
 using FFCEI.Microservices.AspNetCore;
 using FFCEI.Microservices.Microservices;
 
-Microservice.RegistryPathForEnvironment = "SOFTWARE\\FFCEI";
+Microservice.RegistryPathForConfigurationSearchPath = "SOFTWARE\\FFCEI";
 
 // Create Web API microservice template
 var microservice = new WebApiJwtAuthenticatedMicroservice<WebApiClaims>(args);

@@ -125,7 +125,7 @@ public sealed class ConfigurationManager : IConfigurationManager
             }
         }
         
-        var machineSearchPath = Microservice.Instance?.ConfigurationMachineSearchPath;
+        var machineSearchPath = Microservice.ConfigurationMachineSearchPath;
 
         if (!string.IsNullOrEmpty(machineSearchPath))
         {
@@ -135,7 +135,7 @@ public sealed class ConfigurationManager : IConfigurationManager
             }
         }
         
-        var userSearchPath = Microservice.Instance?.ConfigurationUserSearchPath;
+        var userSearchPath = Microservice.ConfigurationUserSearchPath;
 
         if (!string.IsNullOrEmpty(userSearchPath))
         {
@@ -172,16 +172,14 @@ public sealed class ConfigurationManager : IConfigurationManager
 #pragma warning disable CA1031 // Do not catch general exception types
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            var registryPathForConfiguration = Microservice.Instance?.RegistryPathForConfiguration;
-
-            if (!string.IsNullOrEmpty(registryPathForConfiguration))
+            if (!string.IsNullOrEmpty(Microservice.RegistryPathForConfigurationSearchPath))
             {
                 try
                 {
                     string? registryPath = null;
                     string? registryUserName = null;
 
-                    using (var key = registryKey.OpenSubKey(registryPathForConfiguration))
+                    using (var key = registryKey.OpenSubKey(Microservice.RegistryPathForConfigurationSearchPath))
                     {
                         var kind = key?.GetValueKind("EnvironmentFilesPath") ?? RegistryValueKind.None;
 

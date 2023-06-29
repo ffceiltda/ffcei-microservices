@@ -61,21 +61,6 @@ public interface IMicroservice
     bool IsDebugOrDevelopmentEnvironment { get; }
 
     /// <summary>
-    /// Machine configuration search path
-    /// </summary>
-    public string? ConfigurationMachineSearchPath { get; set; }
-
-    /// <summary>
-    /// User configuration search path
-    /// </summary>
-    public string? ConfigurationUserSearchPath { get; set; }
-
-    /// <summary>
-    /// Registry path for configuration (search first in HKCU, then HKLM)
-    /// </summary>
-    public string? RegistryPathForConfiguration { get; set; }
-
-    /// <summary>
     /// Run service
     /// </summary>
     void Run();

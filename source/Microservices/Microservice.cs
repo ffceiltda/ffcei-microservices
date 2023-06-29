@@ -83,11 +83,20 @@ public abstract class Microservice : IMicroservice
 
     public bool IsDebugOrDevelopmentEnvironment => Debugger.IsAttached || IsDevelopmentEnvironment;
 
-    public string? ConfigurationMachineSearchPath { get; set; }
+    /// <summary>
+    /// Machine configuration search path
+    /// </summary>
+    public static string? ConfigurationMachineSearchPath { get; set; }
 
-    public string? ConfigurationUserSearchPath { get; set; }
+    /// <summary>
+    /// User configuration search path
+    /// </summary>
+    public static string? ConfigurationUserSearchPath { get; set; }
 
-    public string? RegistryPathForConfiguration { get; set; }
+    /// <summary>
+    /// Registry path for configuration (search first in HKCU, then HKLM)
+    /// </summary>
+    public static string? RegistryPathForConfigurationSearchPath { get; set; }
 
 #pragma warning disable CA1000
     /// <summary>
