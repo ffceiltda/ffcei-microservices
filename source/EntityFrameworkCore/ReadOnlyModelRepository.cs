@@ -1,6 +1,7 @@
 using FFCEI.Microservices.EntityFrameworkCore.Generic;
 using FFCEI.Microservices.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 
 namespace FFCEI.Microservices.EntityFrameworkCore;
@@ -20,6 +21,8 @@ public class ReadOnlyModelRepository<TModel> : IReadOnlyModelRepository<TModel> 
     /// </summary>
     /// <param name="context">Model Repository DbContext instance</param>
     public ReadOnlyModelRepository(ModelRepositoryDbContext context) => Context = context;
+
+    public IIncludableQueryable<TModel, TProperty> Include<TProperty>(Expression<Func<TModel, TProperty>> navigationPropertyPath) => Set.Include(navigationPropertyPath);
 
     public IQueryable<TModel> Where(Expression<Func<TModel, bool>> predicate) => Set.Where(predicate);
 

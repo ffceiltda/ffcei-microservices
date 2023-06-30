@@ -1,4 +1,6 @@
 using FFCEI.Microservices.Models;
+using Microsoft.EntityFrameworkCore.Query;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace FFCEI.Microservices.EntityFrameworkCore.Generic;
@@ -9,6 +11,13 @@ namespace FFCEI.Microservices.EntityFrameworkCore.Generic;
 /// <typeparam name="TModel"></typeparam>
 public interface IReadOnlyModelRepository<TModel> : IReadOnlyModelRepository where TModel : IModel
 {
+    /// <summary>
+    /// Include child model as Join in query
+    /// </summary>
+    /// <param name="navigationPropertyPath">Navigation property path</param>
+    /// <returns>A queryable instance</returns>
+    IIncludableQueryable<TModel, TProperty> Include<TProperty>(Expression<Func<TModel, TProperty>> navigationPropertyPath);
+
     /// <summary>
     /// Create queryable expression by predicate
     /// </summary>
