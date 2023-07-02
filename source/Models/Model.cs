@@ -34,7 +34,7 @@ public abstract class Model : IModel
         }
 
         idBackingField = value;
-        modelRelationshipBackingField = null;
+        modelRelationshipBackingField = null!;
     }
 
     /// <summary>
@@ -74,7 +74,7 @@ public abstract class Model : IModel
 
         idBackingField = value;
         uuidBackingField = null;
-        modelRelationshipBackingField = null;
+        modelRelationshipBackingField = null!;
     }
 
     /// <summary>
@@ -127,7 +127,7 @@ public abstract class Model : IModel
         }
 
         uuidBackingField = value;
-        modelRelationshipBackingField = null;
+        modelRelationshipBackingField = null!;
     }
 
     /// <summary>
@@ -167,7 +167,7 @@ public abstract class Model : IModel
 
         idBackingField = null;
         uuidBackingField = value;
-        modelRelationshipBackingField = null;
+        modelRelationshipBackingField = null!;
     }
 
     /// <summary>
