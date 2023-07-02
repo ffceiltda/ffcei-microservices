@@ -11,7 +11,7 @@ public static class ModelExtensionMethods
         IModelRepository<TModel> modelRepository,
         Func<TModel, bool> navigationPropertySearchPredicate,
         Expression<Func<TModel, bool>> modelRepositorySearchPredicate)
-        where TModel : IModel
+        where TModel : class, IModel
     {
         if (navigationProperty is null)
         {

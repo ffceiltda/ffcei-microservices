@@ -7,7 +7,7 @@ namespace FFCEI.Microservices.EntityFrameworkCore.Generic;
 /// Generic Model Repository interface
 /// </summary>
 /// <typeparam name="TModel"></typeparam>
-public interface IModelRepository<TModel> : IReadOnlyModelRepository<TModel>, IModelRepository where TModel : IModel
+public interface IModelRepository<TModel> : IReadOnlyModelRepository<TModel>, IModelRepository where TModel : class, IModel
 {
     /// <summary>
     /// Add new Model to repository

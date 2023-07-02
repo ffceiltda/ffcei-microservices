@@ -22,13 +22,11 @@ public class ReadOnlyModelRepository<TModel> : IReadOnlyModelRepository<TModel> 
     /// <param name="context">Model Repository DbContext instance</param>
     public ReadOnlyModelRepository(ModelRepositoryDbContext context) => Context = context;
 
-    public IIncludableQueryable<TModel, TProperty> Include<TProperty>(Expression<Func<TModel, TProperty>> navigationPropertyPath) => Set.Include(navigationPropertyPath);
-
     public IQueryable<TModel> Where(Expression<Func<TModel, bool>> predicate) => Set.Where(predicate);
 
     public IQueryable<TModel> WhereAdvanced(bool ignoreQueryFilters, Expression<Func<TModel, bool>> predicate) => Set.IgnoreQueryFilters().Where(predicate);
 
-    public IQueryable<TModel> WhereAll(bool ignoreQueryFilters = false) => ignoreQueryFilters ? Set.IgnoreQueryFilters().Where(x => true) : Set.Where(x => true);
+    public IQueryable<TModel> WhereAll(bool ignoreQueryFilters = false) => ignoreQueryFilters ? Set.IgnoreQueryFilters() : Set;
 
     public IOrderedQueryable<TModel> OrderBy<TKey>(Expression<Func<TModel, TKey>> keySelector) => WhereAll().OrderBy(keySelector);
 

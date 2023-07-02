@@ -17,7 +17,7 @@ public static class IReadOnlyModelRepositoryIIdAwareModelExtensionMethods
     /// <param name="repository">Model repository</param>>
     /// <returns>Last model that match predicate or null</returns>
     public static async ValueTask<TModel?> LastOrDefaultAsync<TModel>(this IReadOnlyModelRepository<TModel> repository)
-        where TModel : IIdAwareModel
+        where TModel : class, IIdAwareModel
     {
         if (repository is null)
         {
@@ -36,7 +36,7 @@ public static class IReadOnlyModelRepositoryIIdAwareModelExtensionMethods
     /// <param name="predicate">Model match predicate</param>
     /// <returns>Last model that match predicate or null</returns>
     public static async ValueTask<TModel?> LastOrDefaultByPredicateAsync<TModel>(this IReadOnlyModelRepository<TModel> repository, Expression<Func<TModel, bool>> predicate)
-        where TModel : IIdAwareModel
+        where TModel : class, IIdAwareModel
     {
         if (repository is null)
         {
@@ -60,7 +60,7 @@ public static class IReadOnlyModelRepositoryIIdAwareModelExtensionMethods
     /// <param name="ignoreQueryFilters">Ignore EF Core Query Filters</param>
     /// <returns>Last model that match predicate or null</returns>
     public static async ValueTask<TModel?> LastOrDefaultAdvancedAsync<TModel>(this IReadOnlyModelRepository<TModel> repository, bool ignoreQueryFilters)
-        where TModel : IIdAwareModel
+        where TModel : class, IIdAwareModel
     {
         if (repository is null)
         {
@@ -80,7 +80,7 @@ public static class IReadOnlyModelRepositoryIIdAwareModelExtensionMethods
     /// <param name="predicate">Model match predicate</param>
     /// <returns>Last model that match predicate or null</returns>
     public static async ValueTask<TModel?> LastOrDefaultByPredicateAdvancedAsync<TModel>(this IReadOnlyModelRepository<TModel> repository, bool ignoreQueryFilters, Expression<Func<TModel, bool>> predicate)
-        where TModel : IIdAwareModel
+        where TModel : class, IIdAwareModel
     {
         if (repository is null)
         {
