@@ -8,6 +8,12 @@ namespace FFCEI.Microservices.EntityFrameworkCore;
 public interface IReadOnlyModelRepository
 {
     /// <summary>
+    /// Create queryable expression
+    /// </summary>
+    /// <returns>A queryable instance</returns>
+    IQueryable<IModel> AnyModel { get; }
+
+    /// <summary>
     /// Return all models in repository
     /// </summary>
     /// <param name="ignoreQueryFilters">Ignore EF Core Query Filters</param>

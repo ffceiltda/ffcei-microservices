@@ -25,7 +25,7 @@ public static class IReadOnlyModelRepositoryIIdAwareModelExtensionMethods
         }
 
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
-        return await repository.WhereAll().OrderBy(r => r.Id).LastOrDefaultAsync();
+        return await repository.Any.OrderBy(r => r.Id).LastOrDefaultAsync();
 #pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
     }
 
@@ -68,7 +68,7 @@ public static class IReadOnlyModelRepositoryIIdAwareModelExtensionMethods
         }
 
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
-        return await repository.WhereAll(ignoreQueryFilters).OrderBy(r => r.Id).LastOrDefaultAsync();
+        return await repository.AnyAdvanced(ignoreQueryFilters).OrderBy(r => r.Id).LastOrDefaultAsync();
 #pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
     }
 

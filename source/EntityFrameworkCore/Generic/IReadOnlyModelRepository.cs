@@ -10,6 +10,19 @@ namespace FFCEI.Microservices.EntityFrameworkCore.Generic;
 public interface IReadOnlyModelRepository<TModel> : IReadOnlyModelRepository where TModel : class, IModel
 {
     /// <summary>
+    /// Create queryable expression
+    /// </summary>
+    /// <returns>A queryable instance</returns>
+    IQueryable<TModel> Any { get; }
+
+    /// <summary>
+    /// Create queryable expression
+    /// </summary>
+    /// <param name="ignoreQueryFilters">Ignore EF Core Query Filters</param>
+    /// <returns>A queryable instance</returns>
+    IQueryable<TModel> AnyAdvanced(bool ignoreQueryFilters = false);
+
+    /// <summary>
     /// Create queryable expression by predicate
     /// </summary>
     /// <param name="predicate">Predicate for match</param>
@@ -23,13 +36,6 @@ public interface IReadOnlyModelRepository<TModel> : IReadOnlyModelRepository whe
     /// <param name="predicate">Predicate for match</param>
     /// <returns>A queryable instance</returns>
     IQueryable<TModel> WhereAdvanced(bool ignoreQueryFilters, Expression<Func<TModel, bool>> predicate);
-
-    /// <summary>
-    /// Create queryable expression
-    /// </summary>
-    /// <param name="ignoreQueryFilters">Ignore EF Core Query Filters</param>
-    /// <returns>A queryable instance</returns>
-    IQueryable<TModel> WhereAll(bool ignoreQueryFilters = false);
 
     /// <summary>
     /// Create queryable expression ordered by
