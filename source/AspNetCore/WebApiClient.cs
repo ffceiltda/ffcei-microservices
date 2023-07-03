@@ -24,7 +24,7 @@ public class WebApiClient
     /// <summary>
     /// Ignore HTTPS SSL Errors
     /// </summary>
-    public bool IgnoreHTTPSSLErrors { get; set; } = false;
+    public bool IgnoreHTTPSSLErrors { get; set; }
 
     /// <summary>
     /// Create a Rest Client
@@ -40,7 +40,7 @@ public class WebApiClient
 
         if (IgnoreHTTPSSLErrors)
         {
-            httpOptions.RemoteCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true,
+            httpOptions.RemoteCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => { return IgnoreHTTPSSLErrors; };
         }
 
         var httpClient = new RestClient(httpOptions);
