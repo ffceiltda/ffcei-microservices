@@ -21,6 +21,15 @@ public class WebApiClient
     /// </summary>
     public string? AuthenticationToken { get; set; }
 
+    /// <summary>
+    /// Ignore HTTPS SSL Errors
+    /// </summary>
+    public bool IgnoreHTTPSSLErrors { get; set; } = false;
+
+    /// <summary>
+    /// Create a Rest Client
+    /// </summary>
+    /// <returns>a HTTP Rest Client instance</returns>
     protected RestClient CreateRestClient()
     {
         var httpOptions = new RestClientOptions
@@ -28,6 +37,11 @@ public class WebApiClient
             BaseUrl = ApiHttpUrl,
             Authenticator = string.IsNullOrEmpty(AuthenticationToken) ? null : new JwtAuthenticator(AuthenticationToken)
         };
+
+        if (IgnoreHTTPSSLErrors)
+        {
+            httpOptions.RemoteCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true,
+        }
 
         var httpClient = new RestClient(httpOptions);
 
