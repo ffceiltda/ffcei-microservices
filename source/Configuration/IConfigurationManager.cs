@@ -6,6 +6,11 @@ namespace FFCEI.Microservices.Configuration
     public interface IConfigurationManager
     {
         /// <summary>
+        /// Reload configuration from configuration sources
+        /// </summary>
+        void ReloadConfiguration();
+
+        /// <summary>
         /// Obtains a configuration from repositories
         /// </summary>
         /// <param name="key">Setting name</param>

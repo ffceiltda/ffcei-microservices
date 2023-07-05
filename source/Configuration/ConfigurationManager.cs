@@ -34,7 +34,7 @@ public sealed class ConfigurationManager : IConfigurationManager
         _logger = logger;
         _configuration = builder.Configuration;
 
-        LoadConfiguration();
+        ReloadConfiguration();
     }
 
     internal ConfigurationManager(ILogger logger, IHostBuilder builder, Microsoft.Extensions.Configuration.IConfiguration configuration)
@@ -47,10 +47,10 @@ public sealed class ConfigurationManager : IConfigurationManager
         _logger = logger;
         _configuration = configuration;
 
-        LoadConfiguration();
+        ReloadConfiguration();
     }
 
-    private void LoadConfiguration()
+    public void ReloadConfiguration()
     {
         var mainAssemblyName = Assembly.GetEntryAssembly()?.GetName().Name;
 
