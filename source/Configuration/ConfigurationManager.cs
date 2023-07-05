@@ -5,8 +5,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace FFCEI.Microservices.Configuration;
 
@@ -285,35 +287,47 @@ public sealed class ConfigurationManager : IConfigurationManager
 
                 if (File.Exists(allConfigurationsFilePath))
                 {
+                    for (int i = 0; i < 9; ++i)
+                    {
 #pragma warning disable CA1031 // Do not catch general exception types
-                    try
-                    {
-                        if (isDebugOrDevelopment)
+                        try
                         {
+                            if (isDebugOrDevelopment)
+                            {
 #pragma warning disable CA1848 // Use the LoggerMessage delegates
 #pragma warning disable CA2254 // Template should be a static expression
-                            _logger.LogInformation($"Trying to load system-wide configurations from {allConfigurationsFilePath} ...");
+                                _logger.LogInformation($"Trying to load system-wide configurations from {allConfigurationsFilePath} ...");
 #pragma warning restore CA2254 // Template should be a static expression
 #pragma warning restore CA1848 // Use the LoggerMessage delegates
+                            }
+
+                            string? line;
+                            List<string> lines = new List<string>();
+
+                            using StreamReader reader = new StreamReader(allConfigurationsFilePath, Encoding.UTF8);
+
+                            while ((line = reader.ReadLine()) != null)
+                            {
+                                lines.Add(line);
+                            }
+
+                            _allConfigurations = lines.ToArray();
+                            _allConfigurationsFilePath = allConfigurationsFilePath;
+
+#pragma warning disable CA1848 // Use the LoggerMessage delegates
+#pragma warning disable CA2254 // Template should be a static expression
+                            _logger.LogInformation($"Loaded system-wide configurations from {allConfigurationsFilePath}");
+#pragma warning restore CA2254 // Template should be a static expression
+#pragma warning restore CA1848 // Use the LoggerMessage delegates
+
+                            break;
                         }
-
-                        using var file = File.Open(allConfigurationsFilePath, FileMode.Open, FileAccess.Read);
-
-                        file.Close();
-
-                        _allConfigurations = File.ReadAllLines(allConfigurationsFilePath);
-                        _allConfigurationsFilePath = allConfigurationsFilePath;
-
-#pragma warning disable CA1848 // Use the LoggerMessage delegates
-#pragma warning disable CA2254 // Template should be a static expression
-                        _logger.LogInformation($"Loaded system-wide configurations from {allConfigurationsFilePath}");
-#pragma warning restore CA2254 // Template should be a static expression
-#pragma warning restore CA1848 // Use the LoggerMessage delegates
-                    }
-                    catch
-                    {
-                    }
+                        catch
+                        {
+                            Thread.Sleep(50);
+                        }
 #pragma warning restore CA1031 // Do not catch general exception types
+                    }
                 }
                 else if (isDebugOrDevelopment)
                 {
@@ -331,35 +345,47 @@ public sealed class ConfigurationManager : IConfigurationManager
 
                 if (File.Exists(applicationConfigurationsFilePath))
                 {
+                    for (int i = 0; i < 9; ++i)
+                    {
 #pragma warning disable CA1031 // Do not catch general exception types
-                    try
-                    {
-                        if (isDebugOrDevelopment)
+                        try
                         {
+                            if (isDebugOrDevelopment)
+                            {
 #pragma warning disable CA1848 // Use the LoggerMessage delegates
 #pragma warning disable CA2254 // Template should be a static expression
-                            _logger.LogInformation($"Trying to load application-specific configurations from {applicationConfigurationsFilePath} ...");
+                                _logger.LogInformation($"Trying to load application-specific configurations from {applicationConfigurationsFilePath} ...");
 #pragma warning restore CA2254 // Template should be a static expression
 #pragma warning restore CA1848 // Use the LoggerMessage delegates
+                            }
+
+                            string? line;
+                            List<string> lines = new List<string>();
+
+                            using StreamReader reader = new StreamReader(applicationConfigurationsFilePath, Encoding.UTF8);
+
+                            while ((line = reader.ReadLine()) != null)
+                            {
+                                lines.Add(line);
+                            }
+
+                            _applicationConfigurations = lines.ToArray();
+                            _applicationConfigurationsFilePath = applicationConfigurationsFilePath;
+
+#pragma warning disable CA1848 // Use the LoggerMessage delegates
+#pragma warning disable CA2254 // Template should be a static expression
+                            _logger.LogInformation($"Loaded application-specific configurations from {applicationConfigurationsFilePath}");
+#pragma warning restore CA2254 // Template should be a static expression
+#pragma warning restore CA1848 // Use the LoggerMessage delegates
+
+                            break;
                         }
-
-                        using var file = File.Open(applicationConfigurationsFilePath, FileMode.Open, FileAccess.Read);
-
-                        file.Close();
-
-                        _applicationConfigurations = File.ReadAllLines(applicationConfigurationsFilePath);
-                        _applicationConfigurationsFilePath = applicationConfigurationsFilePath;
-
-#pragma warning disable CA1848 // Use the LoggerMessage delegates
-#pragma warning disable CA2254 // Template should be a static expression
-                        _logger.LogInformation($"Loaded application-specific configurations from {applicationConfigurationsFilePath}");
-#pragma warning restore CA2254 // Template should be a static expression
-#pragma warning restore CA1848 // Use the LoggerMessage delegates
-                    }
-                    catch
-                    {
-                    }
+                        catch
+                        {
+                            Thread.Sleep(50);
+                        }
 #pragma warning restore CA1031 // Do not catch general exception types
+                    }
                 }
                 else if (isDebugOrDevelopment)
                 {
