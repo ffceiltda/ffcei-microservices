@@ -1,11 +1,9 @@
 using FFCEI.Microservices.Microservices;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
-using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -17,12 +15,19 @@ namespace FFCEI.Microservices.Configuration;
 /// </summary>
 public sealed class ConfigurationManager : IConfigurationManager
 {
-    private Microsoft.Extensions.Configuration.IConfiguration _configuration;
-    private Microsoft.Extensions.Logging.ILogger _logger;
+    private IConfiguration? _configuration;
+    private ILogger? _logger;
+    private string _specificConfigurationsFilePath = string.Empty;
+    private IEnumerable<string>? _specificConfigurations;
     private string _allConfigurationsFilePath = string.Empty;
     private IEnumerable<string>? _allConfigurations;
     private string _applicationConfigurationsFilePath = string.Empty;
     private IEnumerable<string>? _applicationConfigurations;
+
+    /// <summary>
+    /// Program-defined specific configurations to be loaded
+    /// </summary>
+    public static string? ProgramDefinedSpecificConfigurationsFilePath { get; internal set; }
 
     internal ConfigurationManager(ILogger logger, WebApplicationBuilder builder)
     {
@@ -37,15 +42,25 @@ public sealed class ConfigurationManager : IConfigurationManager
         ReloadConfiguration();
     }
 
-    internal ConfigurationManager(ILogger logger, IHostBuilder builder, Microsoft.Extensions.Configuration.IConfiguration configuration)
+    internal ConfigurationManager(ILogger logger, IConfiguration configuration)
     {
-        if (builder is null)
+        if (configuration is null)
         {
-            throw new ArgumentNullException(nameof(builder));
+            throw new ArgumentNullException(nameof(configuration));
         }
 
         _logger = logger;
         _configuration = configuration;
+
+        ReloadConfiguration();
+    }
+
+    public ConfigurationManager(string programDefinedSpecificConfigurationsFilePath)
+    {
+        ProgramDefinedSpecificConfigurationsFilePath = programDefinedSpecificConfigurationsFilePath;
+
+        _logger = null;
+        _configuration = null;
 
         ReloadConfiguration();
     }
@@ -263,15 +278,71 @@ public sealed class ConfigurationManager : IConfigurationManager
 #pragma warning disable CA2254 // Template should be a static expression
         if (isDebugOrDevelopment)
         {
-            _logger.LogInformation($"Configuration search path: {existingPaths.Count}");
+            _logger?.LogInformation($"Configuration search path: {existingPaths.Count}");
 
             foreach (var existingPath in existingPaths)
             {
-                _logger.LogInformation(existingPath);
+                _logger?.LogInformation(existingPath);
             }
         }
 #pragma warning restore CA2254 // Template should be a static expression
 #pragma warning restore CA1848 // Use the LoggerMessage delegates
+
+        if (!string.IsNullOrEmpty(ProgramDefinedSpecificConfigurationsFilePath))
+        {
+            if (File.Exists(ProgramDefinedSpecificConfigurationsFilePath))
+            {
+                for (int i = 0; i < 9; ++i)
+                {
+#pragma warning disable CA1031 // Do not catch general exception types
+                    try
+                    {
+                        if (isDebugOrDevelopment)
+                        {
+#pragma warning disable CA1848 // Use the LoggerMessage delegates
+#pragma warning disable CA2254 // Template should be a static expression
+                            _logger?.LogInformation($"Trying to load system-wide configurations from {ProgramDefinedSpecificConfigurationsFilePath} ...");
+#pragma warning restore CA2254 // Template should be a static expression
+#pragma warning restore CA1848 // Use the LoggerMessage delegates
+                        }
+
+                        string? line;
+                        List<string> lines = new List<string>();
+
+                        using StreamReader reader = new StreamReader(ProgramDefinedSpecificConfigurationsFilePath, Encoding.UTF8);
+
+                        while ((line = reader.ReadLine()) != null)
+                        {
+                            lines.Add(line);
+                        }
+
+                        _specificConfigurations = lines.ToArray();
+                        _specificConfigurationsFilePath = ProgramDefinedSpecificConfigurationsFilePath;
+
+#pragma warning disable CA1848 // Use the LoggerMessage delegates
+#pragma warning disable CA2254 // Template should be a static expression
+                        _logger?.LogInformation($"Loaded program-defined specific configurations from {ProgramDefinedSpecificConfigurationsFilePath}");
+#pragma warning restore CA2254 // Template should be a static expression
+#pragma warning restore CA1848 // Use the LoggerMessage delegates
+
+                        break;
+                    }
+                    catch
+                    {
+                        Thread.Sleep(50);
+                    }
+#pragma warning restore CA1031 // Do not catch general exception types
+                }
+            }
+            else if (isDebugOrDevelopment)
+            {
+#pragma warning disable CA1848 // Use the LoggerMessage delegates
+#pragma warning disable CA2254 // Template should be a static expression
+                _logger?.LogWarning($"File {ProgramDefinedSpecificConfigurationsFilePath} not found...");
+#pragma warning restore CA2254 // Template should be a static expression
+#pragma warning restore CA1848 // Use the LoggerMessage delegates
+            }
+        }
 
         foreach (var existingPath in existingPaths)
         {
@@ -296,7 +367,7 @@ public sealed class ConfigurationManager : IConfigurationManager
                             {
 #pragma warning disable CA1848 // Use the LoggerMessage delegates
 #pragma warning disable CA2254 // Template should be a static expression
-                                _logger.LogInformation($"Trying to load system-wide configurations from {allConfigurationsFilePath} ...");
+                                _logger?.LogInformation($"Trying to load system-wide configurations from {allConfigurationsFilePath} ...");
 #pragma warning restore CA2254 // Template should be a static expression
 #pragma warning restore CA1848 // Use the LoggerMessage delegates
                             }
@@ -316,7 +387,7 @@ public sealed class ConfigurationManager : IConfigurationManager
 
 #pragma warning disable CA1848 // Use the LoggerMessage delegates
 #pragma warning disable CA2254 // Template should be a static expression
-                            _logger.LogInformation($"Loaded system-wide configurations from {allConfigurationsFilePath}");
+                            _logger?.LogInformation($"Loaded system-wide configurations from {allConfigurationsFilePath}");
 #pragma warning restore CA2254 // Template should be a static expression
 #pragma warning restore CA1848 // Use the LoggerMessage delegates
 
@@ -333,7 +404,7 @@ public sealed class ConfigurationManager : IConfigurationManager
                 {
 #pragma warning disable CA1848 // Use the LoggerMessage delegates
 #pragma warning disable CA2254 // Template should be a static expression
-                    _logger.LogWarning($"File ALL.env not found in {existingPath} ...");
+                    _logger?.LogWarning($"File ALL.env not found in {existingPath} ...");
 #pragma warning restore CA2254 // Template should be a static expression
 #pragma warning restore CA1848 // Use the LoggerMessage delegates
                 }
@@ -354,7 +425,7 @@ public sealed class ConfigurationManager : IConfigurationManager
                             {
 #pragma warning disable CA1848 // Use the LoggerMessage delegates
 #pragma warning disable CA2254 // Template should be a static expression
-                                _logger.LogInformation($"Trying to load application-specific configurations from {applicationConfigurationsFilePath} ...");
+                                _logger?.LogInformation($"Trying to load application-specific configurations from {applicationConfigurationsFilePath} ...");
 #pragma warning restore CA2254 // Template should be a static expression
 #pragma warning restore CA1848 // Use the LoggerMessage delegates
                             }
@@ -374,7 +445,7 @@ public sealed class ConfigurationManager : IConfigurationManager
 
 #pragma warning disable CA1848 // Use the LoggerMessage delegates
 #pragma warning disable CA2254 // Template should be a static expression
-                            _logger.LogInformation($"Loaded application-specific configurations from {applicationConfigurationsFilePath}");
+                            _logger?.LogInformation($"Loaded application-specific configurations from {applicationConfigurationsFilePath}");
 #pragma warning restore CA2254 // Template should be a static expression
 #pragma warning restore CA1848 // Use the LoggerMessage delegates
 
@@ -391,7 +462,7 @@ public sealed class ConfigurationManager : IConfigurationManager
                 {
 #pragma warning disable CA1848 // Use the LoggerMessage delegates
 #pragma warning disable CA2254 // Template should be a static expression
-                    _logger.LogWarning($"File {mainAssemblyName}.env not found in {existingPath} ...");
+                    _logger?.LogWarning($"File {mainAssemblyName}.env not found in {existingPath} ...");
 #pragma warning restore CA2254 // Template should be a static expression
 #pragma warning restore CA1848 // Use the LoggerMessage delegates
                 }
@@ -402,12 +473,12 @@ public sealed class ConfigurationManager : IConfigurationManager
 #pragma warning disable CA2254 // Template should be a static expression
         if (string.IsNullOrEmpty(_allConfigurationsFilePath))
         {
-            _logger.LogWarning("cannot load file ALL.env");
+            _logger?.LogWarning("cannot load file ALL.env");
         }
 
         if (string.IsNullOrEmpty(_applicationConfigurationsFilePath))
         {
-            _logger.LogWarning($"{mainAssemblyName} cannot load file {mainAssemblyName}.env");
+            _logger?.LogWarning($"{mainAssemblyName} cannot load file {mainAssemblyName}.env");
         }
 #pragma warning restore CA2254 // Template should be a static expression
 #pragma warning restore CA1848 // Use the LoggerMessage delegates
@@ -433,6 +504,11 @@ public sealed class ConfigurationManager : IConfigurationManager
 
     public bool TryGetKey(string key, out string? value)
     {
+        if (TryGetKeyFromProgramSpecificConfigurations(key, out value))
+        {
+            return true;
+        }
+
         if (TryGetKeyFromApplicationConfigurations(key, out value))
         {
             return true;
@@ -498,6 +574,18 @@ public sealed class ConfigurationManager : IConfigurationManager
         return false;
     }
 
+    private bool TryGetKeyFromProgramSpecificConfigurations(string key, out string? value)
+    {
+        if (_specificConfigurations is null)
+        {
+            value = null;
+
+            return false;
+        }
+
+        return TryGetKeyFromConfigurationFile(_specificConfigurations, key, out value);
+    }
+
     private bool TryGetKeyFromApplicationConfigurations(string key, out string? value)
     {
         return TryGetKeyFromConfigurationFile(_applicationConfigurations, key, out value);
@@ -519,13 +607,13 @@ public sealed class ConfigurationManager : IConfigurationManager
 
     private bool TryGetKeyFromConfigurationManager(string key, out string? value)
     {
-        value = _configuration[key];
+        value = _configuration?[key];
 
         if (string.IsNullOrEmpty(value))
         {
             var environmentKey = FormatKeyAsEnvironmentVariable(key);
 
-            value = _configuration[environmentKey];
+            value = _configuration?[environmentKey];
         }
 
         return !string.IsNullOrEmpty(value);
