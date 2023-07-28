@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+
 namespace FFCEI.Microservices.AspNetCore.StaticFolderMappings;
 
 internal sealed class MappedFolder : IMappedFolder
@@ -13,4 +15,6 @@ internal sealed class MappedFolder : IMappedFolder
     public HashSet<string>? AuthorizedRoles { get; set; }
 
     IReadOnlySet<string>? IMappedFolder.AuthorizedRoles => AuthorizedRoles;
+
+    public Func<HttpContext, Task<bool>>? CustomAuthorizationFuction { get; set; }
 }

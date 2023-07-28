@@ -16,5 +16,9 @@ public enum StaticFolderMappingAuthorizationPolicy
     /// <summary>
     /// Require user to be authenticated and has role assigned
     /// </summary>
-    AuthorizedRoles
+    AuthorizedRoles,
+    /// <summary>
+    /// Custom authorization function that receive the WebPath, current user Claims, and returns true/false
+    /// </summary>
+    CustomAuthorizationFunction
 }

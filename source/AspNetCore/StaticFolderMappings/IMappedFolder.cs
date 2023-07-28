@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+
 namespace FFCEI.Microservices.AspNetCore.StaticFolderMappings;
 
 /// <summary>
@@ -29,4 +31,9 @@ public interface IMappedFolder
     /// Authorized roles (if applies)
     /// </summary>
     IReadOnlySet<string>? AuthorizedRoles { get; }
+
+    /// <summary>
+    /// Custom asynchronmous authorization function for each HTTP Request
+    /// </summary>
+    Func<HttpContext, Task<bool>>? CustomAuthorizationFuction { get; }
 }

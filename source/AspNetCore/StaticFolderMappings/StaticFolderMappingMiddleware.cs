@@ -45,56 +45,55 @@ public sealed class StaticFolderMappingMiddleware
             throw new ArgumentNullException(nameof(httpContext));
         }
 
-        if (httpContext.Request.Method == "GET")
+        var requestPath = httpContext.Request.Path.ToString();
+
+        foreach (var mapping in _mappedFolders.Values)
         {
-            var requestPath = httpContext.Request.Path.ToString();
-            var requestAuthorized = false;
-
-            foreach (var mapping in _mappedFolders.Values)
+            if (requestPath.StartsWith(mapping.WebPath, StringComparison.InvariantCulture))
             {
-                if (requestAuthorized)
-                {
-                    break;
-                }
+                bool requestAuthorized;
 
-                if (requestPath.StartsWith(mapping.WebPath, StringComparison.InvariantCulture))
+                switch (mapping.AuthorizationPolicy)
                 {
-                    switch (mapping.AuthorizationPolicy)
+                case StaticFolderMappingAuthorizationPolicy.PublicAccess:
                     {
-                    case StaticFolderMappingAuthorizationPolicy.PublicAccess:
-                        {
-                            requestAuthorized = true;
+                        requestAuthorized = true;
 
-                            continue;
-                        }
-                    case StaticFolderMappingAuthorizationPolicy.AuthenticatedAccess:
-                        {
-                            if (await CheckAuthentication(httpContext))
-                            {
-                                requestAuthorized = true;
+                        break;
+                    }
+                case StaticFolderMappingAuthorizationPolicy.AuthenticatedAccess:
+                    {
+                        requestAuthorized = await CheckAuthentication(httpContext);
 
-                                continue;
-                            }
+                        break;
+                    }
+                case StaticFolderMappingAuthorizationPolicy.AuthorizedRoles:
+                    {
+                        requestAuthorized = await CheckAuthorizedRoles(httpContext, mapping.AuthorizedRoles);
 
-                            return;
-                        }
-                    case StaticFolderMappingAuthorizationPolicy.AuthorizedRoles:
-                        {
-                            if (await CheckAuthorizedRoles(httpContext, mapping.AuthorizedRoles))
-                            {
-                                requestAuthorized = true;
+                        break;
+                    }
+                case StaticFolderMappingAuthorizationPolicy.CustomAuthorizationFunction:
+                    {
+                        requestAuthorized = mapping.CustomAuthorizationFuction is null ? false :
+                            await mapping.CustomAuthorizationFuction(httpContext);
 
-                                continue;
-                            }
+                        break;
+                    }
+                default:
+                    {
+                        requestAuthorized = false;
 
-                            return;
-                        }
-                    default:
-                        {
-                            break;
-                        }
+                        break;
                     }
                 }
+
+                if (!requestAuthorized)
+                {
+                    return;
+                }
+
+                break;
             }
         }
 
