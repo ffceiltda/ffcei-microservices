@@ -23,7 +23,7 @@
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
     <AnalysisLevel>7.0-all</AnalysisLevel>
     <SignAssembly>False</SignAssembly>
-    <Version>0.4.9</Version>
+    <Version>0.5.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -46,36 +46,37 @@
     <PackageReference Include="AutoMapper.Collection.EntityFrameworkCore" Version="9.0.0" />
     <PackageReference Include="AutoMapper.Extensions.EnumMapping" Version="3.1.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.2.1" />
     <PackageReference Include="Destructurama.Attributed" Version="3.1.0" />
     <PackageReference Include="Destructurama.ByIgnoring" Version="1.1.0" />
     <PackageReference Include="Destructurama.JsonNet" Version="2.0.0" />
-    <PackageReference Include="EasyCaching.Redis" Version="1.9.0" />
-    <PackageReference Include="EasyCaching.Serialization.Json" Version="1.9.0" />
-    <PackageReference Include="EasyCaching.Serialization.MessagePack" Version="1.9.0" />
-    <PackageReference Include="EasyCaching.Serialization.Protobuf" Version="1.9.0" />
-    <PackageReference Include="EasyCaching.Serialization.SystemTextJson" Version="1.9.0" />
+    <PackageReference Include="EasyCaching.Redis" Version="1.9.1" />
+    <PackageReference Include="EasyCaching.Serialization.Json" Version="1.9.1" />
+    <PackageReference Include="EasyCaching.Serialization.MessagePack" Version="1.9.1" />
+    <PackageReference Include="EasyCaching.Serialization.Protobuf" Version="1.9.1" />
+    <PackageReference Include="EasyCaching.Serialization.SystemTextJson" Version="1.9.1" />
     <PackageReference Include="EFCoreSecondLevelCacheInterceptor" Version="3.9.2" />
     <PackageReference Include="EntityFrameworkCore.Exceptions.MySQL.Pomelo" Version="6.0.3" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
-    <PackageReference Include="Isopoh.Cryptography.Argon2" Version="1.1.12" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="7.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="7.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.DynamicLinq" Version="7.3.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="7.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.8">
+    <PackageReference Include="Isopoh.Cryptography.Argon2" Version="2.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="7.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="7.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.DynamicLinq" Version="7.3.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="7.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.12">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="7.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="7.0.12" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Localization" Version="7.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="7.0.12" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.Design" Version="1.1.2" />
@@ -84,14 +85,14 @@
     <PackageReference Include="RestSharp" Version="110.2.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
     <PackageReference Include="Serilog.AspNetCore.Enrichers.CorrelationId" Version="1.0.0" />
-    <PackageReference Include="Serilog.Enrichers.ClientInfo" Version="2.0.0" />
+    <PackageReference Include="Serilog.Enrichers.ClientInfo" Version="2.0.1" />
     <PackageReference Include="Serilog.Enrichers.ExceptionData" Version="1.0.0" />
     <PackageReference Include="Serilog.Enrichers.ExceptionStackTraceHash" Version="1.3.0" />
     <PackageReference Include="Serilog.Sinks.RabbitMQ" Version="6.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.6" />
-    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.3.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.11" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.3.5" />
   </ItemGroup>
 
 </Project>
