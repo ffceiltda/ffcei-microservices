@@ -18,10 +18,7 @@ public static class UuidAwareModelBuilder
     /// <exception cref="ArgumentNullException">Throw null if entityBuilder is null</exception>
     public static void Register<TEntity>(EntityTypeBuilder<TEntity> entityBuilder, DatabaseEngine databaseEngine) where TEntity : class, IUuidAwareModel
     {
-        if (entityBuilder is null)
-        {
-            throw new ArgumentNullException(nameof(entityBuilder));
-        }
+        ArgumentNullException.ThrowIfNull(entityBuilder, nameof(entityBuilder));
 
 #pragma warning disable IDE0058 // Expression value is never used
         entityBuilder.Property(e => e.Uuid)

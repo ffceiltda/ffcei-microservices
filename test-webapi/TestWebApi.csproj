@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <ServerGarbageCollection>true</ServerGarbageCollection>
@@ -12,5 +12,5 @@
   <ItemGroup>
     <ProjectReference Include="..\source\FFCEI.Microservices.csproj" />
   </ItemGroup>
-    
+
 </Project>

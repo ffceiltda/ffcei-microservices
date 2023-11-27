@@ -22,10 +22,7 @@ public class UuidAwareLogicallyDeletableModel : LogicallyDeletableModel, IUuidAw
 
     public int CompareTo(IUuidAwareModel? other)
     {
-        if (other is null)
-        {
-            throw new ArgumentNullException(nameof(other));
-        }
+        ArgumentNullException.ThrowIfNull(other, nameof(other));
 
         return Uuid.CompareTo(other.Uuid);
     }

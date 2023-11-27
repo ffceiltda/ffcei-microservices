@@ -28,27 +28,20 @@ public sealed class StaticFolderMappingMiddlewareOptions
         StaticFolderMappingAuthorizationPolicy authorizationPolicy = StaticFolderMappingAuthorizationPolicy.PublicAccess,
         IEnumerable<string>? authorizedRoles = null, Func<HttpContext, Task<bool>>? customAuthorizationFunction = null)
     {
-        if (webPath is null)
-        {
-            throw new ArgumentNullException(nameof(webPath));
-        }
-
-        if (physicalPath is null)
-        {
-            throw new ArgumentNullException(nameof(physicalPath));
-        }
+        ArgumentNullException.ThrowIfNullOrEmpty(webPath, nameof(webPath));
+        ArgumentNullException.ThrowIfNullOrEmpty(physicalPath, nameof(physicalPath));
 
         if (!Directory.Exists(physicalPath))
         {
             throw new InvalidOperationException($"Directory {physicalPath} cannot be accessed or does not exists");
         }
 
-        while (webPath.StartsWith("/", StringComparison.InvariantCulture))
+        while (webPath.StartsWith('/'))
         {
             webPath = webPath[1..];
         }
 
-        while (webPath.EndsWith("/", StringComparison.InvariantCulture))
+        while (webPath.EndsWith('/'))
         {
             webPath = webPath[..^1];
         }

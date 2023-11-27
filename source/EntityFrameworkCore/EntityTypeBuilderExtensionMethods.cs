@@ -46,15 +46,8 @@ public static class EntityTypeBuilderExtensionMethods
     /// <exception cref="ArgumentNullException"></exception>
     public static EntityTypeBuilder<TEntity> HasQueryFilter<TEntity>(this EntityTypeBuilder<TEntity> entityTypeBuilder, IEntityTypeQueryFilterBuilder<TEntity> queryFilterBuilder) where TEntity : class, IModel
     {
-        if (entityTypeBuilder is null)
-        {
-            throw new ArgumentNullException(nameof(entityTypeBuilder));
-        }
-
-        if (queryFilterBuilder is null)
-        {
-            throw new ArgumentNullException(nameof(queryFilterBuilder));
-        }
+        ArgumentNullException.ThrowIfNull(entityTypeBuilder, nameof(entityTypeBuilder));
+        ArgumentNullException.ThrowIfNull(queryFilterBuilder, nameof(queryFilterBuilder));
 
         return entityTypeBuilder.HasQueryFilter(queryFilterBuilder.Build());
     }

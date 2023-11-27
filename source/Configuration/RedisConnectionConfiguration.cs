@@ -139,10 +139,7 @@ public sealed class RedisConnectionConfiguration : ConnectionConfiguration
     /// <exception cref="InvalidOperationException">throw if Host or port is null</exception>
     public void Apply(RedisOptions options)
     {
-        if (options is null)
-        {
-            throw new ArgumentNullException(nameof(options));
-        }
+        ArgumentNullException.ThrowIfNull(options, nameof(options));
 
         options.SerializerName = SerializerName ?? "json";
 

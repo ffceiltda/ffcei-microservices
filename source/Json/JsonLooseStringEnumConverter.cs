@@ -8,10 +8,7 @@ internal sealed class JsonLooseStringEnumConverter : JsonConverterFactory
 {
     public override bool CanConvert(Type typeToConvert)
     {
-        if (typeToConvert is null)
-        {
-            throw new ArgumentNullException(nameof(typeToConvert));
-        }
+        ArgumentNullException.ThrowIfNull(typeToConvert, nameof(typeToConvert));
 
         return typeToConvert.IsEnum;
     }

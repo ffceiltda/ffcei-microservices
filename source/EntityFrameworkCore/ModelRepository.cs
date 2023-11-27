@@ -21,10 +21,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
     public async Task AddNewAsync(TModel model, bool autoCommit = true)
     {
-        if (model is null)
-        {
-            throw new ArgumentNullException(nameof(model));
-        }
+        ArgumentNullException.ThrowIfNull(model, nameof(model));
 
         await Set.AddAsync(model);
 
@@ -36,10 +33,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task AddNewAsync(IModel content, bool autoCommit = true)
     {
-        if (content is null)
-        {
-            throw new ArgumentNullException(nameof(content));
-        }
+        ArgumentNullException.ThrowIfNull(content, nameof(content));
 
         if (content is TModel model)
         {
@@ -53,10 +47,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task AddManyAsync(ICollection<TModel> models, bool autoCommit = true)
     {
-        if (models is null)
-        {
-            throw new ArgumentNullException(nameof(models));
-        }
+        ArgumentNullException.ThrowIfNull(models, nameof(models));
 
         await Set.AddRangeAsync(models);
 
@@ -68,10 +59,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task AddManyAsync(ICollection<IModel> contents, bool autoCommit = true)
     {
-        if (contents is null)
-        {
-            throw new ArgumentNullException(nameof(contents));
-        }
+        ArgumentNullException.ThrowIfNull(contents, nameof(contents));
 
         var models = new List<TModel>();
 
@@ -92,10 +80,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task UpdateExistingAsync(TModel model, bool autoCommit = true)
     {
-        if (model is null)
-        {
-            throw new ArgumentNullException(nameof(model));
-        }
+        ArgumentNullException.ThrowIfNull(model, nameof(model));
 
         Set.Update(model);
 
@@ -107,10 +92,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task UpdateExistingAsync(IModel content, bool autoCommit = true)
     {
-        if (content is null)
-        {
-            throw new ArgumentNullException(nameof(content));
-        }
+        ArgumentNullException.ThrowIfNull(content, nameof(content));
 
         if (content is TModel model)
         {
@@ -124,10 +106,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task UpdateManyAsync(ICollection<TModel> models, bool autoCommit = true)
     {
-        if (models is null)
-        {
-            throw new ArgumentNullException(nameof(models));
-        }
+        ArgumentNullException.ThrowIfNull(models, nameof(models));
 
         Set.UpdateRange(models);
 
@@ -139,10 +118,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task UpdateManyAsync(ICollection<IModel> contents, bool autoCommit = true)
     {
-        if (contents is null)
-        {
-            throw new ArgumentNullException(nameof(contents));
-        }
+        ArgumentNullException.ThrowIfNull(contents, nameof(contents));
 
         var models = new List<TModel>();
 
@@ -177,10 +153,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task LogicallyDeleteExistingAsync(TModel model, bool autoCommit = true)
     {
-        if (model is null)
-        {
-            throw new ArgumentNullException(nameof(model));
-        }
+        ArgumentNullException.ThrowIfNull(model, nameof(model));
 
         if (model is ILogicallyDeletableModel logicallyDeletableModel)
         {
@@ -213,10 +186,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task LogicallyDeleteExistingAsync(IModel content, bool autoCommit = true)
     {
-        if (content is null)
-        {
-            throw new ArgumentNullException(nameof(content));
-        }
+        ArgumentNullException.ThrowIfNull(content, nameof(content));
 
         if (content is TModel model)
         {
@@ -230,10 +200,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task LogicallyDeleteManyAsync(ICollection<TModel> models, bool autoCommit = true)
     {
-        if (models is null)
-        {
-            throw new ArgumentNullException(nameof(models));
-        }
+        ArgumentNullException.ThrowIfNull(models, nameof(models));
 
         var modelType = models.FirstOrDefault();
 
@@ -270,10 +237,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task LogicallyDeleteManyAsync(ICollection<IModel> contents, bool autoCommit = true)
     {
-        if (contents is null)
-        {
-            throw new ArgumentNullException(nameof(contents));
-        }
+        ArgumentNullException.ThrowIfNull(contents, nameof(contents));
 
         var models = new List<TModel>();
 
@@ -308,10 +272,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task LogicallyUndeleteExistingAsync(TModel model, bool autoCommit = true)
     {
-        if (model is null)
-        {
-            throw new ArgumentNullException(nameof(model));
-        }
+        ArgumentNullException.ThrowIfNull(model, nameof(model));
 
         if (model is ILogicallyDeletableModel logicallyDeletableModel)
         {
@@ -344,10 +305,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task LogicallyUndeleteExistingAsync(IModel content, bool autoCommit = true)
     {
-        if (content is null)
-        {
-            throw new ArgumentNullException(nameof(content));
-        }
+        ArgumentNullException.ThrowIfNull(content, nameof(content));
 
         if (content is TModel model)
         {
@@ -361,10 +319,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task LogicallyUndeleteManyAsync(ICollection<TModel> models, bool autoCommit = true)
     {
-        if (models is null)
-        {
-            throw new ArgumentNullException(nameof(models));
-        }
+        ArgumentNullException.ThrowIfNull(models, nameof(models));
 
         var modelType = models.FirstOrDefault();
 
@@ -401,10 +356,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task LogicallyUndeleteManyAsync(ICollection<IModel> contents, bool autoCommit = true)
     {
-        if (contents is null)
-        {
-            throw new ArgumentNullException(nameof(contents));
-        }
+        ArgumentNullException.ThrowIfNull(contents, nameof(contents));
 
         var models = new List<TModel>();
 
@@ -425,10 +377,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task RemoveExistingAsync(TModel model, bool autoCommit = true)
     {
-        if (model is null)
-        {
-            throw new ArgumentNullException(nameof(model));
-        }
+        ArgumentNullException.ThrowIfNull(model, nameof(model));
 
         if (model is ILogicallyDeletableModel)
         {
@@ -447,10 +396,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task RemoveExistingAsync(IModel content, bool autoCommit = true)
     {
-        if (content is null)
-        {
-            throw new ArgumentNullException(nameof(content));
-        }
+        ArgumentNullException.ThrowIfNull(content, nameof(content));
 
         if (content is TModel model)
         {
@@ -464,10 +410,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task RemoveManyAsync(ICollection<TModel> models, bool autoCommit = true)
     {
-        if (models is null)
-        {
-            throw new ArgumentNullException(nameof(models));
-        }
+        ArgumentNullException.ThrowIfNull(models, nameof(models));
 
         var modelType = models.FirstOrDefault();
 
@@ -488,10 +431,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task RemoveManyAsync(ICollection<IModel> contents, bool autoCommit = true)
     {
-        if (contents is null)
-        {
-            throw new ArgumentNullException(nameof(contents));
-        }
+        ArgumentNullException.ThrowIfNull(contents, nameof(contents));
 
         var models = new List<TModel>();
 
@@ -512,10 +452,7 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task RemoveByKeyAsync(bool autoCommit = true, params object[] keys)
     {
-        if (keys is null)
-        {
-            throw new ArgumentNullException(nameof(keys));
-        }
+        ArgumentNullException.ThrowIfNull(keys, nameof(keys));
 
         var content = await FirstOrDefaultByKeyAsync(keys);
 
@@ -539,20 +476,14 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public async Task ReloadExistingAsync(TModel content)
     {
-        if (content is null)
-        {
-            throw new ArgumentNullException(nameof(content));
-        }
+        ArgumentNullException.ThrowIfNull(content, nameof(content));
 
         await Context.Entry(content).ReloadAsync();
     }
 
     public async Task ReloadExistingAsync(IModel content)
     {
-        if (content is null)
-        {
-            throw new ArgumentNullException(nameof(content));
-        }
+        ArgumentNullException.ThrowIfNull(content, nameof(content));
 
         if (content is TModel model)
         {
@@ -569,20 +500,14 @@ public class ModelRepository<TModel> : ReadOnlyModelRepository<TModel>, IModelRe
 
     public void Detach(TModel content)
     {
-        if (content is null)
-        {
-            throw new ArgumentNullException(nameof(content));
-        }
+        ArgumentNullException.ThrowIfNull(content, nameof(content));
 
         Context.Entry(content).State = EntityState.Detached;
     }
 
     public void Detach(IModel content)
     {
-        if (content is null)
-        {
-            throw new ArgumentNullException(nameof(content));
-        }
+        ArgumentNullException.ThrowIfNull(content, nameof(content));
 
         if (content is TModel model)
         {

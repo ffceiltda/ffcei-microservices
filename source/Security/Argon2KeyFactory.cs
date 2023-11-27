@@ -11,10 +11,7 @@ namespace FFCEI.Microservices.Security
 
         public Argon2KeyFactory(IConfigurationManager configurationManager)
         {
-            if (configurationManager is null)
-            {
-                throw new ArgumentNullException(nameof(configurationManager));
-            }
+            ArgumentNullException.ThrowIfNull(configurationManager, nameof(configurationManager));
 
             _secretKey = configurationManager["Argon2.Secret"];
 

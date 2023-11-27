@@ -20,10 +20,7 @@ public static class ModelBuilderMapper
     /// <exception cref="ArgumentNullException"></exception>
     public static void MapModelBuilders(ModelBuilder modelBuilder, DatabaseEngine databaseEngine, Assembly? initialAssembly)
     {
-        if (modelBuilder is null)
-        {
-            throw new ArgumentNullException(nameof(modelBuilder));
-        }
+        ArgumentNullException.ThrowIfNull(modelBuilder, nameof(modelBuilder));
 
         if (initialAssembly is null)
         {
@@ -93,6 +90,7 @@ public static class ModelBuilderMapper
                 }
             }
 
+#pragma warning disable CA1864 // Prefer the 'IDictionary.TryAdd(TKey, TValue)' method
             if (!_assembliesDecoded.ContainsKey(modelAssemblyFullName))
             {
                 lock (_assembliesDecoded)
@@ -115,6 +113,7 @@ public static class ModelBuilderMapper
                     }
                 }
             }
+#pragma warning restore CA1864 // Prefer the 'IDictionary.TryAdd(TKey, TValue)' method
         }
 
         foreach (var method in methods)

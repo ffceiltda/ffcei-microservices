@@ -24,10 +24,7 @@ public sealed class JwtPostAuthorizationMiddleware
     /// <exception cref="ArgumentNullException">throw if options is null</exception>
     public JwtPostAuthorizationMiddleware(RequestDelegate next, IOptions<JwtPostAuthorizationMiddlewareOptions> options)
     {
-        if (options is null)
-        {
-            throw new ArgumentNullException(nameof(options));
-        }
+        ArgumentNullException.ThrowIfNull(options, nameof(options));
 
         _next = next;
         _delegateMethod = options.Value.JwtPostAuthorization;
@@ -40,10 +37,7 @@ public sealed class JwtPostAuthorizationMiddleware
     /// <returns>Continuation</returns>
     public async Task InvokeAsync(HttpContext httpContext)
     {
-        if (httpContext is null)
-        {
-            throw new ArgumentNullException(nameof(httpContext));
-        }
+        ArgumentNullException.ThrowIfNull(httpContext, nameof(httpContext));
 
         var authorized = false;
 

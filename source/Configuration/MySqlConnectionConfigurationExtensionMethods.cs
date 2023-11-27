@@ -35,10 +35,7 @@ public static class MySqlConnectionConfigurationExtensionMethods
         string? password = null,
         string? database = null)
     {
-        if (configurationManager is null)
-        {
-            throw new ArgumentNullException(nameof(configurationManager));
-        }
+        ArgumentNullException.ThrowIfNull(configurationManager, nameof(configurationManager));
 
         var mySqlPort = configurationManager[portSettingName];
 

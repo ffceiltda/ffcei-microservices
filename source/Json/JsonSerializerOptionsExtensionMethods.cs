@@ -7,10 +7,7 @@ namespace FFCEI.Microservices.Json
     {
         public static JsonSerializerOptions ConfigureJsonSerializerOptions(this JsonSerializerOptions options, bool writeIndented, bool ignoreNullsOrSerialization)
         {
-            if (options is null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
+            ArgumentNullException.ThrowIfNull(options, nameof(options));
 
             options.WriteIndented = writeIndented;
             options.DefaultIgnoreCondition = ignoreNullsOrSerialization ? JsonIgnoreCondition.WhenWritingNull : JsonIgnoreCondition.Never;

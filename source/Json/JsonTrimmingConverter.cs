@@ -9,10 +9,7 @@ internal sealed class JsonTrimmingConverter : JsonConverter<string>
 
     public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
     {
-        if (writer is null)
-        {
-            throw new ArgumentNullException(nameof(writer));
-        }
+        ArgumentNullException.ThrowIfNull(writer, nameof(writer));
 
         writer.WriteStringValue(value?.Trim());
     }

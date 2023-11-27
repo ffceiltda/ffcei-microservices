@@ -22,10 +22,7 @@ public class IdAwareUuidAwareLogicallyDeletableTimeStampedModel : UuidAwareLogic
 
     public int CompareTo(IIdAwareModel? other)
     {
-        if (other is null)
-        {
-            throw new ArgumentNullException(nameof(other));
-        }
+        ArgumentNullException.ThrowIfNull(other, nameof(other));
 
         return Id.CompareTo(other.Id);
     }

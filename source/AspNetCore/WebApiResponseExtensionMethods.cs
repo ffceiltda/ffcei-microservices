@@ -74,10 +74,7 @@ public static class IWebApiResponseExtensionMethods
     /// <returns>NotFound if response is null or Status is null, OK if response status is 0, InternalError if status if 500, BadRequest if status &gt; 0, NotAcceptable if status &lt; 0</returns>
     public static IActionResult ToHttpResponse<TResult>(this WebApiResultWith<TResult> response)
     {
-        if (response is null)
-        {
-            throw new ArgumentNullException(nameof(response));
-        }
+        ArgumentNullException.ThrowIfNull(response, nameof(response));
 
         return ToHttpResponseInternal(response, false);
     }
@@ -90,10 +87,7 @@ public static class IWebApiResponseExtensionMethods
     /// <returns>NotFound if response is null or Status is null, OK if response status is 0, InternalError if status if 500, BadRequest if status &gt; 0, NotAcceptable if status &lt; 0</returns>
     public static IActionResult ToHttpResponseAsResult<TResult>(this WebApiResultWith<TResult> response)
     {
-        if (response is null)
-        {
-            throw new ArgumentNullException(nameof(response));
-        }
+        ArgumentNullException.ThrowIfNull(response, nameof(response));
 
         return ToHttpResponseInternal(response, true);
     }

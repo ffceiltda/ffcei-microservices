@@ -35,10 +35,7 @@ public static class RedisConnectionConfigurationExtensionMethods
         string? password = null,
         int? database = null)
     {
-        if (configurationManager is null)
-        {
-            throw new ArgumentNullException(nameof(configurationManager));
-        }
+        ArgumentNullException.ThrowIfNull(configurationManager, nameof(configurationManager));
 
         var redisPort = configurationManager[portSettingName];
         var redisDatabase = configurationManager[databaseSettingName];

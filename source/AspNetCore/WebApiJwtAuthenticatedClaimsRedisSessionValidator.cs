@@ -20,10 +20,7 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
     /// <exception cref="ArgumentNullException">throw if Redis configuration is null</exception>
     public WebApiJwtAuthenticatedClaimsRedisSessionValidator(RedisConnectionConfiguration configuration)
     {
-        if (configuration is null)
-        {
-            throw new ArgumentNullException(nameof(configuration));
-        }
+        ArgumentNullException.ThrowIfNull(configuration, nameof(configuration));
 
         _redisConnection = ConnectionMultiplexer.Connect(configuration.ConnectionString, Debugger.IsAttached ? Console.Error : null);
         _redisDatabase = _redisConnection.GetDatabase(configuration.Database);
@@ -52,13 +49,13 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
         var scriptResult = await _redisDatabase.ScriptEvaluateAsync(
             LuaScript.Prepare(@"
                 local existingSpecificTokens = redis.call('KEYS', 'claim:*:'..@Session..':'..@Claimer..':'..@Resource)
-                
+
                 if #existingSpecificTokens > 0 then
                     redis.call('DEL', existingSpecificTokens[1])
                 else
-                    
+
                     local existingTokens = redis.call('KEYS', 'claim:*:*:'..@Claimer..':*')
-                
+
                     if #existingTokens == tonumber(@MaxNumberOfSimultaneousSessions) then
                         redis.call('DEL', existingTokens[1])
                     end
@@ -81,12 +78,16 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
             });
 #pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
 
-        if (scriptResult is null)
+        string? value = null;
+
+        if (scriptResult is not null)
+        {
+            value = scriptResult.ToString();
+        }
+        else
         {
             throw new InvalidOperationException("Redis call failed");
         }
-
-        string value = (string)scriptResult;
 
         if (string.IsNullOrEmpty(value) || (value != "OK"))
         {
@@ -130,12 +131,16 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
             });
 #pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
 
-        if (scriptResult is null)
+        string? value = null;
+
+        if (scriptResult is not null)
+        {
+            value = scriptResult.ToString();
+        }
+        else
         {
             throw new InvalidOperationException("Redis call failed");
         }
-
-        string value = (string)scriptResult;
 
         if (string.IsNullOrEmpty(value))
         {
@@ -181,12 +186,16 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
             });
 #pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
 
-        if (scriptResult is null)
+        string? value = null;
+
+        if (scriptResult is not null)
+        {
+            value = scriptResult.ToString();
+        }
+        else
         {
             throw new InvalidOperationException("Redis call failed");
         }
-
-        string value = (string)scriptResult;
 
         if (string.IsNullOrEmpty(value) || (value != "OK"))
         {
@@ -218,12 +227,16 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
             });
 #pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
 
-        if (scriptResult is null)
+        string? value = null;
+
+        if (scriptResult is not null)
+        {
+            value = scriptResult.ToString();
+        }
+        else
         {
             throw new InvalidOperationException("Redis call failed");
         }
-
-        string value = (string)scriptResult;
 
         if (string.IsNullOrEmpty(value) || (value != "OK"))
         {

@@ -52,15 +52,8 @@ public class SecurityKeyFactory
     /// <exception cref="ArgumentNullException">throw is configurationManager is null of configurationKeyStringPrefis is null or empty</exception>
     public SecurityKeyFactory(IConfigurationManager configurationManager, string configurationKeyStringPrefix, ILogger? logger = null)
     {
-        if (configurationManager is null)
-        {
-            throw new ArgumentNullException(nameof(configurationManager));
-        }
-
-        if (string.IsNullOrEmpty(configurationKeyStringPrefix))
-        {
-            throw new ArgumentNullException(nameof(configurationKeyStringPrefix));
-        }
+        ArgumentNullException.ThrowIfNull(configurationManager, nameof(configurationManager));
+        ArgumentNullException.ThrowIfNull(configurationKeyStringPrefix, nameof(configurationKeyStringPrefix));
 
 #pragma warning disable CA1031 // Do not catch general exception types
         if (_securityKey is null)

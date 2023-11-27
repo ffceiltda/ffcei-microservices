@@ -25,15 +25,8 @@ internal sealed class MessageAttributeSchemaFilter : ISchemaFilter
             return;
         }
 
-        if (schema is null)
-        {
-            throw new ArgumentNullException(nameof(schema));
-        }
-
-        if (context is null)
-        {
-            throw new ArgumentNullException(nameof(context));
-        }
+        ArgumentNullException.ThrowIfNull(schema, nameof(schema));
+        ArgumentNullException.ThrowIfNull(context, nameof(context));
 
         var attribute = Attribute.GetCustomAttribute(context.Type, typeof(SwaggerRequestAttribute), true);
 

@@ -21,10 +21,7 @@ public sealed class StaticFolderMappingMiddleware
     /// <param name="options">Folder mappings</param>
     public StaticFolderMappingMiddleware(RequestDelegate next, ILogger<StaticFolderMappingMiddleware> logger, StaticFolderMappingMiddlewareOptions options)
     {
-        if (options is null)
-        {
-            throw new ArgumentNullException(nameof(options));
-        }
+        ArgumentNullException.ThrowIfNull(options, nameof(options));
 
         _next = next;
         _logger = logger;
@@ -40,10 +37,7 @@ public sealed class StaticFolderMappingMiddleware
     /// <exception cref="ArgumentNullException">throw if httpContext is null</exception>
     public async Task InvokeAsync(HttpContext httpContext)
     {
-        if (httpContext is null)
-        {
-            throw new ArgumentNullException(nameof(httpContext));
-        }
+        ArgumentNullException.ThrowIfNull(httpContext, nameof(httpContext));
 
         var requestPath = httpContext.Request.Path.ToString();
 

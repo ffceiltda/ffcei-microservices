@@ -316,10 +316,7 @@ public abstract class Microservice : IMicroservice
 
     protected virtual LoggerConfiguration BuildSeriLogConfiguration(LoggerConfiguration configuration)
     {
-        if (configuration is null)
-        {
-            throw new ArgumentNullException(nameof(configuration));
-        }
+        ArgumentNullException.ThrowIfNull(configuration, nameof(configuration));
 
 #pragma warning disable IDE0058 // Expression value is never used
 #pragma warning disable CA1305 // Specify IFormatProvider

@@ -18,9 +18,11 @@ public class Controller : ControllerBase
     /// </summary>
     public string? RemoteClientAddress => GetRemoteClientAddress();
 
+    static readonly char[] _splitOptions = [','];
+
     private string? GetRemoteClientAddress()
     {
-        var requestorAddress = Request?.Headers["X-Forwarded-For"].ToString().Split(new char[] { ',' }).FirstOrDefault();
+        var requestorAddress = Request?.Headers["X-Forwarded-For"].ToString().Split(_splitOptions).FirstOrDefault();
 
         if (string.IsNullOrEmpty(requestorAddress))
         {

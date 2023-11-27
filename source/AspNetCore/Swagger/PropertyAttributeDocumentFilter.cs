@@ -12,15 +12,8 @@ internal sealed class PropertyAttributeDocumentFilter : IDocumentFilter
 {
     public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
     {
-        if (swaggerDoc is null)
-        {
-            throw new ArgumentNullException(nameof(swaggerDoc));
-        }
-
-        if (context is null)
-        {
-            throw new ArgumentNullException(nameof(context));
-        }
+        ArgumentNullException.ThrowIfNull(swaggerDoc, nameof(swaggerDoc));
+        ArgumentNullException.ThrowIfNull(context, nameof(context));
 
         foreach (var path in swaggerDoc.Paths.Values)
         {
@@ -69,8 +62,8 @@ internal sealed class PropertyAttributeDocumentFilter : IDocumentFilter
                         continue;
                     }
 
-                    var lastOpenParenthesis = schema.Title.LastIndexOf("(", StringComparison.InvariantCulture);
-                    var lastCloseParenthesis = schema.Title.LastIndexOf(")", StringComparison.InvariantCulture);
+                    var lastOpenParenthesis = schema.Title.LastIndexOf('(');
+                    var lastCloseParenthesis = schema.Title.LastIndexOf(')');
 
                     if (lastOpenParenthesis == -1 || lastCloseParenthesis == -1)
                     {
@@ -132,7 +125,7 @@ internal sealed class PropertyAttributeDocumentFilter : IDocumentFilter
 
                         /*
                         TODO: fixup response generator to include all fields, and handle array types
-                        
+
                         content.Value.Examples.Add("Complete Request Schema", new OpenApiExample { Value = new OpenApiString(JsonSerializer.Serialize(fullObject, options)) });
 
                         if (expandoDictionary.Any())

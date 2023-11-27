@@ -361,10 +361,7 @@ public abstract class Model : IModel
 
     public virtual void CopyModelPropertiesFrom(IModel model)
     {
-        if (model is null)
-        {
-            throw new ArgumentNullException(nameof(model));
-        }
+        ArgumentNullException.ThrowIfNull(model, nameof(model));
 
         var propertyList = GetType().GetProperties().Where(prop => prop.IsDefined(typeof(ModelPropertyAttribute), true));
 

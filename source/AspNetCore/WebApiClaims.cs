@@ -67,10 +67,7 @@ public class WebApiClaims
 
     private void DoParseClaims(object instance, ClaimsIdentity claims)
     {
-        if (claims is null)
-        {
-            throw new ArgumentNullException(nameof(claims));
-        }
+        ArgumentNullException.ThrowIfNull(claims, nameof(claims));
 
         var instanceClaims = instance.GetType().GetProperties().Where(claim => claim.GetCustomAttributes(typeof(WebApiClaimAttribute), true).Length > 0).ToList();
 
@@ -190,7 +187,7 @@ public class WebApiClaims
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="claims"></param>
     public void ParseClaims(ClaimsIdentity claims)

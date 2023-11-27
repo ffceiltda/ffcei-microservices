@@ -26,15 +26,8 @@ internal sealed class EnumTypesSchemaFilter : ISchemaFilter
             return;
         }
 
-        if (schema is null)
-        {
-            throw new ArgumentNullException(nameof(schema));
-        }
-
-        if (context is null)
-        {
-            throw new ArgumentNullException(nameof(context));
-        }
+        ArgumentNullException.ThrowIfNull(schema, nameof(schema));
+        ArgumentNullException.ThrowIfNull(context, nameof(context));
 
         if ((schema.Enum is not { Count: > 0 }) ||
             (context.Type is not { IsEnum: true }))

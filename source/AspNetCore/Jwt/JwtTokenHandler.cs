@@ -26,15 +26,8 @@ public static class JwtTokenHandler
     /// <returns>SecurityToken instance</returns>
     public static JwtSecurityToken CreateJwtSecurityToken(ref TimeSpan? expiration, IEnumerable<KeyValuePair<string, string>>? subjectClaims = null, SigningCredentials? signingCredentials = null, IEnumerable<string>? roles = null, EncryptingCredentials? encryptingCredentials = null, string? issuer = null, string? audience = null)
     {
-        if (subjectClaims is null)
-        {
-            throw new ArgumentNullException(nameof(subjectClaims));
-        }
-
-        if (signingCredentials is null)
-        {
-            throw new ArgumentNullException(nameof(signingCredentials));
-        }
+        ArgumentNullException.ThrowIfNull(subjectClaims, nameof(subjectClaims));
+        ArgumentNullException.ThrowIfNull(signingCredentials, nameof(signingCredentials));
 
         DateTime issuedAt = DateTime.UtcNow;
         DateTime? expiresAt = expiration is not null ? issuedAt + expiration : null;

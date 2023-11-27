@@ -19,10 +19,7 @@ public static class IReadOnlyModelRepositoryITimestampedModelExtensionMethods
     public static async ValueTask<TModel?> LastOrDefaultByPredicateAsync<TModel>(this IReadOnlyModelRepository<TModel> repository)
         where TModel : class, ITimestampedModel
     {
-        if (repository is null)
-        {
-            throw new ArgumentNullException(nameof(repository));
-        }
+        ArgumentNullException.ThrowIfNull(repository, nameof(repository));
 
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
         return await repository.Any.OrderBy(r => r.CreatedAt).LastOrDefaultAsync();
@@ -38,15 +35,8 @@ public static class IReadOnlyModelRepositoryITimestampedModelExtensionMethods
     public static async ValueTask<TModel?> LastOrDefaultByPredicateAsync<TModel>(this IReadOnlyModelRepository<TModel> repository, Expression<Func<TModel, bool>> predicate)
         where TModel : class, ITimestampedModel
     {
-        if (repository is null)
-        {
-            throw new ArgumentNullException(nameof(repository));
-        }
-
-        if (predicate is null)
-        {
-            throw new ArgumentNullException(nameof(predicate));
-        }
+        ArgumentNullException.ThrowIfNull(repository, nameof(repository));
+        ArgumentNullException.ThrowIfNull(predicate, nameof(predicate));
 
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
         return await repository.Where(predicate).OrderBy(r => r.CreatedAt).LastOrDefaultAsync();
@@ -58,14 +48,11 @@ public static class IReadOnlyModelRepositoryITimestampedModelExtensionMethods
     /// </summary>
     /// <param name="repository">Model repository</param>>
     /// <param name="ignoreQueryFilters">Ignore EF Core Query Filters</param>
-    /// <returns>Last model that match predicate or null</returns>
+    /// /// <returns>Last model that match predicate or null</returns>
     public static async ValueTask<TModel?> LastOrDefaultByPredicateAdvancedAsync<TModel>(this IReadOnlyModelRepository<TModel> repository, bool ignoreQueryFilters)
         where TModel : class, ITimestampedModel
     {
-        if (repository is null)
-        {
-            throw new ArgumentNullException(nameof(repository));
-        }
+        ArgumentNullException.ThrowIfNull(repository, nameof(repository));
 
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
         return await repository.AnyAdvanced(ignoreQueryFilters).OrderBy(r => r.CreatedAt).LastOrDefaultAsync();
@@ -82,15 +69,8 @@ public static class IReadOnlyModelRepositoryITimestampedModelExtensionMethods
     public static async ValueTask<TModel?> LastOrDefaultByPredicateAdvancedAsync<TModel>(this IReadOnlyModelRepository<TModel> repository, bool ignoreQueryFilters, Expression<Func<TModel, bool>> predicate)
         where TModel : class, ITimestampedModel
     {
-        if (repository is null)
-        {
-            throw new ArgumentNullException(nameof(repository));
-        }
-
-        if (predicate is null)
-        {
-            throw new ArgumentNullException(nameof(predicate));
-        }
+        ArgumentNullException.ThrowIfNull(repository, nameof(repository));
+        ArgumentNullException.ThrowIfNull(predicate, nameof(predicate));
 
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
         return await repository.WhereAdvanced(ignoreQueryFilters, predicate).OrderBy(r => r.CreatedAt).LastOrDefaultAsync();

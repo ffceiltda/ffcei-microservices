@@ -28,10 +28,7 @@ public sealed class ShuttingDownHandlerMiddleware
     /// <exception cref="ArgumentNullException">throws if httpContext is null</exception>
     public async Task InvokeAsync(HttpContext httpContext)
     {
-        if (httpContext is null)
-        {
-            throw new ArgumentNullException(nameof(httpContext));
-        }
+        ArgumentNullException.ThrowIfNull(httpContext, nameof(httpContext));
 
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
         if (Microservice.Instance?.ShuttingDown ?? true)

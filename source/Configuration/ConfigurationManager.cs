@@ -31,10 +31,7 @@ public sealed class ConfigurationManager : IConfigurationManager
 
     internal ConfigurationManager(ILogger logger, WebApplicationBuilder builder)
     {
-        if (builder is null)
-        {
-            throw new ArgumentNullException(nameof(builder));
-        }
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
 
         _logger = logger;
         _configuration = builder.Configuration;
@@ -44,10 +41,7 @@ public sealed class ConfigurationManager : IConfigurationManager
 
     internal ConfigurationManager(ILogger logger, IConfiguration configuration)
     {
-        if (configuration is null)
-        {
-            throw new ArgumentNullException(nameof(configuration));
-        }
+        ArgumentNullException.ThrowIfNull(configuration, nameof(configuration));
 
         _logger = logger;
         _configuration = configuration;
@@ -141,7 +135,7 @@ public sealed class ConfigurationManager : IConfigurationManager
                 }
             }
         }
-        
+
         var machineSearchPath = Microservice.ConfigurationMachineSearchPath;
 
         if (!string.IsNullOrEmpty(machineSearchPath))
@@ -151,7 +145,7 @@ public sealed class ConfigurationManager : IConfigurationManager
                 var _ = InsertDirectoryInSearchPath(ref configurationSearchPath, machineSearchPath);
             }
         }
-        
+
         var userSearchPath = Microservice.ConfigurationUserSearchPath;
 
         if (!string.IsNullOrEmpty(userSearchPath))
@@ -246,7 +240,7 @@ public sealed class ConfigurationManager : IConfigurationManager
             {
                 environmentRuntimePath = Path.Combine(environmentPath, "Development");
             }
-            else 
+            else
             {
                 environmentRuntimePath = Path.Combine(environmentPath, "Production");
             }

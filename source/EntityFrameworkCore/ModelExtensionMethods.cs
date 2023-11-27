@@ -13,25 +13,10 @@ public static class ModelExtensionMethods
         Expression<Func<TModel, bool>> modelRepositorySearchPredicate)
         where TModel : class, IModel
     {
-        if (navigationProperty is null)
-        {
-            throw new ArgumentNullException(nameof(navigationProperty));
-        }
-
-        if (modelRepository is null)
-        {
-            throw new ArgumentNullException(nameof(modelRepository));
-        }
-
-        if (navigationPropertySearchPredicate is null)
-        {
-            throw new ArgumentNullException(nameof(navigationPropertySearchPredicate));
-        }
-
-        if (modelRepositorySearchPredicate is null)
-        {
-            throw new ArgumentNullException(nameof(modelRepositorySearchPredicate));
-        }
+        ArgumentNullException.ThrowIfNull(navigationProperty, nameof(navigationProperty));
+        ArgumentNullException.ThrowIfNull(modelRepository, nameof(modelRepository));
+        ArgumentNullException.ThrowIfNull(navigationPropertySearchPredicate, nameof(navigationPropertySearchPredicate));
+        ArgumentNullException.ThrowIfNull(modelRepositorySearchPredicate, nameof(modelRepositorySearchPredicate));
 
         var result = navigationProperty.FirstOrDefault(navigationPropertySearchPredicate);
 
