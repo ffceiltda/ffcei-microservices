@@ -34,6 +34,7 @@ public static class DatabaseColumnTypeMapping
             DatabaseColumnType.Numeric => $"decimal({precision ?? 20}, {scale ?? 2})",
             DatabaseColumnType.BigInt => "bigint",
             DatabaseColumnType.Text => "longtext",
+            DatabaseColumnType.Binary => "longblob",
             _ => throw new NotImplementedException("Unsupported driverType/fieldType combination for FFCEI.Microservices.EntityFrameworkCore.DbNativeFieldTypeMapping.GetNativeMapping()")
         };
     }

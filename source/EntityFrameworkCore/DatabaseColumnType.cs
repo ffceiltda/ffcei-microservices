@@ -42,7 +42,11 @@ public enum DatabaseColumnType
     /// </summary>
     Numeric,
     /// <summary>
-    /// Blob / LongText
+    /// Long Text / Memo
     /// </summary>
-    Text
+    Text,
+    /// <summary>
+    /// Binary / Blob
+    /// </summary>
+    Binary
 }

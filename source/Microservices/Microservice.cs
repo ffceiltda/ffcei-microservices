@@ -278,6 +278,8 @@ public abstract class Microservice : IMicroservice
         Builder.ConfigureServices((context, services) =>
         {
             _configurationManager = new ConfigurationManager(Logger, context.Configuration);
+
+            services.AddSingleton(typeof(IConfigurationManager), _configurationManager);
         });
 #pragma warning restore IDE0058 // Expression value is never used
 

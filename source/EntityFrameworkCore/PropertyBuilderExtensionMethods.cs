@@ -83,10 +83,18 @@ public static class PropertyBuilderExtensionMethods
     public static PropertyBuilder<TProperty> IsDecimalColumn<TProperty>(this PropertyBuilder<TProperty> property, int? precision = null, int? scale = null) => property.HasColumnType(DatabaseColumnTypeMapping.GetNativeMapping(null, DatabaseColumnType.Numeric, precision, scale)).HasPrecision(precision ?? 20, scale ?? 2);
 
     /// <summary>
-    /// Define a long text (memo / blob) column
+    /// Define a long text (memo) column
     /// </summary>
     /// <typeparam name="TProperty">Model Property</typeparam>
     /// <param name="property">PropertyBuilder instance</param>
     /// <returns>PropertyBuilder instance</returns>
     public static PropertyBuilder<TProperty> IsLongTextColumn<TProperty>(this PropertyBuilder<TProperty> property) => property.HasColumnType(DatabaseColumnTypeMapping.GetNativeMapping(null, DatabaseColumnType.Text));
+
+    /// <summary>
+    /// Define a long binary (blob) column
+    /// </summary>
+    /// <typeparam name="TProperty">Model Property</typeparam>
+    /// <param name="property">PropertyBuilder instance</param>
+    /// <returns>PropertyBuilder instance</returns>
+    public static PropertyBuilder<TProperty> IsLongBlobColumn<TProperty>(this PropertyBuilder<TProperty> property) => property.HasColumnType(DatabaseColumnTypeMapping.GetNativeMapping(null, DatabaseColumnType.Binary));
 }

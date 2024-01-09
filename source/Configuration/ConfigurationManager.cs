@@ -192,21 +192,32 @@ public sealed class ConfigurationManager : IConfigurationManager
 
                     using (var key = registryKey.OpenSubKey(Microservice.RegistryPathForConfigurationSearchPath))
                     {
-                        var kind = key?.GetValueKind("EnvironmentFilesPath") ?? RegistryValueKind.None;
+                        var valueNames = key?.GetValueNames().ToHashSet();
 
-                        if (kind == RegistryValueKind.String)
+                        if (valueNames is not null)
                         {
-                            registryPath = key?.GetValue("EnvironmentFilesPath")?.ToString();
+                            if (valueNames.Contains("EnvironmentFilesPath"))
+                            {
+                                var kind = key?.GetValueKind("EnvironmentFilesPath") ?? RegistryValueKind.None;
+
+                                if (kind == RegistryValueKind.String)
+                                {
+                                    registryPath = key?.GetValue("EnvironmentFilesPath")?.ToString();
+                                }
+                            }
+
+                            if (valueNames.Contains("EnvironmentUserName"))
+                            {
+                                var kind = key?.GetValueKind("EnvironmentUserName") ?? RegistryValueKind.None;
+
+                                if (kind == RegistryValueKind.String)
+                                {
+                                    registryUserName = key?.GetValue("EnvironmentUserName")?.ToString();
+                                }
+                            }
+
+                            return (registryPath, registryUserName);
                         }
-
-                        kind = key?.GetValueKind("EnvironmentUserName") ?? RegistryValueKind.None;
-
-                        if (kind == RegistryValueKind.String)
-                        {
-                            registryUserName = key?.GetValue("EnvironmentUserName")?.ToString();
-                        }
-
-                        return (registryPath, registryUserName);
                     }
                 }
                 catch

@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
-using System.Text;
 
 namespace FFCEI.Microservices.AspNetCore;
 
@@ -92,22 +91,68 @@ public static class IWebApiResponseExtensionMethods
         return ToHttpResponseInternal(response, true);
     }
 
+    /// <summary>
+    /// Returns a IActionResult (FileContentResult) from a WebApiResponseDownload using TResult value if succeeded
+    /// </summary>
+    /// <param name="response">Download (Response)</param>
+    /// <returns>NotFound if response is null or Status is null, OK if response status is 0, InternalError if status if 500, BadRequest if status &gt; 0, NotAcceptable if status &lt; 0</returns>
+    public static IActionResult ToHttpResponse<TResult>(this WebApiResultDownload response)
+    {
+        ArgumentNullException.ThrowIfNull(response, nameof(response));
+
+        return ToHttpResponseInternal(response, true);
+    }
+
+    private static MediaTypeHeaderValue GetResponseMediaTypeOf<TResult>(WebApiResultWith<TResult> result)
+    {
+        if (result is WebApiResultDownload download)
+        {
+            return download.MediaType;
+        }
+
+        return (typeof(TResult) == typeof(byte[]) ?
+            new MediaTypeHeaderValue("application/octet-stream") :
+            new MediaTypeHeaderValue("text/plain") { Charset = "utf-8" });
+    }
+
+    private static string? GetResponseFilenameOf<TResult>(WebApiResultWith<TResult> result)
+    {
+        if (result is WebApiResultDownload download)
+        {
+            return download.Filename;
+        }
+
+        return null;
+    }
+
+    private static DateTimeOffset? GetResponseModificationOf<TResult>(WebApiResultWith<TResult> result)
+    {
+        if (result is WebApiResultDownload download)
+        {
+            return download.ModifiedAt;
+        }
+
+        return null;
+    }
+
     private static IActionResult ToHttpResponseInternal<TResult>(WebApiResultWith<TResult> response, bool forceUsingResult)
     {
-        var isPlainType = typeof(TResult).IsValueType || typeof(TResult).IsEnum || typeof(TResult) == typeof(string);
+        var isPlainType = typeof(TResult).IsValueType || typeof(TResult).IsEnum || typeof(TResult) == typeof(string) || typeof(TResult) == typeof(byte[]);
         var writeResponseAsFileStream = forceUsingResult && isPlainType && (response.Result is not null);
         var httpResponse = ((response is null) || (response.Status == WebApiResultBase.StatusNotFound))
             ?
             new NotFoundObjectResult(response)
             {
-                Value = response is null ? WebApiResultBase.DetailNotFound : response
+                Value = response is null ? global::FFCEI.Microservices.AspNetCore.WebApiResultBase.DetailNotFound : response
             }
             :
             response.Status switch
             {
                 WebApiResultBase.StatusSucceeded => writeResponseAsFileStream ? (IActionResult)
-                new FileContentResult(Encoding.UTF8.GetBytes(response.ResultAsString()), new MediaTypeHeaderValue("text/plain") { Charset = "utf-8" })
+                new FileContentResult(response.ResultAsByteArray(), GetResponseMediaTypeOf(response))
                 {
+                    FileDownloadName = GetResponseFilenameOf(response),
+                    LastModified = GetResponseModificationOf(response)
                 }
                 :
                 new OkObjectResult(response)
