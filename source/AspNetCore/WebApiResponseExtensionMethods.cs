@@ -96,7 +96,7 @@ public static class IWebApiResponseExtensionMethods
     /// </summary>
     /// <param name="response">Download (Response)</param>
     /// <returns>NotFound if response is null or Status is null, OK if response status is 0, InternalError if status if 500, BadRequest if status &gt; 0, NotAcceptable if status &lt; 0</returns>
-    public static IActionResult ToHttpResponse<TResult>(this WebApiResultDownload response)
+    public static IActionResult ToHttpResponse(this WebApiResultDownload response)
     {
         ArgumentNullException.ThrowIfNull(response, nameof(response));
 
