@@ -262,6 +262,8 @@ public abstract class Microservice : IMicroservice
 
         OnBuildMicroservice();
 
+        _ = ConfigurationManager;
+
         return _builder;
     }
 
