@@ -23,7 +23,7 @@
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
     <AnalysisLevel>8.0-all</AnalysisLevel>
     <SignAssembly>False</SignAssembly>
-    <Version>0.6.2-beta</Version>
+    <Version>0.6.3-pre</Version>
   </PropertyGroup>
 
   <ItemGroup>

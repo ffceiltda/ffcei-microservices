@@ -6,6 +6,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -253,6 +254,11 @@ public class WebApiMicroservice : MicroserviceCoreImplementation
         Services.Configure<KestrelServerOptions>(options =>
         {
             options.Limits.MaxRequestBodySize = HttpRequestMaxBodyLength;
+        });
+
+        Services.Configure<FormOptions>(options =>
+        {
+            options.MultipartBodyLengthLimit = HttpRequestMaxBodyLength;
         });
 
         Services.AddHttpContextAccessor();
