@@ -33,7 +33,7 @@ public static class IWebApiResponseExtensionMethods
     /// <returns>NotFound if response is null or Status is null, OK if response status is 0, InternalError if status if 500, BadRequest if status &gt; 0, NotAcceptable if status &lt; 0</returns>
     public static IActionResult ToHttpResponse(this WebApiResult response)
     {
-        var httpResponse = ((response is null) || (response.Status == WebApiResultBase.StatusNotFound))
+        var httpResponse = ((response is null) || (response.Status == WebApiResultBase.StatusNotFound) || (response.Status == 404))
            ?
            new NotFoundObjectResult(response)
            {
@@ -139,7 +139,7 @@ public static class IWebApiResponseExtensionMethods
     {
         var isPlainType = typeof(TResult).IsValueType || typeof(TResult).IsEnum || typeof(TResult) == typeof(string) || typeof(TResult) == typeof(byte[]);
         var writeResponseAsFileStream = forceUsingResult && isPlainType && (response.Result is not null);
-        var httpResponse = ((response is null) || (response.Status == WebApiResultBase.StatusNotFound))
+        var httpResponse = ((response is null) || (response.Status == WebApiResultBase.StatusNotFound) || (response.Status == 404))
             ?
             new NotFoundObjectResult(response)
             {

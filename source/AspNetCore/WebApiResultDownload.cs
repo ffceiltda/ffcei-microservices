@@ -1,4 +1,5 @@
 using Microsoft.Net.Http.Headers;
+using System.Text.Json.Serialization;
 
 namespace FFCEI.Microservices.AspNetCore;
 
@@ -10,16 +11,19 @@ public sealed class WebApiResultDownload : WebApiResultWith<byte[]>
     /// <summary>
     /// Download media type
     /// </summary>
+    [JsonIgnore]
     public MediaTypeHeaderValue MediaType { get; set; } = new MediaTypeHeaderValue("application/octet-stream");
 
     /// <summary>
     /// Filename for download
     /// </summary>
+    [JsonIgnore]
     public string? Filename { get; set; }
 
     /// <summary>
     /// File modified date/time
     /// </summary>
+    [JsonIgnore]
     public DateTimeOffset? ModifiedAt { get; set; }
 
 #pragma warning disable CA1000 // Do not declare static members on generic types
