@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace FFCEI.Microservices.AspNetCore;
 
-public class FormDataJsonBinder : IModelBinder
+public class FormDataJsonModelBinder : IModelBinder
 {
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {

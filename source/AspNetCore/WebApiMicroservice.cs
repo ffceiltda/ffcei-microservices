@@ -1,4 +1,5 @@
 using FFCEI.Microservices.AspNetCore.Middlewares;
+using FFCEI.Microservices.AspNetCore.ModelBindProviders;
 using FFCEI.Microservices.AspNetCore.StaticFolderMappings;
 using FFCEI.Microservices.Microservices;
 using FluentValidation;
@@ -259,6 +260,11 @@ public class WebApiMicroservice : MicroserviceCoreImplementation
         Services.Configure<FormOptions>(options =>
         {
             options.MultipartBodyLengthLimit = HttpRequestMaxBodyLength;
+        });
+
+        Services.AddMvc(options =>
+        {
+            options.ModelBinderProviders.Insert(0, new FormDataJsonModelBinderProvider());
         });
 
         Services.AddHttpContextAccessor();
