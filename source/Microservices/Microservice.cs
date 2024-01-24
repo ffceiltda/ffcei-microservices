@@ -336,19 +336,19 @@ public abstract class Microservice : IMicroservice
         {
             configuration
                 .MinimumLevel.Information()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
-                .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
-                .MinimumLevel.Override("EFCoreSecondLevelCacheInterceptor", LogEventLevel.Warning);
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Information)
+                .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Information)
+                .MinimumLevel.Override("EFCoreSecondLevelCacheInterceptor", LogEventLevel.Information);
         }
         else
         {
             configuration
                 .MinimumLevel.Debug()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-                .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Information)
-                .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Information)
-                .MinimumLevel.Override("EFCoreSecondLevelCacheInterceptor", LogEventLevel.Information);
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Debug)
+                .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Debug)
+                .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Debug)
+                .MinimumLevel.Override("EFCoreSecondLevelCacheInterceptor", LogEventLevel.Debug);
         }
 #pragma warning restore IDE0058 // Expression value is never used
 
