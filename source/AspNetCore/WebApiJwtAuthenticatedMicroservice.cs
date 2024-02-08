@@ -3,7 +3,6 @@ using FFCEI.Microservices.AspNetCore.Middlewares;
 using FFCEI.Microservices.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace FFCEI.Microservices.AspNetCore;
@@ -30,7 +29,7 @@ public class WebApiJwtAuthenticatedMicroservice<TWebApiClaims> : WebApiMicroserv
     /// </summary>
 #pragma warning disable CA1002 // Do not expose generic lists
 #pragma warning disable CA2227 // Collection properties should be read only
-    public List<string> JwtValidIssuers { get; set; } = new();
+    public List<string> JwtValidIssuers { get; set; } = [];
 #pragma warning restore CA2227 // Collection properties should be read only
 #pragma warning restore CA1002 // Do not expose generic lists
 
@@ -49,7 +48,7 @@ public class WebApiJwtAuthenticatedMicroservice<TWebApiClaims> : WebApiMicroserv
     /// </summary>
 #pragma warning disable CA1002 // Do not expose generic lists
 #pragma warning disable CA2227 // Collection properties should be read only
-    public List<string> JwtValidAudiences { get; set; } = new();
+    public List<string> JwtValidAudiences { get; set; } = [];
 #pragma warning restore CA2227 // Collection properties should be read only
 #pragma warning restore CA1002 // Do not expose generic lists
 
@@ -138,7 +137,6 @@ public class WebApiJwtAuthenticatedMicroservice<TWebApiClaims> : WebApiMicroserv
             jwt.Authority = JwtTokenAuthority;
             jwt.SaveToken = JwtSaveSigninToken;
             jwt.IncludeErrorDetails = IsDebugOrDevelopmentEnvironment;
-#pragma warning disable CA5404 // Do not disable token validation checks
             jwt.TokenValidationParameters = new TokenValidationParameters
             {
                 ClockSkew = TimeSpan.FromSeconds(JwtLifetimeClockSkewSeconds),
@@ -156,15 +154,14 @@ public class WebApiJwtAuthenticatedMicroservice<TWebApiClaims> : WebApiMicroserv
                 TokenDecryptionKey = encryptionKeyFactory.SecurityKey,
                 SaveSigninToken = JwtSaveSigninToken,
             };
-#pragma warning restore CA5404 // Do not disable token validation checks
 
             if (JwtDebugBreakOnValidationError)
             {
                 jwt.Events = new JwtBearerEvents
                 {
-                    OnAuthenticationFailed = (ctx) =>
+                    OnAuthenticationFailed = (context) =>
                     {
-                        var exceptionMessage = ctx.Exception;
+                        var exceptionMessage = context.Exception;
 
                         if (System.Diagnostics.Debugger.IsAttached)
                         {

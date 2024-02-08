@@ -11,7 +11,7 @@ namespace FFCEI.Microservices.AspNetCore;
 /// </summary>
 public class WebApiClaims
 {
-    private SortedSet<string> _roles = new();
+    private readonly SortedSet<string> _roles = [];
 
     /// <summary>
     /// Default constructor
@@ -62,8 +62,8 @@ public class WebApiClaims
     /// <summary>
     /// Compute the seconds before token expiration
     /// </summary>
-    public long SecondsBeforeExpiration => (long)(ExpiresAt is null ? long.MaxValue :
-        (ExpiresAt.Value.UtcDateTime - (IssuedAt ?? DateTimeOffset.UtcNow).UtcDateTime).TotalSeconds);
+    public long SecondsBeforeExpiration => (long)(ExpiresAt is null ? new DateTimeOffset(9999, 12, 31, 23, 59, 59, 999, TimeSpan.Zero) - DateTimeOffset.UtcNow :
+        ExpiresAt.Value.UtcDateTime - (IssuedAt ?? DateTimeOffset.UtcNow).UtcDateTime).TotalSeconds;
 
     private void DoParseClaims(object instance, ClaimsIdentity claims)
     {
@@ -74,19 +74,11 @@ public class WebApiClaims
         foreach (var instanceClaim in instanceClaims)
         {
             var claimType = instanceClaim.Name;
-            var attribute = instanceClaim.GetCustomAttributes(typeof(WebApiClaimAttribute), true).FirstOrDefault();
-
-            if (attribute is null)
-            {
+            var attribute = instanceClaim.GetCustomAttributes(typeof(WebApiClaimAttribute), true).FirstOrDefault() ??
                 throw new InvalidOperationException($"Missing claim attribute for {claimType}");
-            }
 
-            var webApiClaimAttribute = (attribute as WebApiClaimAttribute);
-
-            if (webApiClaimAttribute is null)
-            {
+            var webApiClaimAttribute = (attribute as WebApiClaimAttribute) ??
                 throw new InvalidOperationException($"Invalid claim attribute for {claimType}");
-            }
 
             claimType = webApiClaimAttribute.Type ?? instanceClaim.Name;
 
@@ -209,19 +201,10 @@ public class WebApiClaims
         foreach (var instanceClaim in instanceClaims)
         {
             var claimType = instanceClaim.Name;
-            var attribute = instanceClaim.GetCustomAttributes(typeof(WebApiClaimAttribute), true).FirstOrDefault();
-
-            if (attribute is null)
-            {
+            var attribute = instanceClaim.GetCustomAttributes(typeof(WebApiClaimAttribute), true).FirstOrDefault() ??
                 throw new InvalidOperationException($"Missing claim attribute for {claimType}");
-            }
-
-            var webApiClaimAttribute = (attribute as WebApiClaimAttribute);
-
-            if (webApiClaimAttribute is null)
-            {
+            var webApiClaimAttribute = (attribute as WebApiClaimAttribute) ??
                 throw new InvalidOperationException($"Invalid claim attribute for {claimType}");
-            }
 
             if (webApiClaimAttribute.DoNotListOnSubjectClaims)
             {

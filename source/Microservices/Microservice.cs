@@ -98,7 +98,6 @@ public abstract class Microservice : IMicroservice
     /// </summary>
     public static string? RegistryPathForConfigurationSearchPath { get; set; }
 
-#pragma warning disable CA1000
     /// <summary>
     /// Microservice instance (singleton)
     /// </summary>
@@ -114,7 +113,6 @@ public abstract class Microservice : IMicroservice
             return null;
         }
     }
-#pragma warning restore CA1000
 
     /// <summary>
     /// Variable to control shutdown request
@@ -246,12 +244,8 @@ public abstract class Microservice : IMicroservice
             throw new InvalidOperationException("Microservice CreateBuilder() was already called before");
         }
 
-        var initialBuilder = GetImplementationInitialBuilder();
-
-        if (initialBuilder is null)
-        {
+        var initialBuilder = GetImplementationInitialBuilder() ??
             throw new InvalidOperationException("Microservice CreateBuilder() logic error");
-        }
 
         _builder = initialBuilder;
 
@@ -365,12 +359,8 @@ public abstract class Microservice : IMicroservice
             throw new InvalidOperationException("Microservice CreateApplication() was already called before");
         }
 
-        var builder = Builder;
-
-        if (builder is null)
-        {
+        var builder = Builder ??
             throw new InvalidOperationException("Microservice CreateApplication() logic error");
-        }
 
         _host = GetImplementationHost();
 

@@ -30,17 +30,19 @@ public sealed class ShuttingDownHandlerMiddleware
     {
         ArgumentNullException.ThrowIfNull(httpContext, nameof(httpContext));
 
-#pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
         if (Microservice.Instance?.ShuttingDown ?? true)
         {
             httpContext.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
             httpContext.Response.ContentType = "text/plain";
 
+#pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
             await httpContext.Response.Body.WriteAsync(Encoding.UTF8.GetBytes("Service is not available"));
+#pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
 
             return;
         }
 
+#pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
         await _next(httpContext);
 #pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
     }

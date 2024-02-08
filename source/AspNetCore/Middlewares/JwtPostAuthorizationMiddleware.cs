@@ -39,8 +39,6 @@ public sealed class JwtPostAuthorizationMiddleware
     {
         ArgumentNullException.ThrowIfNull(httpContext, nameof(httpContext));
 
-        var authorized = false;
-
         var controllerActionDescriptor = httpContext.GetEndpoint()?.Metadata.GetMetadata<ControllerActionDescriptor>();
 
         if (controllerActionDescriptor?.MethodInfo is null)
@@ -56,17 +54,23 @@ public sealed class JwtPostAuthorizationMiddleware
         }
 
         var hasAllowAnonymousAttributeOnAction = controllerActionDescriptor?.MethodInfo?
-            .GetCustomAttributes(inherit: true)?.Any(a => a.GetType() == typeof(AllowAnonymousAttribute)) ?? false;
+            .GetCustomAttributes(inherit: true)?.Any(attributes => attributes is AllowAnonymousAttribute) ?? false;
+
         var hasAllowAnonymousAttributeOnController = controllerActionDescriptor?.ControllerTypeInfo?
-            .GetCustomAttributes(inherit: true)?.Any(a => a.GetType() == typeof(AllowAnonymousAttribute)) ?? false;
+            .GetCustomAttributes(inherit: true)?.Any(attributes => attributes is AllowAnonymousAttribute) ?? false;
 
         var hasAuthorizeAttributeOnAction = controllerActionDescriptor?.MethodInfo?
-            .GetCustomAttributes(inherit: true)?.Any(a => a.GetType() == typeof(AuthorizeAttribute)) ?? false;
-        var hasAuthorizeAttributeOnController = controllerActionDescriptor?.ControllerTypeInfo?
-            .GetCustomAttributes(inherit: true)?.Any(a => a.GetType() == typeof(AuthorizeAttribute)) ?? false;
+            .GetCustomAttributes(inherit: true)?.Any(attributes => attributes is AuthorizeAttribute) ?? false;
 
-        if ((!hasAllowAnonymousAttributeOnAction && !hasAllowAnonymousAttributeOnController && !hasAuthorizeAttributeOnAction && !hasAuthorizeAttributeOnController) ||
-            (hasAllowAnonymousAttributeOnAction || hasAllowAnonymousAttributeOnController))
+        var hasAuthorizeAttributeOnController = controllerActionDescriptor?.ControllerTypeInfo?
+            .GetCustomAttributes(inherit: true)?.Any(attributes => attributes is AuthorizeAttribute) ?? false;
+
+        var authorized = true;
+       
+#pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
+        if ((!hasAllowAnonymousAttributeOnAction && !hasAuthorizeAttributeOnAction &&
+            ((!hasAllowAnonymousAttributeOnController && !hasAuthorizeAttributeOnController) ||
+            (hasAllowAnonymousAttributeOnController))) || (hasAllowAnonymousAttributeOnAction))
         {
             authorized = true;
         }
@@ -74,7 +78,6 @@ public sealed class JwtPostAuthorizationMiddleware
         {
             var authenticated = httpContext.User?.Identity?.IsAuthenticated ?? false;
 
-#pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
             if (authenticated)
             {
                 authorized = (_delegateMethod is null) ? authenticated : await _delegateMethod(httpContext);

@@ -25,10 +25,10 @@ public interface IWebApiJwtAuthenticatedClaimsSessionValidator
     /// <param name="claimer">Claimer</param>
     /// <param name="session">Session</param>
     /// <param name="resource">Resource</param>
-    /// <returns>Bearer token</returns>
+    /// <returns>Bearer token and Expiration</returns>
     /// <exception cref="ArgumentNullException">throw if claimer, session or resource is empty</exception>
     /// <exception cref="InvalidOperationException">throw if Redis call failed</exception>
-    Task<string> GetSessionAsync(Guid claimer, Guid session, string resource);
+    Task<(string, DateTimeOffset?)> GetSessionAsync(Guid claimer, Guid session, string resource);
 
     /// <summary>
     /// Expires a session

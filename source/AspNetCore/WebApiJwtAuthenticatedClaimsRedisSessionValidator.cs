@@ -43,7 +43,7 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
             throw new ArgumentNullException(nameof(resource));
         }
 
-        var now = DateTime.UtcNow;
+        var now = DateTimeOffset.UtcNow.AddSeconds(expirationInSeconds);
 
 #pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
         var scriptResult = await _redisDatabase.ScriptEvaluateAsync(
@@ -78,7 +78,7 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
             });
 #pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
 
-        string? value = null;
+        string? value;
 
         if (scriptResult is not null)
         {
@@ -95,7 +95,7 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
         }
     }
 
-    public async Task<string> GetSessionAsync(Guid claimer, Guid session, string resource)
+    public async Task<(string, DateTimeOffset?)> GetSessionAsync(Guid claimer, Guid session, string resource)
     {
         if (claimer == Guid.Empty)
         {
@@ -118,7 +118,7 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
                 local existingTokens = redis.call('KEYS', 'claim:*:'..@Session..':'..@Claimer..':'..@Resource)
 
                 if #existingTokens > 0 then
-                    return redis.call('GET', existingTokens[1])
+                    return existingTokens[1]
                 end
 
                 return 'NOTFOUND'
@@ -131,7 +131,52 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
             });
 #pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
 
-        string? value = null;
+        string? claim;
+
+        if (scriptResult is not null)
+        {
+            claim = scriptResult.ToString();
+        }
+        else
+        {
+            throw new InvalidOperationException("Redis call failed");
+        }
+
+        if (string.IsNullOrEmpty(claim) || !claim.StartsWith("claim:", StringComparison.InvariantCulture))
+        {
+            if (claim == "NOTFOUND")
+            {
+                return (claim, null);
+            }
+
+            throw new InvalidOperationException($"Redis call failed, expected 'claims:...' but received '{claim}'");
+        }
+
+        var claimsSplit = claim.Split(":");
+
+        if (claimsSplit.Length != 5)
+        {
+            throw new InvalidOperationException($"Redis call failed, invalid 'claims:...' length {claimsSplit.Length} for claim '{claim}'");
+        }
+
+#pragma warning disable CA2007 // Consider calling ConfigureAwait on the awaited task
+        scriptResult = await _redisDatabase.ScriptEvaluateAsync(
+            LuaScript.Prepare(@"
+                local existingTokens = redis.call('KEYS', @Claims)
+
+                if #existingTokens > 0 then
+                    return redis.call('GET', existingTokens[1])
+                end
+
+                return 'NOTFOUND'
+                "),
+            new
+            {
+                Claims = claim
+            });
+#pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
+
+        string? value;
 
         if (scriptResult is not null)
         {
@@ -142,12 +187,14 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
             throw new InvalidOperationException("Redis call failed");
         }
 
-        if (string.IsNullOrEmpty(value))
+        if (string.IsNullOrEmpty(value) || (value == "NOTFOUND"))
         {
-            throw new InvalidOperationException($"Redis call failed, expected 'OK' or 'NOTFOUND' but received '{value}'");
+            throw new InvalidOperationException($"Redis call failed, expected bearen token but received '{value}'");
         }
 
-        return value;
+        var expiresAt = DateTimeOffset.ParseExact(claimsSplit[1], "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+
+        return (value, expiresAt);
     }
 
     public async Task ExpireSessionAsync(Guid claimer, Guid session, string resource)
@@ -186,7 +233,7 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
             });
 #pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
 
-        string? value = null;
+        string? value;
 
         if (scriptResult is not null)
         {
@@ -227,7 +274,7 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
             });
 #pragma warning restore CA2007 // Consider calling ConfigureAwait on the awaited task
 
-        string? value = null;
+        string? value;
 
         if (scriptResult is not null)
         {
