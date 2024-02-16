@@ -6,6 +6,7 @@ using FFCEI.Microservices.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Logging;
 using Serilog;
 using Serilog.Debugging;
 using Serilog.Events;
@@ -323,27 +324,12 @@ public abstract class Microservice : IMicroservice
             .Enrich.FromLogContext()
             .Enrich.WithCorrelationIdHeader()
             .Destructure.UsingAttributes()
-            .WriteTo.Console();
+            .WriteTo.Console()
+            .MinimumLevel.Override("Microsoft", IsDebugOrDevelopmentEnvironment ? LogEventLevel.Debug : LogEventLevel.Information)
+            .MinimumLevel.Override("Microsoft.AspNetCore", IsDebugOrDevelopmentEnvironment ? LogEventLevel.Debug : LogEventLevel.Information)
+            .MinimumLevel.Override("Microsoft.EntityFrameworkCore", IsDebugOrDevelopmentEnvironment ? LogEventLevel.Debug : LogEventLevel.Information)
+            .MinimumLevel.Override("EFCoreSecondLevelCacheInterceptor", IsDebugOrDevelopmentEnvironment ? LogEventLevel.Debug : LogEventLevel.Information);
 #pragma warning restore CA1305 // Specify IFormatProvider
-
-        if (!IsDebugOrDevelopmentEnvironment)
-        {
-            configuration
-                .MinimumLevel.Information()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-                .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Information)
-                .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Information)
-                .MinimumLevel.Override("EFCoreSecondLevelCacheInterceptor", LogEventLevel.Information);
-        }
-        else
-        {
-            configuration
-                .MinimumLevel.Debug()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Debug)
-                .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Debug)
-                .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Debug)
-                .MinimumLevel.Override("EFCoreSecondLevelCacheInterceptor", LogEventLevel.Debug);
-        }
 #pragma warning restore IDE0058 // Expression value is never used
 
         return configuration;
@@ -388,6 +374,9 @@ public abstract class Microservice : IMicroservice
 
     private void BuildSerilog()
     {
+        IdentityModelEventSource.ShowPII = IsDebugOrDevelopmentEnvironment;
+        IdentityModelEventSource.LogCompleteSecurityArtifact = IsDebugOrDevelopmentEnvironment;
+
 #pragma warning disable IDE0058 // Expression value is never used
         Builder.UseSerilog((context, serviceProvider, configuration) => BuildSeriLogConfiguration(configuration));
 #pragma warning restore IDE0058 // Expression value is never used
