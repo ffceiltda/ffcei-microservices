@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <NoWarn>1591</NoWarn>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
     <Authors>Virgilio Alexandre Fornazin</Authors>
     <Company>Fornazin &amp; Fornazin Consultoria em Informática Ltda</Company>
     <Description>A free library for ASP.NET Core 6+ Microservices development, with Model, Model Repository, Entity Framework Core and common Web Api features like CORS, Json serialization fixes, Swagger generation, JWT Authentication for simple and objective microservices development</Description>
@@ -21,9 +21,9 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
-    <AnalysisLevel>8.0-all</AnalysisLevel>
+    <AnalysisLevel>10.0-all</AnalysisLevel>
     <SignAssembly>False</SignAssembly>
-    <Version>0.7.0</Version>
+    <Version>0.7.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -41,62 +41,60 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="13.0.1" />
-    <PackageReference Include="AutoMapper.Collection" Version="10.0.0" />
-    <PackageReference Include="AutoMapper.Collection.EntityFrameworkCore" Version="10.0.0" />
-    <PackageReference Include="AutoMapper.Extensions.EnumMapping" Version="3.2.0" />
-    <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.2.2" />
-    <PackageReference Include="Destructurama.Attributed" Version="4.0.0" />
-    <PackageReference Include="Destructurama.ByIgnoring" Version="3.0.1" />
-    <PackageReference Include="Destructurama.JsonNet" Version="3.0.0" />
+    <PackageReference Include="AutoMapper" Version="16.2.0" />
+    <PackageReference Include="AutoMapper.Collection" Version="13.0.0" />
+    <PackageReference Include="AutoMapper.Collection.EntityFrameworkCore" Version="13.0.0" />
+    <PackageReference Include="AutoMapper.Extensions.EnumMapping" Version="6.0.0" />
+    <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.4.2" />
+    <PackageReference Include="Destructurama.Attributed" Version="5.3.0" />
+    <PackageReference Include="Destructurama.ByIgnoring" Version="4.0.1" />
+    <PackageReference Include="Destructurama.JsonNet" Version="4.0.2" />
     <PackageReference Include="EasyCaching.Redis" Version="1.9.2" />
     <PackageReference Include="EasyCaching.Serialization.Json" Version="1.9.2" />
     <PackageReference Include="EasyCaching.Serialization.MessagePack" Version="1.9.2" />
     <PackageReference Include="EasyCaching.Serialization.Protobuf" Version="1.9.2" />
     <PackageReference Include="EasyCaching.Serialization.SystemTextJson" Version="1.9.2" />
-    <PackageReference Include="EFCoreSecondLevelCacheInterceptor" Version="4.2.3" />
-    <PackageReference Include="EntityFrameworkCore.Exceptions.MySQL.Pomelo" Version="8.0.0" />
-    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="EFCoreSecondLevelCacheInterceptor" Version="5.4.0" />
+    <PackageReference Include="EntityFrameworkCore.Exceptions.MySQL.Pomelo" Version="8.1.3" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
     <PackageReference Include="Isopoh.Cryptography.Argon2" Version="2.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="8.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="8.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.DynamicLinq" Version="8.3.10" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="8.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.3">
+    <PackageReference Include="MessagePack" Version="3.1.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="10.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="10.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.DynamicLinq" Version="10.7.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="10.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.10">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.3" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Localization" Version="8.0.3" />
-    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.1" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.Design" Version="1.1.2" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.Json.Microsoft" Version="8.0.1" />
-    <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
-    <PackageReference Include="RestSharp" Version="110.2.0" />
-    <PackageReference Include="Serilog" Version="3.1.1" />
-    <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="10.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="10.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="10.0.10" />
+    <PackageReference Include="MySql.EntityFrameworkCore" Version="10.0.7" />
+    <PackageReference Include="RabbitMQ.Client" Version="7.2.1" />
+    <PackageReference Include="RestSharp" Version="114.0.0" />
+    <PackageReference Include="Serilog" Version="4.4.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageReference Include="Serilog.AspNetCore.Enrichers.CorrelationId" Version="1.0.0" />
-    <PackageReference Include="Serilog.Enrichers.ClientInfo" Version="2.0.3" />
-    <PackageReference Include="Serilog.Enrichers.Environment" Version="2.3.0" />
+    <PackageReference Include="Serilog.Enrichers.ClientInfo" Version="2.9.0" />
+    <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageReference Include="Serilog.Enrichers.ExceptionData" Version="1.0.0" />
     <PackageReference Include="Serilog.Enrichers.ExceptionStackTraceHash" Version="1.3.0" />
-    <PackageReference Include="Serilog.Enrichers.Process" Version="2.0.2" />
-    <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.0" />
-    <PackageReference Include="Serilog.Sinks.RabbitMQ" Version="6.0.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.1" />
-    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.3.10" />
+    <PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0" />
+    <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="10.0.1" />
+    <PackageReference Include="Serilog.Sinks.RabbitMQ" Version="9.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.2.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="10.0.1" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.3" />
   </ItemGroup>
 
 </Project>

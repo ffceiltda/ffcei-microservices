@@ -48,7 +48,7 @@ public static class MySqlConnectionConfigurationExtensionMethods
             Database = configurationManager[databaseSettingName]
         };
 
-        if (string.IsNullOrEmpty(result.Host) || (host is not null))
+        if (string.IsNullOrWhiteSpace(result.Host) || (host is not null))
         {
             result.Host = host;
         }
@@ -58,17 +58,17 @@ public static class MySqlConnectionConfigurationExtensionMethods
             result.Port = port;
         }
 
-        if (string.IsNullOrEmpty(result.UserName) || (userName is not null))
+        if (string.IsNullOrWhiteSpace(result.UserName) || (userName is not null))
         {
             result.UserName = userName;
         }
 
-        if (string.IsNullOrEmpty(result.Password) || (password is not null))
+        if (string.IsNullOrWhiteSpace(result.Password) || (password is not null))
         {
             result.Password = password;
         }
 
-        if (string.IsNullOrEmpty(result.Database) || (database is not null))
+        if (string.IsNullOrWhiteSpace(result.Database) || (database is not null))
         {
             result.Database = database;
         }

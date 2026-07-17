@@ -35,7 +35,7 @@ public class WebApiClient
         var httpOptions = new RestClientOptions
         {
             BaseUrl = ApiHttpUrl,
-            Authenticator = string.IsNullOrEmpty(AuthenticationToken) ? null : new JwtAuthenticator(AuthenticationToken)
+            Authenticator = string.IsNullOrWhiteSpace(AuthenticationToken) ? null : new JwtAuthenticator(AuthenticationToken)
         };
 
         if (IgnoreHTTPSSLErrors)

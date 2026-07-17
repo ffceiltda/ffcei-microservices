@@ -50,14 +50,14 @@ public static class JwtTokenHandler
             }
             else if (claim.Key == JwtRegisteredClaimNames.Iss)
             {
-                if (!string.IsNullOrEmpty(issuer))
+                if (!string.IsNullOrWhiteSpace(issuer))
                 {
                     claimValue = issuer;
                 }
             }
             else if (claim.Key == JwtRegisteredClaimNames.Aud)
             {
-                if (!string.IsNullOrEmpty(audience))
+                if (!string.IsNullOrWhiteSpace(audience))
                 {
                     claimValue = audience;
                 }
@@ -123,7 +123,7 @@ public static class JwtTokenHandler
         var jwtTokenStringBuilder = new StringBuilder();
 
 #pragma warning disable IDE0058 // Expression value is never used
-        if (!string.IsNullOrEmpty(bearerTokenPrefix))
+        if (!string.IsNullOrWhiteSpace(bearerTokenPrefix))
         {
             jwtTokenStringBuilder.Append(bearerTokenPrefix);
             jwtTokenStringBuilder.Append(' ');

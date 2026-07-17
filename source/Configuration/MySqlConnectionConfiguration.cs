@@ -98,7 +98,7 @@ public sealed class MySqlConnectionConfiguration : ConnectionConfiguration
 
 #pragma warning disable IDE0058 // Expression value is never used
 #pragma warning disable CA1305 // Specify IFormatProvider
-        if (!string.IsNullOrEmpty(Host))
+        if (!string.IsNullOrWhiteSpace(Host))
         {
             stringBuilder.Append($"Server={Host};");
         }
@@ -108,17 +108,17 @@ public sealed class MySqlConnectionConfiguration : ConnectionConfiguration
             stringBuilder.Append($"Port={Port};");
         }
 
-        if (!string.IsNullOrEmpty(UserName))
+        if (!string.IsNullOrWhiteSpace(UserName))
         {
             stringBuilder.Append($"User={UserName};");
         }
 
-        if (!string.IsNullOrEmpty(Password))
+        if (!string.IsNullOrWhiteSpace(Password))
         {
             stringBuilder.Append($"Password={Password};");
         }
 
-        if (!string.IsNullOrEmpty(Database))
+        if (!string.IsNullOrWhiteSpace(Database))
         {
             stringBuilder.Append($"Database={Database};");
         }

@@ -8,6 +8,7 @@ tab_width = 4
 trim_trailing_whitespace = true
 insert_final_newline = true
 #end_of_line = lf
+visualstudio_format_on_save = true
 
 [*.{txt,md}]
 trim_trailing_whitespace = false

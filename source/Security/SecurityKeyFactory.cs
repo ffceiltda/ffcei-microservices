@@ -60,12 +60,28 @@ public class SecurityKeyFactory
         {
             var x509certificateFilename = configurationManager[$"{configurationKeyStringPrefix}X509Certificate.Filename"];
             var x509certificatePassword = configurationManager[$"{configurationKeyStringPrefix}X509Certificate.Password"];
+            var x509certificateKeyFilename = configurationManager[$"{configurationKeyStringPrefix}X509Certificate.KeyFilename"];
 
-            if (!string.IsNullOrEmpty(x509certificateFilename) && File.Exists(x509certificateFilename))
+            if (string.IsNullOrWhiteSpace(x509certificateKeyFilename))
+            {
+                x509certificateKeyFilename = null;
+            }
+
+            if (!string.IsNullOrWhiteSpace(x509certificateFilename) && File.Exists(x509certificateFilename))
             {
                 try
                 {
-                    using var certificate = new X509Certificate2(x509certificateFilename, x509certificatePassword);
+                    var x509certificateFilenameExtension = Path.GetExtension(x509certificateFilename).ToUpperInvariant();
+                    var x509certificateFilenameIsPK = x509certificateFilenameExtension.EndsWith("P12", StringComparison.InvariantCulture) ||
+                        x509certificateFilenameExtension.EndsWith("PFX", StringComparison.InvariantCulture);
+                    var x509certificateFilenameIsPEM = x509certificateFilenameExtension.EndsWith("PEM", StringComparison.InvariantCulture);
+
+                    using var certificate =
+                        x509certificateFilenameIsPK ? X509CertificateLoader.LoadPkcs12FromFile(x509certificateFilename, x509certificatePassword) :
+                        !x509certificateFilenameIsPEM ? X509CertificateLoader.LoadCertificateFromFile(x509certificateFilename) :
+                            string.IsNullOrWhiteSpace(x509certificatePassword) ?
+                                X509Certificate2.CreateFromPemFile(x509certificateFilename, x509certificateKeyFilename) :
+                                X509Certificate2.CreateFromEncryptedPemFile(x509certificateFilename, x509certificatePassword, x509certificateKeyFilename);
 
                     _securityKey = new X509SecurityKey(certificate);
                     _signingCredentials = new X509SigningCredentials(certificate);
@@ -85,9 +101,9 @@ public class SecurityKeyFactory
         {
             var certificateList = new List<X509Certificate2>();
 
-            foreach (StoreLocation storeLocation in (StoreLocation[])Enum.GetValues(typeof(StoreLocation)))
+            foreach (StoreLocation storeLocation in Enum.GetValues<StoreLocation>())
             {
-                foreach (StoreName storeName in (StoreName[])Enum.GetValues(typeof(StoreName)))
+                foreach (StoreName storeName in Enum.GetValues<StoreName>())
                 {
                     try
                     {
@@ -99,7 +115,7 @@ public class SecurityKeyFactory
                         {
                             var x509certificateSubject = configurationManager[$"{configurationKeyStringPrefix}X509Certificate.Subject"];
 
-                            if (!string.IsNullOrEmpty(x509certificateSubject))
+                            if (!string.IsNullOrWhiteSpace(x509certificateSubject))
                             {
                                 var certificateCollection = store.Certificates.Find(X509FindType.FindBySubjectName, x509certificateSubject, true);
 
@@ -114,7 +130,7 @@ public class SecurityKeyFactory
 
                             var x509certificateSubjectKeyIdentifier = configurationManager[$"{configurationKeyStringPrefix}X509Certificate.SubjectKeyIdentifier"];
 
-                            if (!string.IsNullOrEmpty(x509certificateSubjectKeyIdentifier))
+                            if (!string.IsNullOrWhiteSpace(x509certificateSubjectKeyIdentifier))
                             {
                                 var certificateCollection = store.Certificates.Find(X509FindType.FindBySubjectKeyIdentifier, x509certificateSubjectKeyIdentifier, true);
 
@@ -129,7 +145,7 @@ public class SecurityKeyFactory
 
                             var x509certificateSubjectDistinguishedName = configurationManager[$"{configurationKeyStringPrefix}X509Certificate.SubjectDistinguishedName"];
 
-                            if (!string.IsNullOrEmpty(x509certificateSubjectDistinguishedName))
+                            if (!string.IsNullOrWhiteSpace(x509certificateSubjectDistinguishedName))
                             {
                                 var certificateCollection = store.Certificates.Find(X509FindType.FindBySubjectDistinguishedName, x509certificateSubjectDistinguishedName, true);
 
@@ -144,7 +160,7 @@ public class SecurityKeyFactory
 
                             var x509certificateSerialNumber = configurationManager[$"{configurationKeyStringPrefix}X509Certificate.SerialNumber"];
 
-                            if (!string.IsNullOrEmpty(x509certificateSerialNumber))
+                            if (!string.IsNullOrWhiteSpace(x509certificateSerialNumber))
                             {
                                 var certificateCollection = store.Certificates.Find(X509FindType.FindBySerialNumber, x509certificateSerialNumber, true);
 
@@ -191,21 +207,21 @@ public class SecurityKeyFactory
             var symmetricEncryptionKeyWrapAlgorithm = configurationManager[$"{configurationKeyStringPrefix}Symmetric.EncryptionKeyWrapAlgorithm"];
             var symmetricEncryptionAlgorithm = configurationManager[$"{configurationKeyStringPrefix}Symmetric.EncryptionAlgorithm"];
 
-            if (!string.IsNullOrEmpty(symmetricSecurityKey))
+            if (!string.IsNullOrWhiteSpace(symmetricSecurityKey))
             {
                 try
                 {
-                    if (string.IsNullOrEmpty(symmetricSecuritySignatureAlgorithm))
+                    if (string.IsNullOrWhiteSpace(symmetricSecuritySignatureAlgorithm))
                     {
                         symmetricSecuritySignatureAlgorithm = SecurityAlgorithms.HmacSha512;
                     }
 
-                    if (string.IsNullOrEmpty(symmetricEncryptionKeyWrapAlgorithm))
+                    if (string.IsNullOrWhiteSpace(symmetricEncryptionKeyWrapAlgorithm))
                     {
                         symmetricEncryptionKeyWrapAlgorithm = SecurityAlgorithms.Aes256KW;
                     }
 
-                    if (string.IsNullOrEmpty(symmetricEncryptionAlgorithm))
+                    if (string.IsNullOrWhiteSpace(symmetricEncryptionAlgorithm))
                     {
                         symmetricEncryptionAlgorithm = SecurityAlgorithms.Aes256CbcHmacSha512;
                     }

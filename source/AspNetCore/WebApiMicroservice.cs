@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Diagnostics;
 using System.IO.Compression;
@@ -371,13 +370,14 @@ public class WebApiMicroservice : MicroserviceCoreImplementation
         Services.AddEndpointsApiExplorer();
         Services.AddSwaggerGen(options =>
         {
+            /*
             options.SwaggerDoc(WebApiSwaggerVersion,
                 new OpenApiInfo
                 {
                     Title = MicroserviceName,
                     Version = WebApiSwaggerVersion
                 });
-
+            */
             options.TagActionsBy(api =>
             {
                 if (api.GroupName is not null)
@@ -397,6 +397,7 @@ public class WebApiMicroservice : MicroserviceCoreImplementation
 
             if (WebApiUseAuthorization)
             {
+                /*
                 options.AddSecurityDefinition("Bearer",
                     new OpenApiSecurityScheme
                     {
@@ -422,6 +423,7 @@ public class WebApiMicroservice : MicroserviceCoreImplementation
                         Array.Empty<string>()
                     }
                 });
+                */
             }
 
             var xmlFiles = Directory.GetFiles(AppContext.BaseDirectory, "*.xml", SearchOption.TopDirectoryOnly).ToList();
@@ -432,10 +434,11 @@ public class WebApiMicroservice : MicroserviceCoreImplementation
                 try
                 {
                     options.IncludeXmlComments(xmlFile);
-
+                    /*
                     options.SchemaFilter<Swagger.EnumTypesSchemaFilter>(xmlFile);
                     options.SchemaFilter<Swagger.MessageAttributeSchemaFilter>(xmlFile);
                     options.DocumentFilter<Swagger.PropertyAttributeDocumentFilter>();
+                    */
                 }
                 catch (Exception e)
                 {

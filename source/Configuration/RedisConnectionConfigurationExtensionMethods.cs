@@ -49,7 +49,7 @@ public static class RedisConnectionConfigurationExtensionMethods
             Database = (redisDatabase is null) ? 0 : ushort.Parse(redisDatabase, NumberStyles.Integer, CultureInfo.InvariantCulture),
         };
 
-        if (string.IsNullOrEmpty(result.Host) || (host is not null))
+        if (string.IsNullOrWhiteSpace(result.Host) || (host is not null))
         {
             result.Host = host;
         }
@@ -59,12 +59,12 @@ public static class RedisConnectionConfigurationExtensionMethods
             result.Port = port;
         }
 
-        if (string.IsNullOrEmpty(result.UserName) || (userName is not null))
+        if (string.IsNullOrWhiteSpace(result.UserName) || (userName is not null))
         {
             result.UserName = userName;
         }
 
-        if (string.IsNullOrEmpty(result.Password) || (password is not null))
+        if (string.IsNullOrWhiteSpace(result.Password) || (password is not null))
         {
             result.Password = password;
         }

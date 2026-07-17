@@ -1,6 +1,5 @@
 using FFCEI.Microservices.Configuration;
 using Microsoft.EntityFrameworkCore;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 namespace FFCEI.Microservices.EntityFrameworkCore;
 
@@ -37,9 +36,10 @@ public sealed class MySqlCachingDbContextOptionsBuilder<TDbModelRepositoryContex
 #pragma warning disable IDE0058 // Expression value is never used
         base.ApplyOptions(options, serviceProvider);
 
-        options.UseMySql(ConnectionString, ServerVersion.AutoDetect(ConnectionString),
+        options.UseMySQL(ConnectionString,
             parameters =>
             {
+                /*
                 parameters.DefaultDataTypeMappings(m => m.WithClrBoolean(MySqlBooleanType.Bit1));
                 parameters.DefaultDataTypeMappings(m => m.WithClrDateTime(MySqlDateTimeType.DateTime6));
                 parameters.DefaultDataTypeMappings(m => m.WithClrDateTimeOffset(MySqlDateTimeType.DateTime6));
@@ -47,8 +47,11 @@ public sealed class MySqlCachingDbContextOptionsBuilder<TDbModelRepositoryContex
                 parameters.DefaultDataTypeMappings(m => m.WithClrTimeOnly(6));
                 parameters.EnableIndexOptimizedBooleanColumns();
                 parameters.EnableStringComparisonTranslations();
+                */
                 parameters.EnableRetryOnFailure().CommandTimeout(60);
+                /*
                 parameters.UseMicrosoftJson();
+                */
             });
 #pragma warning restore IDE0058 // Expression value is never used
     }

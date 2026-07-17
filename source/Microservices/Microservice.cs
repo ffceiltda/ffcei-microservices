@@ -58,9 +58,10 @@ public abstract class Microservice : IMicroservice
 
         Logger = CreateMicroserviceBootstrapLogger();
 
-#pragma warning disable CA1848 // Use the LoggerMessage delegates
-        Logger.LogInformation("Microservice {MicroserviceName} starting at {DateTimeOffsetNow} (in Debug: {DebuggerIsAttached} / .NET Development environment: {IsDevelopment})",
-            MicroserviceName, DateTimeOffset.Now, Debugger.IsAttached, IsDevelopmentEnvironment);
+#pragma warning disable CA1848 // Use the LoggerMessage delegatesf (Logger.IsEnabled(LogLevel.Information))
+        if (Logger.IsEnabled(LogLevel.Information))
+            Logger.LogInformation("Microservice {MicroserviceName} starting at {DateTimeOffsetNow} (in Debug: {DebuggerIsAttached} / .NET Development environment: {IsDevelopment})",
+                MicroserviceName, DateTimeOffset.Now, Debugger.IsAttached, IsDevelopmentEnvironment);
 #pragma warning restore CA1848 // Use the LoggerMessage delegates
     }
 
@@ -276,7 +277,7 @@ public abstract class Microservice : IMicroservice
         {
             _configurationManager = new ConfigurationManager(Logger, context.Configuration);
 
-            services.AddSingleton(typeof(IConfigurationManager), _configurationManager);
+            services.AddSingleton<IConfigurationManager>(_configurationManager);
         });
 #pragma warning restore IDE0058 // Expression value is never used
 
@@ -423,7 +424,7 @@ public abstract class Microservice : IMicroservice
             .UseCacheKeyPrefix($"EFCoreSecondLevelCache_{assemblyPrefix}_")
             .CacheAllQueries(EntityFrameworkSecondLevelCacheExpirationMode, EntityFrameworkSecondLevelCacheExpirationPeriod)
             .SkipCachingResults(result => (result.Value is null) || ((result.Value is EFTableRows rows) && (rows.RowsCount == 0)))
-            .DisableLogging(!IsDebugOrDevelopmentEnvironment);
+            /* .DisableLogging(!IsDebugOrDevelopmentEnvironment) */;
 #pragma warning restore IDE0058 // Expression value is never used
     }
 
@@ -432,7 +433,9 @@ public abstract class Microservice : IMicroservice
 #pragma warning disable IDE0058 // Expression value is never used
         Services.AddEFSecondLevelCache(options =>
         {
+            /*
             BuildEntityFrameworkCoreSecondLevelCacheOptions(options.UseMemoryCacheProvider());
+            */
         });
 #pragma warning restore IDE0058 // Expression value is never used
     }
@@ -440,10 +443,12 @@ public abstract class Microservice : IMicroservice
     private void BuildRedisEntityFrameworkCoreSecondLevelCache()
     {
 #pragma warning disable IDE0058 // Expression value is never used
+        /*
         Services.AddEFSecondLevelCache(options =>
         {
             BuildEntityFrameworkCoreSecondLevelCacheOptions(options.UseEasyCachingCoreProvider("EFSecondLevelRedisCache"));
         });
+        */
 
         Services.AddEasyCaching(option =>
         {
@@ -466,7 +471,7 @@ public abstract class Microservice : IMicroservice
 #pragma warning restore IDE0058 // Expression value is never used
     }
 
-    private void BuildAutoMapper()
+    private static void BuildAutoMapper()
     {
         var entryAssembly = Assembly.GetEntryAssembly();
 
@@ -500,7 +505,7 @@ public abstract class Microservice : IMicroservice
         foreach (var assembly in assemblies)
         {
 #pragma warning disable IDE0058 // Expression value is never used
-            Services.AddAutoMapper(assembly);
+            // Services.AddAutoMapper(assembly);
 #pragma warning restore IDE0058 // Expression value is never used
         }
     }

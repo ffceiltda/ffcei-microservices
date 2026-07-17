@@ -29,7 +29,7 @@ public static class ModelBuilderMapper
 
         var modelAssemblyFullName = initialAssembly.FullName ?? string.Empty;
 
-        if (string.IsNullOrEmpty(modelAssemblyFullName))
+        if (string.IsNullOrWhiteSpace(modelAssemblyFullName))
         {
             return;
         }

@@ -24,7 +24,7 @@ public class Controller : ControllerBase
     {
         var requestorAddress = Request?.Headers["X-Forwarded-For"].ToString().Split(_splitOptions).FirstOrDefault();
 
-        if (string.IsNullOrEmpty(requestorAddress))
+        if (string.IsNullOrWhiteSpace(requestorAddress))
         {
             requestorAddress = HttpContext?.Connection?.RemoteIpAddress?.ToString();
         }

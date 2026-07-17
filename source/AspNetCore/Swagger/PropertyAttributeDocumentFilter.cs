@@ -1,11 +1,6 @@
-using FFCEI.Microservices.Json;
-using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Collections.Concurrent;
-using System.Dynamic;
-
 namespace FFCEI.Microservices.AspNetCore.Swagger;
 
+/*   
 #pragma warning disable CA1812
 internal sealed class PropertyAttributeDocumentFilter : IDocumentFilter
 #pragma warning restore CA1812
@@ -23,7 +18,7 @@ internal sealed class PropertyAttributeDocumentFilter : IDocumentFilter
                 {
                     var schemaReferenceId = parameter.Schema.Reference?.Id;
 
-                    if (string.IsNullOrEmpty(schemaReferenceId))
+                    if (string.IsNullOrWhiteSpace(schemaReferenceId))
                     {
                         continue;
                     }
@@ -50,14 +45,14 @@ internal sealed class PropertyAttributeDocumentFilter : IDocumentFilter
                 {
                     var schemaReferenceId = content.Value.Schema.Reference?.Id;
 
-                    if (string.IsNullOrEmpty(schemaReferenceId))
+                    if (string.IsNullOrWhiteSpace(schemaReferenceId))
                     {
                         continue;
                     }
 
                     var schema = context.SchemaRepository.Schemas[schemaReferenceId];
 
-                    if (string.IsNullOrEmpty(schema.Title))
+                    if (string.IsNullOrWhiteSpace(schema.Title))
                     {
                         continue;
                     }
@@ -123,19 +118,18 @@ internal sealed class PropertyAttributeDocumentFilter : IDocumentFilter
                             expandoDictionary.Add(requiredProperty.Name, requiredProperty.PropertyType.GetDefaultValue());
                         }
 
-                        /*
-                        TODO: fixup response generator to include all fields, and handle array types
+                        // TODO: fixup response generator to include all fields, and handle array types
 
-                        content.Value.Examples.Add("Complete Request Schema", new OpenApiExample { Value = new OpenApiString(JsonSerializer.Serialize(fullObject, options)) });
+                        // content.Value.Examples.Add("Complete Request Schema", new OpenApiExample { Value = new OpenApiString(JsonSerializer.Serialize(fullObject, options)) });
 
-                        if (expandoDictionary.Any())
-                        {
-                            content.Value.Examples.Add("Minimal Required Schema", new OpenApiExample { Value = new OpenApiString(JsonSerializer.Serialize(miniObject, options)) });
-                        }
-                        */
+                        // if (expandoDictionary.Any())
+                        // {
+                        //     content.Value.Examples.Add("Minimal Required Schema", new OpenApiExample { Value = new OpenApiString(JsonSerializer.Serialize(miniObject, options)) });
+                        // }
                     }
                 }
             }
         }
     }
 }
+*/

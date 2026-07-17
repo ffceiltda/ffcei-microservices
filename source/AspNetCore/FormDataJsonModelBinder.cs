@@ -21,7 +21,7 @@ public class FormDataJsonModelBinder : IModelBinder
 
         var value = valueProviderResult.FirstValue;
 
-        if (string.IsNullOrEmpty(value))
+        if (string.IsNullOrWhiteSpace(value))
         {
             return Task.CompletedTask;
         }

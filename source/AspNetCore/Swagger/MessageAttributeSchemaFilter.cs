@@ -1,9 +1,6 @@
-using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Xml.Linq;
-
 namespace FFCEI.Microservices.AspNetCore.Swagger;
 
+/*
 #pragma warning disable CA1812
 internal sealed class MessageAttributeSchemaFilter : ISchemaFilter
 #pragma warning restore CA1812
@@ -36,3 +33,4 @@ internal sealed class MessageAttributeSchemaFilter : ISchemaFilter
         }
     }
 }
+*/

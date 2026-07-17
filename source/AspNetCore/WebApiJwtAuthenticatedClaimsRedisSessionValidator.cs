@@ -38,7 +38,7 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
             throw new ArgumentNullException(nameof(session));
         }
 
-        if (string.IsNullOrEmpty(resource))
+        if (string.IsNullOrWhiteSpace(resource))
         {
             throw new ArgumentNullException(nameof(resource));
         }
@@ -89,7 +89,7 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
             throw new InvalidOperationException("Redis call failed");
         }
 
-        if (string.IsNullOrEmpty(value) || (value != "OK"))
+        if (string.IsNullOrWhiteSpace(value) || (value != "OK"))
         {
             throw new InvalidOperationException($"Redis call failed, expected 'OK' but received '{value}'");
         }
@@ -107,7 +107,7 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
             throw new ArgumentNullException(nameof(session));
         }
 
-        if (string.IsNullOrEmpty(resource))
+        if (string.IsNullOrWhiteSpace(resource))
         {
             throw new ArgumentNullException(nameof(resource));
         }
@@ -142,7 +142,7 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
             throw new InvalidOperationException("Redis call failed");
         }
 
-        if (string.IsNullOrEmpty(claim) || !claim.StartsWith("claim:", StringComparison.InvariantCulture))
+        if (string.IsNullOrWhiteSpace(claim) || !claim.StartsWith("claim:", StringComparison.InvariantCulture))
         {
             if (claim == "NOTFOUND")
             {
@@ -187,7 +187,7 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
             throw new InvalidOperationException("Redis call failed");
         }
 
-        if (string.IsNullOrEmpty(value) || (value == "NOTFOUND"))
+        if (string.IsNullOrWhiteSpace(value) || (value == "NOTFOUND"))
         {
             throw new InvalidOperationException($"Redis call failed, expected bearen token but received '{value}'");
         }
@@ -209,7 +209,7 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
             throw new ArgumentNullException(nameof(session));
         }
 
-        if (string.IsNullOrEmpty(resource))
+        if (string.IsNullOrWhiteSpace(resource))
         {
             throw new ArgumentNullException(nameof(resource));
         }
@@ -244,7 +244,7 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
             throw new InvalidOperationException("Redis call failed");
         }
 
-        if (string.IsNullOrEmpty(value) || (value != "OK"))
+        if (string.IsNullOrWhiteSpace(value) || (value != "OK"))
         {
             throw new InvalidOperationException($"Redis call failed, expected 'OK' but received '{value}'");
         }
@@ -285,7 +285,7 @@ public sealed class WebApiJwtAuthenticatedClaimsRedisSessionValidator : IWebApiJ
             throw new InvalidOperationException("Redis call failed");
         }
 
-        if (string.IsNullOrEmpty(value) || (value != "OK"))
+        if (string.IsNullOrWhiteSpace(value) || (value != "OK"))
         {
             throw new InvalidOperationException($"Redis call failed, expected 'OK' but received '{value}'");
         }

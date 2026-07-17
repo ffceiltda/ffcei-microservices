@@ -85,7 +85,7 @@ public sealed class RedisConnectionConfiguration : ConnectionConfiguration
 
 #pragma warning disable IDE0058 // Expression value is never used
 #pragma warning disable CA1305 // Specify IFormatProvider
-        if (string.IsNullOrEmpty(Host))
+        if (string.IsNullOrWhiteSpace(Host))
         {
             throw new ArgumentNullException(nameof(Host));
         }
@@ -97,12 +97,12 @@ public sealed class RedisConnectionConfiguration : ConnectionConfiguration
             stringBuilder.Append($":{Port}");
         }
 
-        if (!string.IsNullOrEmpty(UserName))
+        if (!string.IsNullOrWhiteSpace(UserName))
         {
             stringBuilder.Append($",user={UserName}");
         }
 
-        if (!string.IsNullOrEmpty(Password))
+        if (!string.IsNullOrWhiteSpace(Password))
         {
             stringBuilder.Append($",password={Password}");
         }
@@ -112,7 +112,7 @@ public sealed class RedisConnectionConfiguration : ConnectionConfiguration
             stringBuilder.Append($",defaultDatabase={Database}");
         }
 
-        if (!string.IsNullOrEmpty(ConnectionName))
+        if (!string.IsNullOrWhiteSpace(ConnectionName))
         {
             stringBuilder.Append($",name={ConnectionName}");
         }

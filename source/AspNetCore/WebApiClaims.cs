@@ -244,7 +244,7 @@ public class WebApiClaims
                 claimValue = claimObjectValue.ToString();
             }
 
-            if (string.IsNullOrEmpty(claimValue))
+            if (string.IsNullOrWhiteSpace(claimValue))
             {
                 continue;
             }
